@@ -1,0 +1,28 @@
+NAME
+       Sjis - allows you to write your script in ShiftJIS again
+
+SYNOPSIS
+           use Sjis;
+
+DESCRIPTION
+       The "Sjis" module provides the interfaces between Perl's
+       strings and the rest of the system.  Perl strings are
+       sequences of characters also bytes.
+
+INSTALLATION
+
+To install this module, type the following:
+
+   perl Makefile.PL
+   make.bat
+   make.bat test
+   make.bat install
+
+DEPENDENCIES
+
+This module requires perl5.00503 or later.
+
+MAINTAINER
+
+This project was originated by INABA Hitoshi <ina@cpan.org>.
+
