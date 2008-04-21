@@ -23,6 +23,7 @@ goto endofperl
 
 # poor make
 
+undef @rem;
 use strict;
 use FindBin;
 use File::Path;
@@ -49,9 +50,22 @@ for my $target (@ARGV) {
         runtests(<$FindBin::Bin/test.pl $FindBin::Bin/t/*.t>);
     }
     elsif ($target eq 'install') {
+
+        # install *.pm files to /Perl/site/lib
         my($perl_site_lib) = grep(m{/site/}i, @INC);
         while (<$FindBin::Bin/*.pm>) {
             copy($_, $perl_site_lib);
+        }
+
+        # install *.pl and *.bat files to /Perl/bin
+        my($perl_bin) = $^X =~ /^(.*)\\[^\\]*$/;
+        while (<$FindBin::Bin/*.pl $FindBin::Bin/*.bat>) {
+            copy($_, $perl_bin);
+        }
+
+        # install into perl5.10 directory too
+        if (($] < 5.010) and -e 'perl510.bat') {
+            system($^X, qw(perl510.bat make.bat install));
         }
     }
     elsif ($target eq 'dist') {
@@ -62,15 +76,20 @@ for my $target (@ARGV) {
         close(MANIFEST);
 
         # make work directory
-        my($pm) = grep(/\.pm$/i, @file);
+        my $pm = $file[0];
+        open(PM,$pm) || die "Can't open file: $pm\n";
+        $_ = join('',<PM>);
+        close(PM);
+
+        use vars qw($VERSION);
+        my($version) = m/(\$VERSION\s*=\s*.+?;)/xms;
+        eval $version; # get $VERSION
+
         my $basename = basename($pm, '.pm');
-        no strict;
-        eval qq{use $basename};
-        my $tardir = "$basename-" . eval(sprintf(q{$%s::VERSION},$basename));
-        use strict;
+        my $tardir = "$basename-$VERSION";
         rmtree($tardir,0,0);
 
-        # make .tar file
+        # make *.tar file
         my $tar = Archive::Tar->new;
         for my $file (@file) {
             if (-e $file) {
@@ -86,7 +105,7 @@ for my $target (@ARGV) {
         $tar->write($tarfile);
         rmtree($tardir,0,0);
 
-        # make .tar.gz file
+        # make *.tar.gz file
         my $gz = gzopen("$tarfile.gz", 'wb');
         open(TAR, $tarfile) || die "Can't open file: $tarfile\n";
         binmode(TAR);
@@ -124,6 +143,7 @@ goto endofperl
 
 # poor tar
 
+undef @rem;
 use strict;
 use Compress::Zlib;
 use Archive::Tar;

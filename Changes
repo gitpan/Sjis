@@ -3,3 +3,6 @@ Revision history for Perl extension Sjis.
 0.10  2008/04/01 00:00:00
 	- original version; created by INABA Hitoshi
 
+0.11  2008/04/22 00:00:00
+	- compiler version for perl5.5 and perl5.10; created by INABA Hitoshi
+
