@@ -1,37 +1,65 @@
 NAME
-       Sjis - allows you to write your script in ShiftJIS again
+       Esjis - Source code filter to escape ShiftJIS
 
 SYNOPSIS
-           jperl55   yourscript.pl  param1  param2 ...
+           jperl55  yourscript.pl  param1  param2 ...
+           perl     yourscript.pl  param1  param2 ...
+                      with "use Sjis;"
+
+           jperl58  yourscript.pl  param1  param2 ...
+           perl58   yourscript.pl  param1  param2 ...
+                      with "use Sjis;"
+
            jperl510  yourscript.pl  param1  param2 ...
+           perl510   yourscript.pl  param1  param2 ...
+                       with "use Sjis;"
+
+           perl  esjis.pl  ShiftJIS_script.pl  >  Escaped_script.pl.e
+
+           pl2ebat.bat  ShiftJIS_script.pl
 
 DESCRIPTION
-       The "Sjis" software provides the interfaces between Perl's
+       This software provides the interfaces between Perl's
        strings and the rest of the system.  Perl strings are
        sequences of characters also bytes.
 
-       This software is still a concept code to get <YOUR> help.
+       This software is still an alpha version for expressing a concept.
 
 INSTALLATION
 
 To install this software, type the following:
 
-   perl Makefile.PL
+   perl Makefile.PL    --- Makefile.PL makes "make.bat" only, and ...
    make.bat
    make.bat test
    make.bat install
+   make.bat dist       --- make distribution package
+   make.bat tar.bat    --- make perl script "tar.bat"
 
 PROGRAM COMPOSITION
 
-    jperl55.bat  --- jperl emulator by perl5.5 with esjis.pl and Sjis.pm
-    jperl510.bat --- jperl emulator by perl5.10 with esjis.pl and Sjis.pm
+    jperl55.bat  --- jperl emulator by perl5.5 with esjis.pl
+    jperl58.bat  --- jperl emulator by perl5.8 with esjis.pl
+    perl58.bat   --- find and run perl5.8 without %PATH% settings
+    jperl510.bat --- jperl emulator by perl5.10 with esjis.pl
     perl510.bat  --- find and run perl5.10 without %PATH% settings
+    pl2ebat      --- escape and wrap ShiftJIS perl code into a batch file
     esjis.pl     --- source code filter to escape ShiftJIS
-    Sjis.pm      --- run-time routine
+    Esjis.pm     --- run-time routines for esjis.pl
+    Sjis.pm      --- Source code filter for ShiftJIS script
 
 DEPENDENCIES
 
-This software requires perl5.00503 or later and perl5.010.
+This software requires perl5.00503 or later and perl5.008 or perl5.010.
+
+LICENSE AND COPYRIGHT
+
+This software is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See perlartistic.
+
+This software is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINER
 

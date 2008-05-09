@@ -48,6 +48,12 @@ for (@ARGV) {
     }
     else {
 
+        # if new *.e file exists
+        if ((-e "$_.e") and ((stat("$_.e"))[9] > (stat($_))[9]) and ((stat("$_.e"))[9] > (stat(&abspath('esjis.pl')))[9])) {
+            $_ = "$_.e";
+            last;
+        }
+
         # make temp filename
         do {
             $tmpnam = sprintf('%s.%d.%d', $_, time, rand(10000));
@@ -76,5 +82,76 @@ else {
     exit system('perl510.bat', @ARGV);
 }
 
+# find absolute path
+sub abspath($) {
+    my($file) = @_;
+
+    if (-e $file) {
+        return $file;
+    }
+
+    # -S option
+    for my $dir (split /;/, $ENV{'PATH'}) {
+        if (-e qq{$dir\\$file}) {
+            return qq{$dir\\$file};
+        }
+    }
+
+    die "Can't find file: $file\n";
+}
+
 __END__
+=pod
+
+=head1 NAME
+
+jperl510 - execute ShiftJIS perlscript on the perl5.10
+
+=head1 SYNOPSIS
+
+B<jperl510> [perlscript.pl]
+
+=head1 DESCRIPTION
+
+This utility converts a ShiftJIS perl script into a escaped script that
+can be executed by original perl5.10 on DOS-like operating systems.
+
+If the up-to-date escaped file already exists, it is not made again.
+
+When running perl is not version 5.10, the escaped script will execute
+by perl510.bat.
+
+=head1 EXAMPLES
+
+    C:\> jperl510 foo.pl
+    [..creates foo.pl.e and execute it..]
+
+=head1 BUGS AND LIMITATIONS
+
+This software is still an alpha version for expressing a concept.
+Please test code, patches and report problems to author are welcome.
+
+=head1 AUTHOR
+
+INABA Hitoshi E<lt>ina@cpan.orgE<gt>
+
+This project was originated by INABA Hitoshi.
+For any questions, use E<lt>ina@cpan.orgE<gt> so we can share
+this file.
+
+=head1 LICENSE AND COPYRIGHT
+
+This software is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See L<perlartistic>.
+
+This software is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=head1 SEE ALSO
+
+perl, esjis.pl, perl510.bat
+
+=cut
+
 :endofperl

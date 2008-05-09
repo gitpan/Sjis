@@ -63,6 +63,11 @@ for my $target (@ARGV) {
             copy($_, $perl_bin);
         }
 
+        # install into perl5.8 directory too
+        if (($] < 5.008) and -e 'perl58.bat') {
+            system($^X, qw(perl58.bat make.bat install));
+        }
+
         # install into perl5.10 directory too
         if (($] < 5.010) and -e 'perl510.bat') {
             system($^X, qw(perl510.bat make.bat install));
@@ -76,16 +81,15 @@ for my $target (@ARGV) {
         close(MANIFEST);
 
         # make work directory
-        my $pm = $file[0];
-        open(PM,$pm) || die "Can't open file: $pm\n";
-        $_ = join('',<PM>);
-        close(PM);
+        open(SCRIPT,$file[0]) || die "Can't open file: $file[0]\n";
+        $_ = join('',<SCRIPT>);
+        close(SCRIPT);
 
         use vars qw($VERSION);
         my($version) = m/(\$VERSION\s*=\s*.+?;)/xms;
         eval $version; # get $VERSION
 
-        my $basename = basename($pm, '.pm');
+        my $basename = basename($file[0], '.pm','.pl','.bat');
         my $tardir = "$basename-$VERSION";
         rmtree($tardir,0,0);
 

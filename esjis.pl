@@ -10,25 +10,25 @@ use strict;
 use 5.00503;
 
 use vars qw($VERSION);
-$VERSION = sprintf '%d.%02d', q$Revision: 0.11 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.16 $ =~ m/(\d+)/oxmsg;
 
 use constant DEBUG => 1;
 local $SIG{__WARN__} = sub { die 'esjis: ', @_ } if DEBUG;
 local $^W = 1;
 
-# if use eval in regexp then 1 else 0.
-use constant USE_REGEXP_EVAL => 0;
+$| = 1;
 
 BEGIN {
-    if ($^X =~ m/jperl/xmsi) {
+    if ($^X =~ m/jperl/oxmsi) {
         die "esjis: need perl(not jperl) 5.00503 or later. (\$^X==$^X)";
     }
 }
 
 # regexp of character
-my $qq_char = qr/[^\\\x81-\x9F\xE0-\xFC]|[\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|\\[\x81-\x9F\xE0-\xFC][\x00-\xFF]/xms;
-my  $q_char = qr/[^\x81-\x9F\xE0-\xFC]|[\x81-\x9F\xE0-\xFC][\x00-\xFF]/xms;
-my $chargap = qr/\G(?:[\x81-\x9F\xE0-\xFC]{2})*?|[^\x81-\x9F\xE0-\xFC](?:[\x81-\x9F\xE0-\xFC]{2})*?/xms;
+my $qq_char   = qr/[^\\\x81-\x9F\xE0-\xFC]|[\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|\\[\x81-\x9F\xE0-\xFC][\x00-\xFF]/oxms;
+my  $q_char   = qr/[^\x81-\x9F\xE0-\xFC]|[\x81-\x9F\xE0-\xFC][\x00-\xFF]/oxms;
+my $sjis_char = q{[^\x81-\x9F\xE0-\xFC]|[\x81-\x9F\xE0-\xFC][\x00-\xFF]};
+my $sjis_gap  = q{\G(?:[\x81-\x9F\xE0-\xFC]{2})*?|[^\x81-\x9F\xE0-\xFC](?:[\x81-\x9F\xE0-\xFC]{2})*?};
 
 # regexp of nested parens in qqXX
 my $qq_paren   = qr{(?{local $nest=0}) (?>(?:
@@ -51,6 +51,23 @@ my $qq_angle   = qr{(?{local $nest=0}) (?>(?:
                                           \<   (?{$nest++}) |
                                           \>   (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
+my $qq_scalar  = qr{(?: \{ (?:$qq_brace)*? \} |
+                       (?: ::)? (?:
+                             [a-zA-Z_][a-zA-Z_0-9]*
+                       (?: ::[a-zA-Z_][a-zA-Z_0-9]* )* (?: \[ (?: \$\[ | \$\] | $qq_char )*? \] | \{ (?:$qq_brace)*? \} )*
+                                         (?: (?: -> )? (?: \[ (?: \$\[ | \$\] | $qq_char )*? \] | \{ (?:$qq_brace)*? \} ) )*
+                   ))
+                 }xms;
+my $qq_variable = qr{(?: \{ (?:$qq_brace)*? \} |
+                        (?: ::)? (?:
+                              [0-9]+            |
+                              [^a-zA-Z_0-9\[\]] |
+                              ^[A-Z]            |
+                              [a-zA-Z_][a-zA-Z_0-9]*
+                        (?: ::[a-zA-Z_][a-zA-Z_0-9]* )* (?: \[ (?: \$\[ | \$\] | $qq_char )*? \] | \{ (?:$qq_brace)*? \} )*
+                                          (?: (?: -> )? (?: \[ (?: \$\[ | \$\] | $qq_char )*? \] | \{ (?:$qq_brace)*? \} ) )*
+                    ))
+                  }xms;
 
 # regexp of nested parens in qXX
 my $q_paren    = qr{(?{local $nest=0}) (?>(?:
@@ -74,6 +91,13 @@ my $q_angle    = qr{(?{local $nest=0}) (?>(?:
                                         \>   (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 
+my $tr_variable1 = '';    # variable of ($scalar = ...) =~ tr///
+my $tr_variable2 = '';    # variable of  $scalar        =~ tr///
+my $tr_variable  = '';    # variable of                    tr///
+my $slash        = 'm//'; # '/' means regexp match 'm//' and '?' means regexp match '??'
+my %heredoc      = ();    # here document
+my $heredoc_qq   = 0;     # here document quote type
+
 # When this script is main program
 if ($0 eq __FILE__) {
 
@@ -88,216 +112,423 @@ END
 
     # read ShiftJIS script
     $_ = join '', <>;
-    if (/^use Sjis;\n/) {
+    if (m/^use Esjis;$/oxms) {
         print $_;
         exit 0;
     }
-    print "use Sjis;\n";
+    else {
+        if (m/(.+#line \d+\n)/msgc) {
+            my $head = $1;
+            $head =~ s/\bjperl\b/perl/gi;
+            print $head;
+        }
+        print "use Esjis;\n";
+        s/^ \s* use \s+ Sjis \s* ; \s* $//oxms;
+    }
 
     # while all script
-    while (not /\G \z/xgc) {
+    while (not /\G \z/oxgc) {
         print &escape;
     }
     exit 0;
 }
 
 # escape ShiftJIS script
-sub escape {
+sub escape() {
 
-    # ignore space, comment
-    if (/\G (\s+|\#.*) /xgc) { return $1; }
+# \n output here document
+    if (/\G ( \n ) /oxgc) {
+        my $heredoc = '';
+        if (scalar(keys %heredoc) >= 1) {
+            $slash = 'm//';
+            my($longest_heredoc_delimiter) = sort { length($heredoc{$b}) <=> length($heredoc{$a}) } keys %heredoc;
+            if ($heredoc_qq >= 1) {
+                $heredoc = &e_heredoc($heredoc{$longest_heredoc_delimiter});
+            }
+            else {
+                $heredoc =            $heredoc{$longest_heredoc_delimiter};
+            }
 
-# split
-    elsif (m{\G \b split (\s* \( \s*) m\s*(\S)\2 }xgc) { return "Sjis::Split$1''";  }
-    elsif (m{\G \b split (\s* \( \s*) //         }xgc) { return "Sjis::Split$1''";  }
-    elsif (m{\G \b split (\s*)        m\s*(\S)\2 }xgc) { return "Sjis::Split$1''";  }
-    elsif (m{\G \b split (\s*)        //         }xgc) { return "Sjis::Split$1''";  }
-    elsif (m{\G \b split \b                      }xgc) { return 'Sjis::Split';      }
+            # skip here document
+            /\G .*? \n $longest_heredoc_delimiter \n/xmsgc;
 
-# chop
-    elsif (m{\G \b chop  \b                      }xgc) { return 'Sjis::Chop';       }
+            %heredoc = ();
+            $heredoc_qq = 0;
+        }
+        return "\n" . $heredoc;
+    }
 
-# tr/// y///
-    elsif (/\G \b (tr|y)  \b /xgc) {
-        die "esjis: Can't use $1, use function Sjis::trans.";
+# ignore space, comment
+    elsif (/\G (\s+|\#.*) /oxgc) { return $1; }
+
+# scalar variable ($scalar = ...) =~ tr///;
+    elsif (/\G ( \( \s* (?: local \s+ | my \s+ | our \s+ | state \s+ )? ( \$ $qq_scalar ) ) /oxgc) {
+        my $e_string  = &e_string($1);
+        $tr_variable1 = &e_string($2);
+        $slash = 'div';
+        return $e_string;
+    }
+
+# scalar variable $scalar =~ tr///;
+    elsif (/\G ( \$ $qq_scalar ) /oxgc) {
+        $tr_variable2 = &e_string($1);
+        my $e_string  = &e_string($1);
+        $slash = 'div';
+        return $e_string;
+    }
+
+# =~ tr ...
+    elsif (/\G ( =~ \s* ) (?= (?: tr|y) \b ) /oxgc) {
+        $slash = 'm//';
+        $tr_variable = ($tr_variable1 || $tr_variable2);
+        return ', ';
+    }
+
+    # end of statement
+    elsif (/\G ( [,;] ) /oxgc) {
+        $slash = 'm//';
+
+        # clear tr variable
+        $tr_variable  = '';
+        $tr_variable1 = '';
+        $tr_variable2 = '';
+
+        return $1;
+    }
+
+# variable or function
+    elsif (/\G ( (?: [\$\@\%\&\*] | \$\# | -> | \b sub \b) \s* (?: split|chop|index|rindex|lc|uc|chr|ord|reverse|tr|y|q|qq|qx|qw|m|s|qr) ) \b /oxmsgc) {
+        $slash = 'div';
+        return $1;
+    }
+    elsif (/\G ( \$\$ | \$\@ | \$\# | \$\\ | \$\' | \$\" | \$\` | \$\/ | \$\? | \$\( | \$\) | \$\[ | \$\] | \$\< | \$\> ) /oxmsgc) {
+        $slash = 'div';
+        return $1;
+    }
+
+# doit if, doit unless, doit while, doit until, doit for
+    elsif (m{\G \b ( if | unless | while | until | for ) \b }oxgc) { $slash = 'm//'; return $1;  }
+
+# functions of package Esjis
+    elsif (m{\G \b (CORE::(?:split|chop|index|rindex|lc|uc|chr|ord|reverse)) \b }oxgc) { $slash = 'm//'; return $1;  }
+    elsif (m{\G \b split (\s* \( \s*) m\s*(\S)\2          }oxgc) { $slash = 'm//'; return   "Esjis::split$1''";   }
+    elsif (m{\G \b split (\s* \( \s*) //                  }oxgc) { $slash = 'm//'; return   "Esjis::split$1''";   }
+    elsif (m{\G \b split (\s*)        m\s*(\S)\2          }oxgc) { $slash = 'm//'; return   "Esjis::split$1''";   }
+    elsif (m{\G \b split (\s*)        //                  }oxgc) { $slash = 'm//'; return   "Esjis::split$1''";   }
+    elsif (m{\G \b split (\s* \( \s*) m\s*([ -?]\+?)\2    }oxgc) { $slash = 'm//'; return   "Esjis::split$1'$2'"; }
+    elsif (m{\G \b split (\s* \( \s*) /([ -?]\+?)/        }oxgc) { $slash = 'm//'; return   "Esjis::split$1'$2'"; }
+    elsif (m{\G \b split (\s*)        m\s*([ -?]\+?)\2    }oxgc) { $slash = 'm//'; return   "Esjis::split$1'$2'"; }
+    elsif (m{\G \b split (\s*)        /([ -?]\+?)/        }oxgc) { $slash = 'm//'; return   "Esjis::split$1'$2'"; }
+    elsif (m{\G \b split (\s* \( \s*) m\s*(\\[nrtf]\+?)\2 }oxgc) { $slash = 'm//'; return qq{Esjis::split$1"$2"}; }
+    elsif (m{\G \b split (\s* \( \s*) /(\\[nrtf]\+?)/     }oxgc) { $slash = 'm//'; return qq{Esjis::split$1"$2"}; }
+    elsif (m{\G \b split (\s*)        m\s*(\\[nrtf]\+?)\2 }oxgc) { $slash = 'm//'; return qq{Esjis::split$1"$2"}; }
+    elsif (m{\G \b split (\s*)        /(\\[nrtf]\+?)/     }oxgc) { $slash = 'm//'; return qq{Esjis::split$1"$2"}; }
+    elsif (m{\G \b split \b   (?! \s* => )                }oxgc) { $slash = 'm//'; return   'Esjis::split';       }
+    elsif (m{\G \b chop \b    (?! \s* => )                }oxgc) { $slash = 'm//'; return   'Esjis::chop';        }
+    elsif (m{\G \b index \b   (?! \s* => )                }oxgc) { $slash = 'm//'; return   'Esjis::index';       }
+    elsif (m{\G \b rindex \b  (?! \s* => )                }oxgc) { $slash = 'm//'; return   'Esjis::rindex';      }
+    elsif (m{\G \b lc \b      (?! \s* => )                }oxgc) { $slash = 'm//'; return   'Esjis::lc';          }
+    elsif (m{\G \b uc \b      (?! \s* => )                }oxgc) { $slash = 'm//'; return   'Esjis::uc';          }
+    elsif (m{\G \b chr \b     (?! \s* => )                }oxgc) { $slash = 'm//'; return   'Esjis::chr';         }
+    elsif (m{\G \b ord \b     (?! \s* => )                }oxgc) { $slash = 'div'; return   'Esjis::ord';         }
+    elsif (m{\G \b reverse \b (?! \s* => )                }oxgc) { $slash = 'm//'; return   'Esjis::reverse';     }
+
+# tr/// or y///
+    elsif (/\G \b (tr|y) \b /oxgc) {
+        my $ope = $1;
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ((?:$qq_char)*?) (\#) ([a-z]*) /oxgc) {
+            my @tr = ($tr_variable,$2);
+            return &e_tr(@tr, '', $4,$6);
+        }
+        else {
+            my $e = '';
+            while (not /\G \z/oxgc) {
+                if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                elsif (/\G (\() ((?:$qq_paren)*?) (\)) /oxgc) {
+                    my @tr = ($tr_variable,$2);
+                    while (not /\G \z/oxgc) {
+                        if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                    }
+                    die "esjis: operator $ope can't find delimiter.\n";
+                }
+                elsif (/\G (\{) ((?:$qq_brace)*?) (\}) /oxgc) {
+                    my @tr = ($tr_variable,$2);
+                    while (not /\G \z/oxgc) {
+                        if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                    }
+                    die "esjis: operator $ope can't find delimiter.\n";
+                }
+                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) {
+                    my @tr = ($tr_variable,$2);
+                    while (not /\G \z/oxgc) {
+                        if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                    }
+                    die "esjis: operator $ope can't find delimiter.\n";
+                }
+                elsif (/\G (\<) ((?:$qq_angle)*?) (\>) /oxgc) {
+                    my @tr = ($tr_variable,$2);
+                    while (not /\G \z/oxgc) {
+                        if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                    }
+                    die "esjis: operator $ope can't find delimiter.\n";
+                }
+                elsif (/\G (\|) ((?:$qq_char)*?) (\|) /oxgc) {
+                    my @tr = ($tr_variable,$2);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G      ((?:$qq_char)*?)    (\|) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $1,$3); }
+                        elsif (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                    }
+                    die "esjis: operator $ope can't find delimiter.\n";
+                }
+                elsif (/\G (\S) ((?:$qq_char)*?) (\1) /oxgc) {
+                    my $end = $1;
+                    my @tr = ($tr_variable,$2);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G      ((?:$qq_char)*?)    ($end) ([a-z]*) /xgc ) { return &e_tr(@tr, $e, $1,$3); }
+                        elsif (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\))   ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\})   ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\])   ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>)   ([a-z]*) /oxgc) { return &e_tr(@tr, $e, $2,$4); }
+                    }
+                    die "esjis: operator $ope can't find delimiter.\n";
+                }
+            }
+            die "esjis: operator $ope can't find delimiter.\n";
+        }
+
+        # clear tr variable
+        $tr_variable  = '';
+        $tr_variable1 = '';
+        $tr_variable2 = '';
     }
 
 # q//
-    elsif (/\G \b (q) \b /xgc) {
+    elsif (/\G \b (q) \b /oxgc) {
         my $ope = $1;
-        if (/\G (\#) ((?:\\\#|\\\\|$q_char)*?) (\#) /xgc) {
+        if (/\G (\#) ((?:\\\#|\\\\|$q_char)*?) (\#) /oxgc) {
             return &e_q($ope,$1,$3,$2);
         }
         else {
             my $e = '';
-            while (not /\G \z/xgc) {
-                if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                elsif (/\G (\() ((?:\\\)|\\\\|$q_paren)*?)   (\)) /xgc) { return $e . &e_q($ope,$1,$3,$2); }
-                elsif (/\G (\{) ((?:\\\}|\\\\|$q_brace)*?)   (\}) /xgc) { return $e . &e_q($ope,$1,$3,$2); }
-                elsif (/\G (\[) ((?:\\\]|\\\\|$q_bracket)*?) (\]) /xgc) { return $e . &e_q($ope,$1,$3,$2); }
-                elsif (/\G (\<) ((?:\\\>|\\\\|$q_angle)*?)   (\>) /xgc) { return $e . &e_q($ope,$1,$3,$2); }
-                elsif (/\G (\') ((?:\\\1|\\\\|$q_char)*?)    (\') /xgc) { return $e . &e_q($ope,$1,$3,$2); } #'
-                elsif (/\G (\S) ((?:\\\1|\\\\|$q_char)*?)    (\1) /xgc) { return $e . &e_q($ope,$1,$3,$2); }
+            while (not /\G \z/oxgc) {
+                if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                elsif (/\G (\() ((?:\\\)|\\\\|$q_paren)*?)   (\)) /oxgc) { return $e . &e_q($ope,$1,$3,$2); }
+                elsif (/\G (\{) ((?:\\\}|\\\\|$q_brace)*?)   (\}) /oxgc) { return $e . &e_q($ope,$1,$3,$2); }
+                elsif (/\G (\[) ((?:\\\]|\\\\|$q_bracket)*?) (\]) /oxgc) { return $e . &e_q($ope,$1,$3,$2); }
+                elsif (/\G (\<) ((?:\\\>|\\\\|$q_angle)*?)   (\>) /oxgc) { return $e . &e_q($ope,$1,$3,$2); }
+                elsif (/\G (\') ((?:\\\1|\\\\|$q_char)*?)    (\') /oxgc) { return $e . &e_q($ope,$1,$3,$2); }
+                elsif (/\G (\S) ((?:\\\1|\\\\|$q_char)*?)    (\1) /oxgc) { return $e . &e_q($ope,$1,$3,$2); }
             }
             die "esjis: operator $ope can't find delimiter.\n";
         }
     }
 
 # qq//
-    elsif (/\G \b (qq) \b /xgc) {
+    elsif (/\G \b (qq) \b /oxgc) {
         my $ope = $1;
-        if (/\G (\#) ((?:$qq_char)*?) (\#) /xgc) {
+        if (/\G (\#) ((?:$qq_char)*?) (\#) /oxgc) {
             return &e_qq($ope,$1,$3,$2);
         }
         else {
             my $e = '';
-            while (not /\G \z/xgc) {
-                if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                elsif (/\G (\() ((?:$qq_paren)*?)   (\)) /xgc) { return $e . &e_qq($ope,$1,$3,$2); }
-                elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) /xgc) { return $e . &e_qq($ope,$1,$3,$2); }
-                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /xgc) { return $e . &e_qq($ope,$1,$3,$2); }
-                elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) /xgc) { return $e . &e_qq($ope,$1,$3,$2); }
-                elsif (/\G (\') ((?:$qq_char)*?)    (\') /xgc) { return $e . &e_qq($ope,$1,$3,$2); } #'
-                elsif (/\G (\S) ((?:$qq_char)*?)    (\1) /xgc) { return $e . &e_qq($ope,$1,$3,$2); }
+            while (not /\G \z/oxgc) {
+                if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                elsif (/\G (\() ((?:$qq_paren)*?)   (\)) /oxgc) { return $e . &e_qq($ope,$1,$3,$2); }
+                elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) /oxgc) { return $e . &e_qq($ope,$1,$3,$2); }
+                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) { return $e . &e_qq($ope,$1,$3,$2); }
+                elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) /oxgc) { return $e . &e_qq($ope,$1,$3,$2); }
+                elsif (/\G (\') ((?:$qq_char)*?)    (\') /oxgc) { return $e . &e_qq($ope,$1,$3,$2); }
+                elsif (/\G (\S) ((?:$qq_char)*?)    (\1) /oxgc) { return $e . &e_qq($ope,$1,$3,$2); }
             }
             die "esjis: operator $ope can't find delimiter.\n";
         }
     }
 
 # qx//
-    elsif (/\G \b (qx) \b /xgc) {
+    elsif (/\G \b (qx) \b /oxgc) {
         my $ope = $1;
-        if (/\G (\#) ((?:$qq_char)*?) (\#) /xgc) {
+        if (/\G (\#) ((?:$qq_char)*?) (\#) /oxgc) {
             return &e_qx($ope,$1,$3,$2);
         }
         else {
             my $e = '';
-            while (not /\G \z/xgc) {
-                if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                elsif (/\G (\() ((?:$qq_paren)*?)   (\)) /xgc) { return $e . &e_qx($ope,$1,$3,$2); }
-                elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) /xgc) { return $e . &e_qx($ope,$1,$3,$2); }
-                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /xgc) { return $e . &e_qx($ope,$1,$3,$2); }
-                elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) /xgc) { return $e . &e_qx($ope,$1,$3,$2); }
-                elsif (/\G (\') ((?:$qq_char)*?)    (\') /xgc) { return $e . &e_q ($ope,$1,$3,$2); } #'
-                elsif (/\G (\S) ((?:$qq_char)*?)    (\1) /xgc) { return $e . &e_qx($ope,$1,$3,$2); }
+            while (not /\G \z/oxgc) {
+                if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                elsif (/\G (\() ((?:$qq_paren)*?)   (\)) /oxgc) { return $e . &e_qx($ope,$1,$3,$2); }
+                elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) /oxgc) { return $e . &e_qx($ope,$1,$3,$2); }
+                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) { return $e . &e_qx($ope,$1,$3,$2); }
+                elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) /oxgc) { return $e . &e_qx($ope,$1,$3,$2); }
+                elsif (/\G (\') ((?:$qq_char)*?)    (\') /oxgc) { return $e . &e_q ($ope,$1,$3,$2); }
+                elsif (/\G (\S) ((?:$qq_char)*?)    (\1) /oxgc) { return $e . &e_qx($ope,$1,$3,$2); }
+            }
+            die "esjis: operator $ope can't find delimiter.\n";
+        }
+    }
+
+# qw//
+    elsif (/\G \b (qw) \b /oxgc) {
+        my $ope = $1;
+        if (/\G (\#) (.*?) (\#) /oxmsgc) {
+            return &e_qw($ope,$1,$3,$2);
+        }
+        else {
+            my $e = '';
+            while (not /\G \z/oxgc) {
+                if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                elsif (/\G (\() (.*?) (\)) /oxmsgc) { return $e . &e_qw($ope,$1,$3,$2); }
+                elsif (/\G (\{) (.*?) (\}) /oxmsgc) { return $e . &e_qw($ope,$1,$3,$2); }
+                elsif (/\G (\[) (.*?) (\]) /oxmsgc) { return $e . &e_qw($ope,$1,$3,$2); }
+                elsif (/\G (\<) (.*?) (\>) /oxmsgc) { return $e . &e_qw($ope,$1,$3,$2); }
+                elsif (/\G (\S) (.*?) (\1) /oxmsgc) { return $e . &e_qw($ope,$1,$3,$2); }
             }
             die "esjis: operator $ope can't find delimiter.\n";
         }
     }
 
 # m//
-    elsif (/\G \b (m) \b /xgc) {
+    elsif (/\G \b (m) \b /oxgc) {
         my $ope = $1;
-        if (/\G (\#) ((?:$qq_char)*?) (\#) ([a-z]*) /xgc) {
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ([a-z]*) /oxgc) {
             return &e_m($ope,$1,$3,$2,$4);
         }
         else {
             my $e = '';
-            while (not /\G \z/xgc) {
-                if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /xgc) { return $e . &e_m  ($ope,$1,$3,$2,$4); }
-                elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /xgc) { return $e . &e_m  ($ope,$1,$3,$2,$4); }
-                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /xgc) { return $e . &e_m  ($ope,$1,$3,$2,$4); }
-                elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /xgc) { return $e . &e_m  ($ope,$1,$3,$2,$4); }
-                elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /xgc) { return $e . &e_m_q($ope,$1,$3,$2,$4); } #'
-                elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /xgc) { return $e . &e_m  ($ope,$1,$3,$2,$4); }
+            while (not /\G \z/oxgc) {
+                if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return $e . &e_m  ($ope,$1, $3, $2,$4); }
+                elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return $e . &e_m  ($ope,$1, $3, $2,$4); }
+                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return $e . &e_m  ($ope,$1, $3, $2,$4); }
+                elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return $e . &e_m  ($ope,$1, $3, $2,$4); }
+                elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /oxgc) { return $e . &e_m_q($ope,$1, $3, $2,$4); }
+                elsif (/\G (\|) ((?:$qq_char)*?)    (\|) ([a-z]*) /oxgc) { return $e . &e_m  ($ope,'<','>',$2,$4); }
+                elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /oxgc) { return $e . &e_m  ($ope,$1, $3, $2,$4); }
             }
             die "esjis: operator $ope can't find delimiter.\n";
         }
     }
 
 # s///
-    elsif (/\G \b (s) \b /xgc) {
+    elsif (/\G \b (s) \b /oxgc) {
         my $ope = $1;
-        if (/\G (\#) ((?:$qq_char)*?) (\#) ((?:$qq_char)*?) (\#) ([a-z]*) /xgc) {
-            my $re = &e_s($ope,$1,$3,$2);
-            return $re . &e_s_qq($ope,'',$5,$4,$6,$re);
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ((?:$qq_char)*?) (\#) ([a-z]*) /oxgc) {
+            my @s = ($ope,$1,$3,$2);
+            return &e_s(@s,$6) . &e_s_qq($ope,'',$5,$4,$6);
         }
         else {
             my $e = '';
-            while (not /\G \z/xgc) {
-                if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                elsif (/\G (\() ((?:$qq_paren)*?) (\)) /xgc) {
-                    my $re = &e_s($ope,$1,$3,$2);
-                    $e .= $re;
-                    while (not /\G \z/xgc) {
-                        if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /xgc) { return $e . &e_s_q2($ope,$1,$3,$2,$4,$re); } #'
-                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
+            while (not /\G \z/oxgc) {
+                if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                elsif (/\G (\() ((?:$qq_paren)*?) (\)) /oxgc) {
+                    my @s = ($ope,$1,$3,$2);
+                    while (not /\G \z/oxgc) {
+                        if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_q2($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
                     }
                     die "esjis: operator $ope can't find delimiter.\n";
                 }
-                elsif (/\G (\{) ((?:$qq_brace)*?) (\}) /xgc) {
-                    my $re = &e_s($ope,$1,$3,$2);
-                    $e .= $re;
-                    while (not /\G \z/xgc) {
-                        if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /xgc) { return $e . &e_s_q2($ope,$1,$3,$2,$4,$re); } #'
-                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
+                elsif (/\G (\{) ((?:$qq_brace)*?) (\}) /oxgc) {
+                    my @s = ($ope,$1,$3,$2);
+                    while (not /\G \z/oxgc) {
+                        if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_q2($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
                     }
                     die "esjis: operator $ope can't find delimiter.\n";
                 }
-                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /xgc) {
-                    my $re = &e_s($ope,$1,$3,$2);
-                    $e .= $re;
-                    while (not /\G \z/xgc) {
-                        if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /xgc) { return $e . &e_s_q2($ope,$1,$3,$2,$4,$re); } #'
-                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
+                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) {
+                    my @s = ($ope,$1,$3,$2);
+                    while (not /\G \z/oxgc) {
+                        if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_q2($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
                     }
                     die "esjis: operator $ope can't find delimiter.\n";
                 }
-                elsif (/\G (\<) ((?:$qq_angle)*?) (\>) /xgc) {
-                    my $re = &e_s($ope,$1,$3,$2);
-                    $e .= $re;
-                    while (not /\G \z/xgc) {
-                        if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /xgc) { return $e . &e_s_q2($ope,$1,$3,$2,$4,$re); } #'
-                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
+                elsif (/\G (\<) ((?:$qq_angle)*?) (\>) /oxgc) {
+                    my @s = ($ope,$1,$3,$2);
+                    while (not /\G \z/oxgc) {
+                        if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_q2($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
                     }
                     die "esjis: operator $ope can't find delimiter.\n";
                 }
-                elsif (/\G (\') ((?:$qq_char)*?) (\1) /xgc) { #'
+                elsif (/\G (\') ((?:$qq_char)*?) (\') /oxgc) {
+                    my @s = ($ope,$1,$3,$2);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G      ((?:$qq_char)*?)    (\') ([a-z]*) /oxgc) { return &e_s_q(@s,$4) . $e . &e_s_q2($ope,'',$2,$1,$3); }
+                        elsif (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_s_q(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_s_q(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_s_q(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_s_q(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                    }
+                    die "esjis: operator $ope can't find delimiter.\n";
+                }
+                elsif (/\G (\|) ((?:$qq_char)*?) (\|) /oxgc) {
+                    my @s = ($ope,'(',')',$2);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G      ((?:$qq_char)*?)    (\|) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,'(',')',$1,$3); }
+                        elsif (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                    }
+                    die "esjis: operator $ope can't find delimiter.\n";
+                }
+                elsif (/\G (\S) ((?:$qq_char)*?) (\1) /oxgc) {
                     my $end = $1;
-                    my $re  = &e_s_q($ope,$1,$3,$2);
-                    $e .= $re;
-                    while (not /\G \z/xgc) {
-                        if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                        elsif (/\G (\() ((?:$qq_paren)*?)   (\))   ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\})   ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\])   ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>)   ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G      ((?:$qq_char)*?)    ($end) ([a-z]*) /xgc) { return $e . &e_s_q2($ope,'',$2,$1,$4,$re); }
-                    }
-                    die "esjis: operator $ope can't find delimiter.\n";
-                }
-                elsif (/\G (\S) ((?:$qq_char)*?) (\1) /xgc) {
-                    my $end = $1;
-                    my $re  = &e_s($ope,$1,$3,$2);
-                    $e .= $re;
-                    while (not /\G \z/xgc) {
-                        if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                        elsif (/\G (\() ((?:$qq_paren)*?)   (\))   ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\})   ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\])   ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>)   ([a-z]*) /xgc) { return $e . &e_s_qq($ope,$1,$3,$2,$4,$re); }
-                        elsif (/\G      ((?:$qq_char)*?)    ($end) ([a-z]*) /xgc) { return $e . &e_s_qq($ope,'',$2,$1,$4,$re); }
+                    my @s = ($ope,$1,$3,$2);
+                    while (not /\G \z/oxgc) {
+                        if    (/\G      ((?:$qq_char)*?)    ($end) ([a-z]*) /xgc)  { return &e_s(@s,$4) . $e . &e_s_qq($ope,'',$2,$1,$3); }
+                        elsif (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\))   ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\})   ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\])   ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>)   ([a-z]*) /oxgc) { return &e_s(@s,$4) . $e . &e_s_qq($ope,$1,$3,$2,$4); }
                     }
                     die "esjis: operator $ope can't find delimiter.\n";
                 }
@@ -307,125 +538,175 @@ sub escape {
     }
 
 # qr//
-    elsif (/\G \b (qr) \b /xgc) {
+    elsif (/\G \b (qr) \b /oxgc) {
         my $ope = $1;
-        if (/\G (\#) ((?:$qq_char)*?) (\#) ([a-z]*) /xgc) {
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ([a-z]*) /oxgc) {
             return &e_qr($ope,$1,$3,$2,$4);
         }
         else {
             my $e = '';
-            while (not /\G \z/xgc) {
-                if (/\G (\s+|\#.*) /xgc) { $e .= $1; }
-                elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /xgc) { return $e . &e_qr  ($ope,$1,$3,$2,$4); }
-                elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /xgc) { return $e . &e_qr  ($ope,$1,$3,$2,$4); }
-                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /xgc) { return $e . &e_qr  ($ope,$1,$3,$2,$4); }
-                elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /xgc) { return $e . &e_qr  ($ope,$1,$3,$2,$4); }
-                elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /xgc) { return $e . &e_qr_q($ope,$1,$3,$2,$4); } #'
-                elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /xgc) { return $e . &e_qr  ($ope,$1,$3,$2,$4); }
+            while (not /\G \z/oxgc) {
+                if (/\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([a-z]*) /oxgc) { return $e . &e_qr  ($ope,$1, $3, $2,$4); }
+                elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([a-z]*) /oxgc) { return $e . &e_qr  ($ope,$1, $3, $2,$4); }
+                elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([a-z]*) /oxgc) { return $e . &e_qr  ($ope,$1, $3, $2,$4); }
+                elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([a-z]*) /oxgc) { return $e . &e_qr  ($ope,$1, $3, $2,$4); }
+                elsif (/\G (\') ((?:$qq_char)*?)    (\') ([a-z]*) /oxgc) { return $e . &e_qr_q($ope,$1, $3, $2,$4); }
+                elsif (/\G (\|) ((?:$qq_char)*?)    (\|) ([a-z]*) /oxgc) { return $e . &e_qr  ($ope,'<','>',$2,$4); }
+                elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([a-z]*) /oxgc) { return $e . &e_qr  ($ope,$1, $3, $2,$4); }
             }
             die "esjis: operator $ope can't find delimiter.\n";
         }
     }
 
 # ''
-    elsif (/\G (?<!\w) (\') ((?:\\\'|\\\\|$q_char)*?) (\') /xgc) { return &e_q('',$1,$3,$2); } #'
+    elsif (/\G (?<!\w) (\') ((?:\\\'|\\\\|$q_char)*?) (\') /oxgc) { return &e_q('',$1,$3,$2); }
 
 # ""
-    elsif (/\G (\") ((?:$qq_char)*?) (\") /xgc)                  { return &e_qq('qq',$1,$3,$2); } #"
+    elsif (/\G (\") ((?:$qq_char)*?) (\") /oxgc)                  { return &e_qq('',$1,$3,$2); } #"
 
 # ``
-    elsif (/\G (\`) ((?:$qq_char)*?) (\`) /xgc)                  { return &e_qx('qx',$1,$3,$2); }
+    elsif (/\G (\`) ((?:$qq_char)*?) (\`) /oxgc)                  { return &e_qx('',$1,$3,$2); }
 
-# //
-    elsif (/\G (\/) ((?:$qq_char)*?) (\/) ([a-z]*) /xgc)         { return &e_m ('m', $1,$3,$2,$4); }
+# //   --- not divide operator (num / num)
+    elsif (($slash eq 'm//') and
+           /\G (\/) ((?:$qq_char)*?) (\/) ([a-z]*) /oxgc)         { return &e_m ('', $1,$3,$2,$4); }
 
-# ??
-    elsif (/\G (\?) ((?:$qq_char)*?) (\?) ([a-z]*) /xgc)         { return &e_m ('m', $1,$3,$2,$4); }
+# ??   --- not three item operator (condition ? true : false)
+    elsif (($slash eq 'm//') and
+           /\G (\?) ((?:$qq_char)*?) (\?) ([a-z]*) /oxgc)         { return &e_m ('', $1,$3,$2,$4); }
 
-# <<
-    elsif (/\G (?= << ) /xmsgc) {
-        my $e = '';
-        my @delimiter = ();
-        my %quote_type = ();
-        while (not /\G $/xmsgc) {
+# << (bit shift)
+    elsif (/\G ( << \s* ) (?= [0-9\$\@\&] ) /oxgc)                { $slash = 'm//'; return $1; }
 
 # <<'HEREDOC'
-            if (/\G ( << '(\w*)' ) /xmsgc) {
-                $e .= $1;
-                push @delimiter, $2;
-                $quote_type{$2} = 'q';
-            }
+    elsif (/\G ( << '([a-zA-Z_0-9]*)' ) /oxgc) {
+        $slash = 'm//';
+        my $here_quote = $1;
+        my $delimiter  = $2;
 
-# <<\HEREDOC
-            elsif (/\G ( << \\(\w+) ) /xmsgc) {
-                $e .= $1;
-                push @delimiter, $2;
-                $quote_type{$2} = 'q';
-            }
-
-# <<"HEREDOC"
-            elsif (/\G ( << "(\w*)" ) /xmsgc) {
-                $e .= $1;
-                push @delimiter, $2;
-                $quote_type{$2} = 'qq';
-            }
-
-# <<HEREDOC
-            elsif (/\G ( << (\w+) ) /xmsgc) {
-                $e .= $1;
-                push @delimiter, $2;
-                $quote_type{$2} = 'qq';
-            }
-
-# <<`HEREDOC`
-            elsif (/\G ( << `(\w*)` ) /xmsgc) {
-                $e .= $1;
-                push @delimiter, $2;
-                $quote_type{$2} = 'qq';
-            }
-
-            # other any character
-            elsif (/\G (.+?) (?: (?= << ) | $) /xmsgc) {
-                local $_ = $1;
-                $e .= &escape;
-            }
-        }
-
-        # find every document
-        my %delimiter = ();
+        # get here document
         my $script = substr($_, pos($_));
-        for my $delimiter (@delimiter) {
-            if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
-                $delimiter{length($1)} = $delimiter;
-            }
-            else {
-                die "esjis: here document delimiter $delimiter not found.\n";
-            }
+        $script =~ s/.*?\n//oxm;
+        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+            $heredoc{$delimiter} = $1;
         }
-
-        # output every here document
-        for my $length (sort {$a <=> $b} keys %delimiter) {
-            my @longer = grep {$_ >= $length} keys %delimiter;
-            if (grep /^qq$/, map { $quote_type{$delimiter{$_}} } @longer) {
-                my $delimiter = $delimiter{$length};
-                if (/\G (.*?) (\n $delimiter \n)/xmsgc) {
-                    $e .= &e_heredoc($1);
-                    $e .= $2;
-                }
-            }
-            else {
-                my $delimiter = $delimiter{$length};
-                if (/\G (.*?) (\n $delimiter \n)/xmsgc) {
-                    $e .= $1;
-                    $e .= $2;
-                }
-            }
+        else {
+            die "esjis: here document delimiter $delimiter not found.\n";
         }
-        return $e;
+        return $here_quote;
     }
 
+# <<\HEREDOC
+    elsif (/\G ( << \\([a-zA-Z_0-9]+) ) /oxgc) {
+        $slash = 'm//';
+        my $here_quote = $1;
+        my $delimiter  = $2;
+
+        # get here document
+        my $script = substr($_, pos($_));
+        $script =~ s/.*?\n//oxm;
+        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+            $heredoc{$delimiter} = $1;
+        }
+        else {
+            die "esjis: here document delimiter $delimiter not found.\n";
+        }
+        return $here_quote;
+    }
+
+# <<"HEREDOC"
+    elsif (/\G ( << "([a-zA-Z_0-9]*)" ) /oxgc) {
+        $slash = 'm//';
+        my $here_quote = $1;
+        my $delimiter  = $2;
+        $heredoc_qq++;
+
+        # get here document
+        my $script = substr($_, pos($_));
+        $script =~ s/.*?\n//oxm;
+        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+            $heredoc{$delimiter} = $1;
+        }
+        else {
+            die "esjis: here document delimiter $delimiter not found.\n";
+        }
+        return $here_quote;
+    }
+
+# <<HEREDOC
+    elsif (/\G ( << ([a-zA-Z_0-9]+) ) /oxgc) {
+        $slash = 'm//';
+        my $here_quote = $1;
+        my $delimiter  = $2;
+        $heredoc_qq++;
+
+        # get here document
+        my $script = substr($_, pos($_));
+        $script =~ s/.*?\n//oxm;
+        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+            $heredoc{$delimiter} = $1;
+        }
+        else {
+            die "esjis: here document delimiter $delimiter not found.\n";
+        }
+        return $here_quote;
+    }
+
+# <<`HEREDOC`
+    elsif (/\G ( << `([a-zA-Z_0-9]*)` ) /oxgc) {
+        $slash = 'm//';
+        my $here_quote = $1;
+        my $delimiter  = $2;
+        $heredoc_qq++;
+
+        # get here document
+        my $script = substr($_, pos($_));
+        $script =~ s/.*?\n//oxm;
+        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+            $heredoc{$delimiter} = $1;
+        }
+        else {
+            die "esjis: here document delimiter $delimiter not found.\n";
+        }
+        return $here_quote;
+    }
+
+# __DATA__
+    elsif (/\G ^ (__DATA__ \n .*) \z /oxmsgc) { return $1; }
+
+# __END__
+    elsif (/\G ^ (__END__  \n .*) \z /oxmsgc) { return $1; }
+
+    # any operator
+    elsif (/\G (
+
+            != | !~ | ! |
+            %= | % |
+            &&= | && | &= | & |
+            -- | -= | -> | -[rwxoRWXOezsfdlpSbctugkTBMAC] | - |
+            : |
+            <<= | <=> | <= | < |
+            == | => | =~ | = |
+            >>= | >> | >= | > |
+            \*\*= | \*\* | \*= | \* |
+            \+\+ | \+= | \+ |
+            \.\.\. | \.\. | \.= | \. |
+            \/= | \/ |
+            \? |
+            \\ |
+            \^= | \^ |
+            \b x= |
+            \|\|= | \|\| | \|= | \| |
+            ~ |
+            \b(?: and | cmp | eq | ge | gt | le | lt | ne | not | or | xor | x )\b |
+
+            [,;\(\{\[]
+
+                       ) /oxgc) { $slash = 'm//'; return $1; }
+
     # other any character
-    elsif (/\G ($q_char) /xgc) { return $1; }
+    elsif (/\G ($q_char) /oxgc) { $slash = 'div'; return $1; }
 
     # system error
     else {
@@ -433,18 +714,223 @@ sub escape {
     }
 }
 
+# escape ShiftJIS string
+sub e_string($) {
+    my($string) = @_;
+    my $e_string = '';
+
+    # without { ... }
+    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
+    if (not (grep(m/\A \{ \z/xms, @char) and grep(m/\A \} \z/xms, @char))) {
+        return $string;
+    }
+
+E_STRING_LOOP:
+    while ($string !~ /\G \z/oxgc) {
+
+# bare word
+        if ($string =~ /\G ( \{ \s* (?: tr | index | rindex | reverse ) \s* \} ) /oxmsgc) {
+            $e_string .= $1;
+        }
+
+# variable
+        elsif ($string =~ /\G ( (?: [\$\@\%\&\*] | \$\# | -> ) \s* (?: split | chop | index | rindex | lc | uc | chr | ord | reverse | tr | y | q | qq | qx | qw | m | s | qr ) ) \b /oxmsgc) {
+            $e_string .= $1;
+        }
+        elsif ($string =~ /\G ( \$\$ | \$\@ | \$\# | \$\\ | \$\' | \$\" | \$\` | \$\/ | \$\? | \$\( | \$\) | \$\[ | \$\] | \$\< | \$\> ) /oxmsgc) {
+            $e_string .= $1;
+        }
+
+# functions of package Esjis
+        elsif ($string =~ m{\G \b (CORE::(?:split|chop|index|rindex|lc|uc|chr|ord|reverse)) \b }oxgc) { $e_string .= $1;  }
+        elsif ($string =~ m{\G \b split (\s* \( \s*) m\s*(\S)\2          }oxgc) { $e_string .=   "Esjis::split$1''";   }
+        elsif ($string =~ m{\G \b split (\s* \( \s*) //                  }oxgc) { $e_string .=   "Esjis::split$1''";   }
+        elsif ($string =~ m{\G \b split (\s*)        m\s*(\S)\2          }oxgc) { $e_string .=   "Esjis::split$1''";   }
+        elsif ($string =~ m{\G \b split (\s*)        //                  }oxgc) { $e_string .=   "Esjis::split$1''";   }
+        elsif ($string =~ m{\G \b split (\s* \( \s*) m\s*([ -?]\+?)\2    }oxgc) { $e_string .=   "Esjis::split$1'$2'"; }
+        elsif ($string =~ m{\G \b split (\s* \( \s*) /([ -?]\+?)/        }oxgc) { $e_string .=   "Esjis::split$1'$2'"; }
+        elsif ($string =~ m{\G \b split (\s*)        m\s*([ -?]\+?)\2    }oxgc) { $e_string .=   "Esjis::split$1'$2'"; }
+        elsif ($string =~ m{\G \b split (\s*)        /([ -?]\+?)/        }oxgc) { $e_string .=   "Esjis::split$1'$2'"; }
+        elsif ($string =~ m{\G \b split (\s* \( \s*) m\s*(\\[nrtf]\+?)\2 }oxgc) { $e_string .= qq{Esjis::split$1"$2"}; }
+        elsif ($string =~ m{\G \b split (\s* \( \s*) /(\\[nrtf]\+?)/     }oxgc) { $e_string .= qq{Esjis::split$1"$2"}; }
+        elsif ($string =~ m{\G \b split (\s*)        m\s*(\\[nrtf]\+?)\2 }oxgc) { $e_string .= qq{Esjis::split$1"$2"}; }
+        elsif ($string =~ m{\G \b split (\s*)        /(\\[nrtf]\+?)/     }oxgc) { $e_string .= qq{Esjis::split$1"$2"}; }
+        elsif ($string =~ m{\G \b split \b                               }oxgc) { $e_string .=   'Esjis::split';       }
+        elsif ($string =~ m{\G \b chop \b                                }oxgc) { $e_string .=   'Esjis::chop';        }
+        elsif ($string =~ m{\G \b index \b                               }oxgc) { $e_string .=   'Esjis::index';       }
+        elsif ($string =~ m{\G \b rindex \b                              }oxgc) { $e_string .=   'Esjis::rindex';      }
+        elsif ($string =~ m{\G \b lc \b                                  }oxgc) { $e_string .=   'Esjis::lc';          }
+        elsif ($string =~ m{\G \b uc \b                                  }oxgc) { $e_string .=   'Esjis::uc';          }
+        elsif ($string =~ m{\G \b chr \b                                 }oxgc) { $e_string .=   'Esjis::chr';         }
+        elsif ($string =~ m{\G \b ord \b                                 }oxgc) { $e_string .=   'Esjis::ord';         }
+        elsif ($string =~ m{\G \b reverse \b                             }oxgc) { $e_string .=   'Esjis::reverse';     }
+
+# q//
+        elsif ($string =~ /\G \b (q) \b /oxgc) {
+            my $ope = $1;
+            if ($string =~ /\G (\#) ((?:\\\#|\\\\|$q_char)*?) (\#) /oxgc) {
+                $e_string .= &e_q($ope,$1,$3,$2);
+            }
+            else {
+                my $e = '';
+                while ($string !~ /\G \z/oxgc) {
+                    if ($string =~ /\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                    elsif ($string =~ /\G (\() ((?:\\\)|\\\\|$q_paren)*?)   (\)) /oxgc) { $e_string .= $e . &e_q($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\{) ((?:\\\}|\\\\|$q_brace)*?)   (\}) /oxgc) { $e_string .= $e . &e_q($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\[) ((?:\\\]|\\\\|$q_bracket)*?) (\]) /oxgc) { $e_string .= $e . &e_q($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\<) ((?:\\\>|\\\\|$q_angle)*?)   (\>) /oxgc) { $e_string .= $e . &e_q($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\') ((?:\\\1|\\\\|$q_char)*?)    (\') /oxgc) { $e_string .= $e . &e_q($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\S) ((?:\\\1|\\\\|$q_char)*?)    (\1) /oxgc) { $e_string .= $e . &e_q($ope,$1,$3,$2); next E_STRING_LOOP; }
+                }
+                die "esjis: operator $ope can't find delimiter.\n";
+            }
+        }
+
+# qq//
+        elsif ($string =~ /\G \b (qq) \b /oxgc) {
+            my $ope = $1;
+            if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) /oxgc) {
+                $e_string .= &e_qq($ope,$1,$3,$2);
+            }
+            else {
+                my $e = '';
+                while ($string !~ /\G \z/oxgc) {
+                    if ($string =~ /\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                    elsif ($string =~ /\G (\() ((?:$qq_paren)*?)   (\)) /oxgc) { $e_string .= $e . &e_qq($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\{) ((?:$qq_brace)*?)   (\}) /oxgc) { $e_string .= $e . &e_qq($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) { $e_string .= $e . &e_qq($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\<) ((?:$qq_angle)*?)   (\>) /oxgc) { $e_string .= $e . &e_qq($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\') ((?:$qq_char)*?)    (\') /oxgc) { $e_string .= $e . &e_qq($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\S) ((?:$qq_char)*?)    (\1) /oxgc) { $e_string .= $e . &e_qq($ope,$1,$3,$2); next E_STRING_LOOP; }
+                }
+                die "esjis: operator $ope can't find delimiter.\n";
+            }
+        }
+
+# qx//
+        elsif ($string =~ /\G \b (qx) \b /oxgc) {
+            my $ope = $1;
+            if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) /oxgc) {
+                $e_string .= &e_qx($ope,$1,$3,$2);
+            }
+            else {
+                my $e = '';
+                while ($string !~ /\G \z/oxgc) {
+                    if ($string =~ /\G (\s+|\#.*) /oxgc) { $e .= $1; }
+                    elsif ($string =~ /\G (\() ((?:$qq_paren)*?)   (\)) /oxgc) { $e_string .= $e . &e_qx($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\{) ((?:$qq_brace)*?)   (\}) /oxgc) { $e_string .= $e . &e_qx($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) { $e_string .= $e . &e_qx($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\<) ((?:$qq_angle)*?)   (\>) /oxgc) { $e_string .= $e . &e_qx($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\') ((?:$qq_char)*?)    (\') /oxgc) { $e_string .= $e . &e_q ($ope,$1,$3,$2); next E_STRING_LOOP; }
+                    elsif ($string =~ /\G (\S) ((?:$qq_char)*?)    (\1) /oxgc) { $e_string .= $e . &e_qx($ope,$1,$3,$2); next E_STRING_LOOP; }
+                }
+                die "esjis: operator $ope can't find delimiter.\n";
+            }
+        }
+
+# ''
+        elsif ($string =~ /\G (?<!\w) (\') ((?:\\\'|\\\\|$q_char)*?) (\') /oxgc) { $e_string .= &e_q('',$1,$3,$2); }
+
+# ""
+        elsif ($string =~ /\G (\") ((?:$qq_char)*?) (\") /oxgc)                  { $e_string .= &e_qq('',$1,$3,$2); } #"
+
+# ``
+        elsif ($string =~ /\G (\`) ((?:$qq_char)*?) (\`) /oxgc)                  { $e_string .= &e_qx('',$1,$3,$2); }
+
+        # other any character
+        elsif ($string =~ /\G ($q_char) /oxgc) { $e_string .= $1; }
+
+        # system error
+        else {
+            die "esjis: Can't rewrite script $0";
+        }
+    }
+
+    return $e_string;
+}
+
+#
+# escape transliteration (tr/// or y///)
+#
+sub e_tr($$$$$) {
+    my($tr_variable,$charclass,$e,$charclass2,$option) = @_;
+    $option ||= '';
+
+    $slash = 'div';
+
+    # variable
+    if ($tr_variable eq '') {
+        $tr_variable = q{$_};
+    }
+
+    # quote character class 1
+    if($charclass !~ m/'/oxms) {
+        $charclass = &e_q('',  "'", "'", $charclass);
+    }
+    elsif($charclass !~ m{/}oxms) {
+        $charclass = &e_q('q', '/', '/', $charclass);
+    }
+    elsif($charclass !~ m/\#/oxms) {
+        $charclass = &e_q('q', '#', '#', $charclass);
+    }
+    elsif($charclass !~ m/[<>]/oxms) {
+        $charclass = &e_q('q', '<', '>', $charclass);
+    }
+    elsif($charclass !~ m/[()]/oxms) {
+        $charclass = &e_q('q', '(', ')', $charclass);
+    }
+    elsif($charclass !~ m/!/oxms) {
+        $charclass = &e_q('q', '!', '!', $charclass);
+    }
+    else {
+        $charclass = &e_q('q', '{', '}', $charclass);
+    }
+
+    # quote character class 2
+    if($charclass2 !~ m/'/oxms) {
+        $charclass2 = &e_q('',  "'", "'", $charclass2);
+    }
+    elsif($charclass2 !~ m{/}oxms) {
+        $charclass2 = &e_q('q', '/', '/', $charclass2);
+    }
+    elsif($charclass2 !~ m/\#/oxms) {
+        $charclass2 = &e_q('q', '#', '#', $charclass2);
+    }
+    elsif($charclass2 !~ m/[<>]/oxms) {
+        $charclass2 = &e_q('q', '<', '>', $charclass2);
+    }
+    elsif($charclass2 !~ m/[()]/oxms) {
+        $charclass2 = &e_q('q', '(', ')', $charclass2);
+    }
+    elsif($charclass2 !~ m/!/oxms) {
+        $charclass2 = &e_q('q', '!', '!', $charclass2);
+    }
+    else {
+        $charclass2 = &e_q('q', '{', '}', $charclass2);
+    }
+
+    return qq{Esjis::tr($tr_variable,$charclass,$e$charclass2,'$option')};
+}
+
 #
 # escape q string (q//, '')
 #
-sub e_q {
+sub e_q($$$$) {
     my($ope,$delimiter,$end_delimiter,$string) = @_;
 
-    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /xmsg;
+    $slash = 'div';
+
+    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
     for (my $i=0; $i <= $#char-1; $i++) {
-        if (($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
+        if (($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/oxms) and
             (($char[$i+1] eq '\\') or ($char[$i+1] eq $end_delimiter))
         ) {
             $char[$i] .= '\\';
+        }
+    }
+    if (defined $char[$#char]) {
+        if ($char[$#char] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/oxms) {
+            $char[$#char] .= '\\';
         }
     }
 
@@ -454,17 +940,20 @@ sub e_q {
 #
 # escape qq string (qq//, "")
 #
-sub e_qq {
+sub e_qq($$$$) {
     my($ope,$delimiter,$end_delimiter,$string) = @_;
 
+    $slash = 'div';
+
     my $metachar = {
-        'qq' => qr/[@\\]/xms,
-    }->{$ope} || die "esjis: system error (e_qq)";
+        'qq' => qr/[\@\\]/oxms,
+        ''   => qr/[\@\\]/oxms,
+    }->{$ope} || die 'esjis: system error (e_qq)';
 
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /xmsg;
+    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape character
@@ -473,24 +962,24 @@ sub e_qq {
         }
 
         # \L \U \Q \E
-        elsif ($char[$i] =~ m/\A ([<>]) \z/xms) {
+        elsif ($char[$i] =~ m/\A ([<>]) \z/oxms) {
             if ($right_e < $left_e) {
                 $char[$i] = '\\' . $char[$i];
             }
         }
-        elsif ($char[$i] =~ m/\A \\L \z/xms) {
-            $char[$i] = '@{[Sjis::lc qq<';
+        elsif ($char[$i] eq '\\L') {
+            $char[$i] = '@{[Esjis::lc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\U \z/xms) {
-            $char[$i] = '@{[Sjis::uc qq<';
+        elsif ($char[$i] eq '\\U') {
+            $char[$i] = '@{[Esjis::uc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\Q \z/xms) {
+        elsif ($char[$i] eq '\\Q') {
             $char[$i] = '@{[CORE::quotemeta qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\E \z/xms) {
+        elsif ($char[$i] eq '\\E') {
             if ($right_e < $left_e) {
                 $char[$i] = '>]}';
                 $right_e++;
@@ -513,17 +1002,20 @@ sub e_qq {
 #
 # escape qx string (qx//)
 #
-sub e_qx {
+sub e_qx($$$$) {
     my($ope,$delimiter,$end_delimiter,$string) = @_;
 
+    $slash = 'div';
+
     my $metachar = {
-        'qx' => qr/[@\\|]/xms,
-    }->{$ope} || die "esjis: system error (e_qx)";
+        'qx' => qr/[\@\\|]/oxms,
+        ''   => qr/[\@\\|]/oxms,
+    }->{$ope} || die 'esjis: system error (e_qx)';
 
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /xmsg;
+    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape character
@@ -532,24 +1024,24 @@ sub e_qx {
         }
 
         # \L \U \Q \E
-        elsif ($char[$i] =~ m/\A ([<>]) \z/xms) {
+        elsif ($char[$i] =~ m/\A ([<>]) \z/oxms) {
             if ($right_e < $left_e) {
                 $char[$i] = '\\' . $char[$i];
             }
         }
-        elsif ($char[$i] =~ m/\A \\L \z/xms) {
-            $char[$i] = '@{[Sjis::lc qq<';
+        elsif ($char[$i] eq '\\L') {
+            $char[$i] = '@{[Esjis::lc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\U \z/xms) {
-            $char[$i] = '@{[Sjis::uc qq<';
+        elsif ($char[$i] eq '\\U') {
+            $char[$i] = '@{[Esjis::uc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\Q \z/xms) {
+        elsif ($char[$i] eq '\\Q') {
             $char[$i] = '@{[CORE::quotemeta qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\E \z/xms) {
+        elsif ($char[$i] eq '\\E') {
             if ($right_e < $left_e) {
                 $char[$i] = '>]}';
                 $right_e++;
@@ -570,43 +1062,57 @@ sub e_qx {
 }
 
 #
+# escape qw string (qw//)
+#
+sub e_qw($$$$) {
+    my($ope,$delimiter,$end_delimiter,$string) = @_;
+
+    $slash = 'div';
+
+    # return string
+    return join '', $ope, $delimiter, $string, $end_delimiter;
+}
+
+#
 # escape here document (<<"HEREDOC", <<HEREDOC, <<`HEREDOC`)
 #
-sub e_heredoc {
+sub e_heredoc($) {
     my($string) = @_;
 
-    my $metachar = qr/[@\\|]/xms; # '|' is for <<`HEREDOC`
+    $slash = 'm//';
+
+    my $metachar = qr/[\@\\|]/oxms; # '|' is for <<`HEREDOC`
 
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /xmsg;
+    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape character
-        if ($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar) \z/xms) {
+        if ($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar) \z/oxms) {
             $char[$i] = $1.'\\'.$2;
         }
 
         # \L \U \Q \E
-        elsif ($char[$i] =~ m/\A ([<>]) \z/xms) {
+        elsif ($char[$i] =~ m/\A ([<>]) \z/oxms) {
             if ($right_e < $left_e) {
                 $char[$i] = '\\' . $char[$i];
             }
         }
-        elsif ($char[$i] =~ m/\A \\L \z/xms) {
-            $char[$i] = '@{[Sjis::lc qq<';
+        elsif ($char[$i] eq '\\L') {
+            $char[$i] = '@{[Esjis::lc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\U \z/xms) {
-            $char[$i] = '@{[Sjis::uc qq<';
+        elsif ($char[$i] eq '\\U') {
+            $char[$i] = '@{[Esjis::uc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\Q \z/xms) {
+        elsif ($char[$i] eq '\\Q') {
             $char[$i] = '@{[CORE::quotemeta qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\E \z/xms) {
+        elsif ($char[$i] eq '\\E') {
             if ($right_e < $left_e) {
                 $char[$i] = '>]}';
                 $right_e++;
@@ -629,12 +1135,16 @@ sub e_heredoc {
 #
 # escape regexp (m//)
 #
-sub e_m {
+sub e_m($$$$$) {
     my($ope,$delimiter,$end_delimiter,$string,$option) = @_;
+    $option ||= '';
+
+    $slash = 'div';
 
     my $metachar = {
-        'm' => qr/[@\\|[\]{]/xms,
-    }->{$ope} || die "esjis: system error (e_m)";
+        'm' => qr/[\@\\|[\]{]/oxms,
+        ''  => qr/[\@\\|[\]{]/oxms,
+    }->{$ope} || die 'esjis: system error (e_m)';
 
     # split regexp
     my @char = $string =~ m{\G(
@@ -642,10 +1152,11 @@ sub e_m {
         \\x [0-9A-Fa-f]{2}     |
         \\x \{ [0-9A-Fa-f]+ \} |
         \\c [\x40-\x5F]        |
-        \\  (?:[^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?) |
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+        [\$\@] $qq_variable |
         \[\^ |
-            (?:[^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?)
-    )}xmsg;
+            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+    )}oxmsg;
 
     # unescape character
     my $left_e  = 0;
@@ -658,37 +1169,15 @@ sub e_m {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_qr(@char[$left+1..$right-1]);
 
-                    # replace character class if double octet code
-                    if (grep m/[\x81-\x9F\xE0-\xFC]/xms, @charlist) {
+                    # [...]
+                    splice(@char, $left, $right-$left+1, &charlist_qr(@char[$left+1..$right-1], $option));
 
-                        # escape character
-                        for my $char (@charlist) {
-
-                            # do not use quotemeta here
-                            if ($char =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
-                               $char = $1.'\\'.$2;
-                            }
-                            elsif ($char =~ m/\A [.|)] \z/xms) {
-                                $char = '\\' . $char;
-                            }
-                        }
-
-                        # [...]
-                        splice(@char, $left, $right-$left+1,
-                            '(?:' . join('|', @charlist) . ')'
-                        );
-
-                        $i = $left;
-                    }
-                    else {
-                        $i = $right;
-                    }
+                    $i = $left;
                     last;
                 }
             }
@@ -699,28 +1188,13 @@ sub e_m {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_not_qr(@char[$left+1..$right-1]);
-
-                    # escape character
-                    for my $char (@charlist) {
-
-                        # do not use quotemeta here
-                        if ($char =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
-                            $char = $1.'\\'.$2;
-                        }
-                        elsif ($char =~ m/\A [.|)] \z/xms) {
-                            $char = '\\' . $char;
-                        }
-                    }
 
                     # [^...]
-                    splice(@char, $left, $right-$left+1,
-                        '(?!' . join('|', @charlist) . ')(?:[^\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF])'
-                    );
+                    splice(@char, $left, $right-$left+1, &charlist_not_qr(@char[$left+1..$right-1], $option));
 
                     $i = $left;
                     last;
@@ -728,89 +1202,87 @@ sub e_m {
             }
         }
 
-        # replace character class or escape character
-        elsif (
-my $char = {
-
-'.'  => "(?:[^\x81-\x9F\xE0-\xFC]|[\x00-\xFF][\x00-\xFF])",
-'\d' => "[0-9]",
-'\w' => "[a-zA-Z_0-9]",
-'\s' => "[\x20\t\n\r\f]",
-'\D' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])",
-'\W' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])",
-'\S' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])",
-
-# do not add below
-# '\0' => "\0",
-# '\n' => "\n",
-# '\r' => "\r",
-# '\t' => "\t",
-# '\f' => "\f",
-# '\b' => "\b",
-# '\a' => "\a",
-# '\e' => "\e",
-
-}->{$char[$i]}
+        # rewrite character class or escape character
+        elsif (my $char = {
+            '.'  => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])',
+            }->{$char[$i]}
         ) {
             $char[$i] = $char;
         }
 
         # unescape for join separated double octet
-        #                              $    (    )    *    +    .    ?    [   \   ^   {   |
-        elsif ($char[$i] =~ m/\A \\ (?:0?44|0?50|0?51|0?52|0?53|0?56|0?77|133|134|136|173|174) \z/xms) {
+        #                              LF   CR   $    (    )    *    +    .    ?    [   \   ^   {   |
+        elsif ($char[$i] =~ m/\A \\ (?:0?12|0?15|0?44|0?50|0?51|0?52|0?53|0?56|0?77|133|134|136|173|174) \z/oxms) {
         }
-        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/xms) {
-            $char[$i] = CORE::chr(oct($1));
+        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
+            $char[$i] = chr(oct($1));
         }
-        #                               $  (  )  *  +  .  ?  [  \  ^  {  |
-        elsif ($char[$i] =~ m/\A \\x (?:24|28|29|2A|2B|2E|3F|5B|5C|5E|7B|7C) \z/xms) {
+        #                               LF  CR  $  (  )  *  +  .  ?  [  \  ^  {  |
+        elsif ($char[$i] =~ m/\A \\x (?:0?A|0?D|24|28|29|2A|2B|2E|3F|5B|5C|5E|7B|7C) \z/oxmsi) {
         }
-        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/xms) {
-            $char[$i] = CORE::chr(hex($1));
+        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
+            $char[$i] = chr(hex($1));
         }
-        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]+) \} \z/xms) {
+        #                                     LF  CR  $  (  )  *  +  .  ?  [  \  ^  {  |
+        elsif ($char[$i] =~ m/\A \\x \{ 0* (?:0?A|0?D|24|28|29|2A|2B|2E|3F|5B|5C|5E|7B|7C) \} \z/oxmsi) {
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]+) \} \z/oxms) {
             my $hex = (length($1) % 2) ? ('0' . $1) : $1;
-            $char[$i] = CORE::quotemeta pack('H*',$hex);
+            $char[$i] = quotemeta pack('H*',$hex);
         }
-        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/xms) {
-            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
+        #                                LF  CR
+        elsif ($char[$i] =~ m/\A \\c (?: J | M ) \z/oxmsi) {
+        }
+        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
+            $char[$i] = chr(ord($1) & 0x1F);
         }
 
         # /i option
-        if ($option =~ /i/) {
-            if ($char[$i] =~ /^[$@]/) {
-                die "esjis: Can't use regexp /i option with variable interpolation. Use (?i:xxx) or \\L xxx \E to only alphabet.";
-            }
-            elsif ($char[$i] =~ /^[\x81-\x9F\xE0-\xFC]/) {
-                die "esjis: Can't use regexp /i option with double octet code. Use (?i:xxx) or \\L xxx \E to only alphabet.";
+        elsif ($char[$i] =~ m/\A ([A-Za-z]) \z/oxms) {
+            my $c = $1;
+            if ($option =~ m/i/oxms) {
+                $char[$i] = '[' . uc($c) . lc($c) . ']';
             }
         }
 
         # \L \U \Q \E
-        elsif ($char[$i] =~ m/\A ([<>]) \z/xms) {
+        elsif ($char[$i] =~ m/\A ([<>]) \z/oxms) {
             if ($right_e < $left_e) {
                 $char[$i] = '\\' . $char[$i];
             }
         }
-        elsif ($char[$i] =~ m/\A \\L \z/xms) {
-            $char[$i] = '@{[Sjis::lc qq<';
+        elsif ($char[$i] eq '\\L') {
+            $char[$i] = '@{[Esjis::lc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\U \z/xms) {
-            $char[$i] = '@{[Sjis::uc qq<';
+        elsif ($char[$i] eq '\\U') {
+            $char[$i] = '@{[Esjis::uc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\Q \z/xms) {
+        elsif ($char[$i] eq '\\Q') {
             $char[$i] = '@{[CORE::quotemeta qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\E \z/xms) {
+        elsif ($char[$i] eq '\\E') {
             if ($right_e < $left_e) {
                 $char[$i] = '>]}';
                 $right_e++;
             }
             else {
                 $char[$i] = '';
+            }
+        }
+
+        # $scalar or @array
+        elsif ($char[$i] =~ m/\A [\$\@].+ /oxms) {
+            if ($option =~ m/i/oxms) {
+                $char[$i] = '@{[Esjis::ignorecase(' . &e_string($char[$i]) . ')]}';
+            }
+            else {
+                $char[$i] = &e_string($char[$i]);
             }
         }
     }
@@ -820,7 +1292,7 @@ my $char = {
         next if not defined $char[$i];
 
         # join separated double octet
-        if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/xms) {
+        if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
             if ($i < $#char) {
                 $char[$i] .= $char[$i+1];
                 splice(@char,$i+1,1);
@@ -833,15 +1305,15 @@ my $char = {
         }
 
         # unescape double octet
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF]) \z/xms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF]) \z/oxms) {
             $char[$i] = $1;
         }
 
         # quote double octet character before ? + * {
         elsif (
             ($i >= 1) and
-            ($char[$i] =~ m/\A [\?\+\*\{] \z/xms) and
-            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] | \\[0-7]{2,3} | \\x[0-9A-Fa-f]{1,2} ) \z/xms)
+            ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
+            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] | \\[0-7]{2,3} | \\x[0-9A-Fa-f]{1,2} ) \z/oxms)
         ) {
             $char[$i-1] = '(?:' . $char[$i-1] . ')';
         }
@@ -849,20 +1321,12 @@ my $char = {
 
     # make regexp string
     my $re;
+    $option =~ tr/i//d;
     if ($left_e > $right_e) {
-        $re = join '', $ope, $delimiter, $chargap, @char, '>]}' x ($left_e - $right_e), $end_delimiter;
+        $re = join '', $ope, $delimiter, $sjis_gap, @char, '>]}' x ($left_e - $right_e), $end_delimiter, $option;
     }
     else {
-        $re = join '', $ope, $delimiter, $chargap, @char, $end_delimiter, $option;
-    }
-
-    # return ShiftJIS regexp string
-    if (not defined(USE_REGEXP_EVAL) or (USE_REGEXP_EVAL == 0)) {
-
-        #               (?{         (??{          (?p{
-        if ($re =~ m/ ( \(\s*\?\{ | \(\s*\?\?\{ | \(\s*\?p\{ ) /xms) {
-            die "esjis: $1 in regexp without 'use constant USE_REGEXP_EVAL => 1'";
-        }
+        $re = join '', $ope, $delimiter, $sjis_gap, @char,                               $end_delimiter, $option;
     }
     return $re;
 }
@@ -870,14 +1334,17 @@ my $char = {
 #
 # escape regexp (m'')
 #
-sub e_m_q {
+sub e_m_q($$$$$) {
     my($ope,$delimiter,$end_delimiter,$string,$option) = @_;
+    $option ||= '';
+
+    $slash = 'div';
 
     # split regexp
     my @char = $string =~ m{\G(
         \[\^ |
-            (?:[^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?)
-    )}xmsg;
+            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+    )}oxmsg;
 
     # unescape character
     for (my $i=0; $i <= $#char; $i++) {
@@ -888,39 +1355,15 @@ sub e_m_q {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_qr(@char[$left+1..$right-1]);
 
-                    # replace character class if double octet code
-                    if (grep m/[\x81-\x9F\xE0-\xFC]/xms, @charlist) {
+                    # [...]
+                    splice(@char, $left, $right-$left+1, &charlist_qr(@char[$left+1..$right-1], $option));
 
-                        # escape character
-                        for (my $i=0; $i <= $#charlist-1; $i++) {
-
-                            # do not use quotemeta here
-                            if (($charlist[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
-                                (($charlist[$i+1] eq '\\') or ($charlist[$i+1] eq $end_delimiter))
-                            ) {
-                                $charlist[$i] .= '\\';
-                            }
-                            elsif ($charlist[$i] =~ m/\A [.|)] \z/xms) {
-                                $charlist[$i] = '\\' . $charlist[$i];
-                            }
-                        }
-
-                        # [...]
-                        splice(@char, $left, $right-$left+1,
-                            '(?:' . join('|', @charlist) . ')'
-                        );
-
-                        $i = $left;
-                    }
-                    else {
-                        $i = $right;
-                    }
+                    $i = $left;
                     last;
                 }
             }
@@ -931,30 +1374,13 @@ sub e_m_q {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_not_qr(@char[$left+1..$right-1]);
-
-                    # escape character
-                    for (my $i=0; $i <= $#charlist-1; $i++) {
-
-                        # do not use quotemeta here
-                        if (($charlist[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
-                            (($charlist[$i+1] eq '\\') or ($charlist[$i+1] eq $end_delimiter))
-                        ) {
-                            $charlist[$i] .= '\\';
-                        }
-                        elsif ($charlist[$i] =~ m/\A [.|)] \z/xms) {
-                            $charlist[$i] = '\\' . $charlist[$i];
-                        }
-                    }
 
                     # [^...]
-                    splice(@char, $left, $right-$left+1,
-                        '(?!' . join('|', @charlist) . ')(?:[^\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF])'
-                    );
+                    splice(@char, $left, $right-$left+1, &charlist_not_qr(@char[$left+1..$right-1], $option));
 
                     $i = $left;
                     last;
@@ -962,37 +1388,22 @@ sub e_m_q {
             }
         }
 
-        # replace character class or escape character
-        elsif (
-my $char = {
-
-'.'  => "(?:[^\x81-\x9F\xE0-\xFC]|[\x00-\xFF][\x00-\xFF])",
-'\d' => "[0-9]",
-'\w' => "[a-zA-Z_0-9]",
-'\s' => "[\x20\t\n\r\f]",
-'\D' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])",
-'\W' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])",
-'\S' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])",
-
-# do not add below
-# '\0' => "\0",
-# '\n' => "\n",
-# '\r' => "\r",
-# '\t' => "\t",
-# '\f' => "\f",
-# '\b' => "\b",
-# '\a' => "\a",
-# '\e' => "\e",
-
-}->{$char[$i]}
+        # rewrite character class or escape character
+        elsif (my $char = {
+            '.'  => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])',
+            }->{$char[$i]}
         ) {
             $char[$i] = $char;
         }
 
         # /i option
-        if ($option =~ /i/) {
-            if ($char[$i] =~ /^[\x81-\x9F\xE0-\xFC]/) {
-                die "esjis: Can't use regexp /i option with double octet code. Use (?i:xxx) or \\L xxx \E to only alphabet.";
+        elsif ($char[$i] =~ m/\A ([A-Za-z]) \z/oxms) {
+            my $c = $1;
+            if ($option =~ m/i/oxms) {
+                $char[$i] = '[' . uc($c) . lc($c) . ']';
             }
         }
     }
@@ -1003,7 +1414,7 @@ my $char = {
 
         # escape second octet of double octet
         if (($i <= $#char-1) and
-            ($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
+            ($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/oxms) and
             (($char[$i+1] eq '\\') or ($char[$i+1] eq $end_delimiter))
         ) {
             $char[$i] .= '\\';
@@ -1012,35 +1423,29 @@ my $char = {
         # quote double octet character before ? + * {
         elsif (
             ($i >= 1) and
-            ($char[$i] =~ m/\A [\?\+\*\{] \z/xms) and
-            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] | \\[0-7]{2,3} | \\x[0-9A-Fa-f]{1,2} ) \z/xms)
+            ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
+            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] | \\[0-7]{2,3} | \\x[0-9A-Fa-f]{1,2} ) \z/oxms)
         ) {
             $char[$i-1] = '(?:' . $char[$i-1] . ')';
         }
     }
 
-    my $re = join '', $ope, $delimiter, $chargap, @char, $end_delimiter, $option;
-
-    # return ShiftJIS regexp string
-    if (not defined(USE_REGEXP_EVAL) or (USE_REGEXP_EVAL == 0)) {
-
-        #               (?{         (??{          (?p{
-        if ($re =~ m/ ( \(\s*\?\{ | \(\s*\?\?\{ | \(\s*\?p\{ ) /xms) {
-            die "esjis: $1 in regexp without 'use constant USE_REGEXP_EVAL => 1'";
-        }
-    }
-    return $re;
+    $option =~ tr/i//d;
+    return join '', $ope, $delimiter, $sjis_gap, @char, $end_delimiter, $option;
 }
 
 #
 # escape regexp (s/here//)
 #
-sub e_s {
-    my($ope,$delimiter,$end_delimiter,$string) = @_;
+sub e_s($$$$$) {
+    my($ope,$delimiter,$end_delimiter,$string,$option) = @_;
+    $option ||= '';
+
+    $slash = 'div';
 
     my $metachar = {
-        's' => qr/[@\\|[\]{]/xms,
-    }->{$ope} || die "esjis: system error (e_s)";
+        's' => qr/[\@\\|[\]{]/oxms,
+    }->{$ope} || die 'esjis: system error (e_s)';
 
     # split regexp
     my @char = $string =~ m{\G(
@@ -1048,10 +1453,11 @@ sub e_s {
         \\x [0-9A-Fa-f]{2}     |
         \\x \{ [0-9A-Fa-f]+ \} |
         \\c [\x40-\x5F]        |
-        \\  (?:[^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?) |
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+        [\$\@] $qq_variable |
         \[\^ |
-            (?:[^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?)
-    )}xmsg;
+            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+    )}oxmsg;
 
     # unescape character
     my $left_e  = 0;
@@ -1064,37 +1470,15 @@ sub e_s {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_qr(@char[$left+1..$right-1]);
 
-                    # replace character class if double octet code
-                    if (grep m/[\x81-\x9F\xE0-\xFC]/xms, @charlist) {
+                    # [...]
+                    splice(@char, $left, $right-$left+1, &charlist_qr(@char[$left+1..$right-1], $option));
 
-                        # escape character
-                        for my $char (@charlist) {
-
-                            # do not use quotemeta here
-                            if ($char =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
-                               $char = $1.'\\'.$2;
-                            }
-                            elsif ($char =~ m/\A [.|)] \z/xms) {
-                                $char = '\\' . $char;
-                            }
-                        }
-
-                        # [...]
-                        splice(@char, $left, $right-$left+1,
-                            '(?:' . join('|', @charlist) . ')'
-                        );
-
-                        $i = $left;
-                    }
-                    else {
-                        $i = $right;
-                    }
+                    $i = $left;
                     last;
                 }
             }
@@ -1105,28 +1489,13 @@ sub e_s {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_not_qr(@char[$left+1..$right-1]);
-
-                    # escape character
-                    for my $char (@charlist) {
-
-                        # do not use quotemeta here
-                        if ($char =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
-                            $char = $1.'\\'.$2;
-                        }
-                        elsif ($char =~ m/\A [.|)] \z/xms) {
-                            $char = '\\' . $char;
-                        }
-                    }
 
                     # [^...]
-                    splice(@char, $left, $right-$left+1,
-                        '(?!' . join('|', @charlist) . ')(?:[^\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF])'
-                    );
+                    splice(@char, $left, $right-$left+1, &charlist_not_qr(@char[$left+1..$right-1], $option));
 
                     $i = $left;
                     last;
@@ -1134,84 +1503,92 @@ sub e_s {
             }
         }
 
-        # replace character class or escape character
-        elsif (
-my $char = {
-
-'.'  => "(?:[^\x81-\x9F\xE0-\xFC]|[\x00-\xFF][\x00-\xFF])",
-'\d' => "[0-9]",
-'\w' => "[a-zA-Z_0-9]",
-'\s' => "[\x20\t\n\r\f]",
-'\D' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])",
-'\W' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])",
-'\S' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])",
-
-# do not add below
-# '\0' => "\0",
-# '\n' => "\n",
-# '\r' => "\r",
-# '\t' => "\t",
-# '\f' => "\f",
-# '\b' => "\b",
-# '\a' => "\a",
-# '\e' => "\e",
-
-}->{$char[$i]}
+        # rewrite character class or escape character
+        elsif (my $char = {
+            '.'  => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])',
+            }->{$char[$i]}
         ) {
             $char[$i] = $char;
         }
 
         # unescape for join separated double octet
-        #                              $    (    )    *    +    .    ?    [   \   ^   {   |
-        elsif ($char[$i] =~ m/\A \\ (?:0?44|0?50|0?51|0?52|0?53|0?56|0?77|133|134|136|173|174) \z/xms) {
+        #                              LF   CR   $    (    )    *    +    .    ?    [   \   ^   {   |
+        elsif ($char[$i] =~ m/\A \\ (?:0?12|0?15|0?44|0?50|0?51|0?52|0?53|0?56|0?77|133|134|136|173|174) \z/oxms) {
         }
-        elsif ($char[$i] =~ m/\A \\ (([0-7])[0-7]{0,2}) \z/xms) {
+        elsif ($char[$i] =~ m/\A \\ (([0-7])[0-7]{0,2}) \z/oxms) {
             if (($2 eq '0') or ($1 >= 40)) {
-                $char[$i] = CORE::chr(oct($1));
+                $char[$i] = chr(oct($1));
             }
             else {
                 $char[$i] = '\\' . ($1 + 1);
             }
         }
-        #                               $  (  )  *  +  .  ?  [  \  ^  {  |
-        elsif ($char[$i] =~ m/\A \\x (?:24|28|29|2A|2B|2E|3F|5B|5C|5E|7B|7C) \z/xms) {
+        #                               LF  CR  $  (  )  *  +  .  ?  [  \  ^  {  |
+        elsif ($char[$i] =~ m/\A \\x (?:0?A|0?D|24|28|29|2A|2B|2E|3F|5B|5C|5E|7B|7C) \z/oxmsi) {
         }
-        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/xms) {
-            $char[$i] = CORE::chr(hex($1));
+        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
+            $char[$i] = chr(hex($1));
         }
-        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]+) \} \z/xms) {
+        #                                     LF  CR  $  (  )  *  +  .  ?  [  \  ^  {  |
+        elsif ($char[$i] =~ m/\A \\x \{ 0* (?:0?A|0?D|24|28|29|2A|2B|2E|3F|5B|5C|5E|7B|7C) \} \z/oxmsi) {
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]+) \} \z/oxms) {
             my $hex = (length($1) % 2) ? ('0' . $1) : $1;
-            $char[$i] = CORE::quotemeta pack('H*',$hex);
+            $char[$i] = quotemeta pack('H*',$hex);
         }
-        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/xms) {
-            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
+        #                                LF  CR
+        elsif ($char[$i] =~ m/\A \\c (?: J | M ) \z/oxmsi) {
+        }
+        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
+            $char[$i] = chr(ord($1) & 0x1F);
+        }
+
+        # /i option
+        elsif ($char[$i] =~ m/\A ([A-Za-z]) \z/oxms) {
+            my $c = $1;
+            if ($option =~ m/i/oxms) {
+                $char[$i] = '[' . uc($c) . lc($c) . ']';
+            }
         }
 
         # \L \U \Q \E
-        elsif ($char[$i] =~ m/\A ([<>]) \z/xms) {
+        elsif ($char[$i] =~ m/\A ([<>]) \z/oxms) {
             if ($right_e < $left_e) {
                 $char[$i] = '\\' . $char[$i];
             }
         }
-        elsif ($char[$i] =~ m/\A \\L \z/xms) {
-            $char[$i] = '@{[Sjis::lc qq<';
+        elsif ($char[$i] eq '\\L') {
+            $char[$i] = '@{[Esjis::lc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\U \z/xms) {
-            $char[$i] = '@{[Sjis::uc qq<';
+        elsif ($char[$i] eq '\\U') {
+            $char[$i] = '@{[Esjis::uc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\Q \z/xms) {
+        elsif ($char[$i] eq '\\Q') {
             $char[$i] = '@{[CORE::quotemeta qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\E \z/xms) {
+        elsif ($char[$i] eq '\\E') {
             if ($right_e < $left_e) {
                 $char[$i] = '>]}';
                 $right_e++;
             }
             else {
                 $char[$i] = '';
+            }
+        }
+
+        # $scalar or @array
+        elsif ($char[$i] =~ m/\A [\$\@].+ /oxms) {
+            if ($option =~ m/i/oxms) {
+                $char[$i] = '@{[Esjis::ignorecase(' . &e_string($char[$i]) . ')]}';
+            }
+            else {
+                $char[$i] = &e_string($char[$i]);
             }
         }
     }
@@ -1221,7 +1598,7 @@ my $char = {
         next if not defined $char[$i];
 
         # join separated double octet
-        if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/xms) {
+        if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
             if ($i < $#char) {
                 $char[$i] .= $char[$i+1];
                 splice(@char,$i+1,1);
@@ -1234,15 +1611,15 @@ my $char = {
         }
 
         # unescape double octet
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF]) \z/xms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF]) \z/oxms) {
             $char[$i] = $1;
         }
 
         # quote double octet character before ? + * {
         elsif (
             ($i >= 1) and
-            ($char[$i] =~ m/\A [\?\+\*\{] \z/xms) and
-            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] | \\[0-7]{2,3} | \\x[0-9A-Fa-f]{1,2} ) \z/xms)
+            ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
+            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] | \\[0-7]{2,3} | \\x[0-9A-Fa-f]{1,2} ) \z/oxms)
         ) {
             $char[$i-1] = '(?:' . $char[$i-1] . ')';
         }
@@ -1251,19 +1628,10 @@ my $char = {
     # make regexp string
     my $re;
     if ($left_e > $right_e) {
-        $re = join '', $ope, $delimiter, q{\\G((?:$q_char)*?)}, @char, '>]}' x ($left_e - $right_e), $end_delimiter;
+        $re = join '', $ope, $delimiter, qq{\\G((?:$sjis_char)*?)}, @char, '>]}' x ($left_e - $right_e), $end_delimiter;
     }
     else {
-        $re = join '', $ope, $delimiter, q{\\G((?:$q_char)*?)}, @char, $end_delimiter;
-    }
-
-    # return ShiftJIS regexp string
-    if (not defined(USE_REGEXP_EVAL) or (USE_REGEXP_EVAL == 0)) {
-
-        #               (?{         (??{          (?p{
-        if ($re =~ m/ ( \(\s*\?\{ | \(\s*\?\?\{ | \(\s*\?p\{ ) /xms) {
-            die "esjis: $1 in regexp without 'use constant USE_REGEXP_EVAL => 1'";
-        }
+        $re = join '', $ope, $delimiter, qq{\\G((?:$sjis_char)*?)}, @char, $end_delimiter;
     }
     return $re;
 }
@@ -1271,15 +1639,18 @@ my $char = {
 #
 # escape regexp (s'here'{})
 #
-sub e_s_q {
-    my($ope,$delimiter,$end_delimiter,$string) = @_;
+sub e_s_q($$$$$) {
+    my($ope,$delimiter,$end_delimiter,$string,$option) = @_;
+    $option ||= '';
+
+    $slash = 'div';
 
     # split regexp
     my @char = $string =~ m{\G(
         \\  [0-7]{1,3} |
         \[\^ |
-            (?:[^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?)
-    )}xmsg;
+            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+    )}oxmsg;
 
     # unescape character
     for (my $i=0; $i <= $#char; $i++) {
@@ -1290,39 +1661,15 @@ sub e_s_q {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_qr(@char[$left+1..$right-1]);
 
-                    # replace character class if double octet code
-                    if (grep m/[\x81-\x9F\xE0-\xFC]/xms, @charlist) {
+                    # [...]
+                    splice(@char, $left, $right-$left+1, &charlist_qr(@char[$left+1..$right-1], $option));
 
-                        # escape character
-                        for (my $i=0; $i <= $#charlist-1; $i++) {
-
-                            # do not use quotemeta here
-                            if (($charlist[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
-                                (($charlist[$i+1] eq '\\') or ($charlist[$i+1] eq $end_delimiter))
-                            ) {
-                                $charlist[$i] .= '\\';
-                            }
-                            elsif ($charlist[$i] =~ m/\A [.|)] \z/xms) {
-                                $charlist[$i] = '\\' . $charlist[$i];
-                            }
-                        }
-
-                        # [...]
-                        splice(@char, $left, $right-$left+1,
-                            '(?:' . join('|', @charlist) . ')'
-                        );
-
-                        $i = $left;
-                    }
-                    else {
-                        $i = $right;
-                    }
+                    $i = $left;
                     last;
                 }
             }
@@ -1333,30 +1680,13 @@ sub e_s_q {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_not_qr(@char[$left+1..$right-1]);
-
-                    # escape character
-                    for (my $i=0; $i <= $#charlist-1; $i++) {
-
-                        # do not use quotemeta here
-                        if (($charlist[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
-                            (($charlist[$i+1] eq '\\') or ($charlist[$i+1] eq $end_delimiter))
-                        ) {
-                            $charlist[$i] .= '\\';
-                        }
-                        elsif ($charlist[$i] =~ m/\A [.|)] \z/xms) {
-                            $charlist[$i] = '\\' . $charlist[$i];
-                        }
-                    }
 
                     # [^...]
-                    splice(@char, $left, $right-$left+1,
-                        '(?!' . join('|', @charlist) . ')(?:[^\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF])'
-                    );
+                    splice(@char, $left, $right-$left+1, &charlist_not_qr(@char[$left+1..$right-1], $option));
 
                     $i = $left;
                     last;
@@ -1364,42 +1694,31 @@ sub e_s_q {
             }
         }
 
-        # replace character class or escape character
-        elsif (
-my $char = {
-
-'.'  => "(?:[^\x81-\x9F\xE0-\xFC]|[\x00-\xFF][\x00-\xFF])",
-'\d' => "[0-9]",
-'\w' => "[a-zA-Z_0-9]",
-'\s' => "[\x20\t\n\r\f]",
-'\D' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])",
-'\W' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])",
-'\S' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])",
-
-# do not add below
-# '\0' => "\0",
-# '\n' => "\n",
-# '\r' => "\r",
-# '\t' => "\t",
-# '\f' => "\f",
-# '\b' => "\b",
-# '\a' => "\a",
-# '\e' => "\e",
-
-}->{$char[$i]}
+        # rewrite character class or escape character
+        elsif (my $char = {
+            '.'  => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])',
+            }->{$char[$i]}
         ) {
             $char[$i] = $char;
         }
 
         # unescape for join separated double octet
-        #                              $    (    )    *    +    .    ?    [   \   ^   {   |
-        elsif ($char[$i] =~ m/\A \\ (?:0?44|0?50|0?51|0?52|0?53|0?56|0?77|133|134|136|173|174) \z/xms) {
-        }
-        elsif ($char[$i] =~ m/\A \\ (([0-7])[0-7]{0,2}) \z/xms) {
+        elsif ($char[$i] =~ m/\A \\ (([0-7])[0-7]{0,2}) \z/oxms) {
             if (($2 eq '0') or ($1 >= 40)) {
             }
             else {
                 $char[$i] = '\\' . ($1 + 1);
+            }
+        }
+
+        # /i option
+        elsif ($char[$i] =~ m/\A ([A-Za-z]) \z/oxms) {
+            my $c = $1;
+            if ($option =~ m/i/oxms) {
+                $char[$i] = '[' . uc($c) . lc($c) . ']';
             }
         }
     }
@@ -1408,9 +1727,17 @@ my $char = {
     for (my $i=0; $i <= $#char; $i++) {
         next if not defined $char[$i];
 
+        # join separated double octet
+        if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
+            if ($i < $#char) {
+                $char[$i] .= $char[$i+1];
+                splice(@char,$i+1,1);
+            }
+        }
+
         # escape second octet of double octet
         if (($i <= $#char-1) and
-            ($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
+            ($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/oxms) and
             (($char[$i+1] eq '\\') or ($char[$i+1] eq $end_delimiter))
         ) {
             $char[$i] .= '\\';
@@ -1419,57 +1746,36 @@ my $char = {
         # quote double octet character before ? + * {
         elsif (
             ($i >= 1) and
-            ($char[$i] =~ m/\A [\?\+\*\{] \z/xms) and
-            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] | \\[0-7]{2,3} | \\x[0-9A-Fa-f]{1,2} ) \z/xms)
+            ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
+            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] | \\[0-7]{2,3} | \\x[0-9A-Fa-f]{1,2} ) \z/oxms)
         ) {
             $char[$i-1] = '(?:' . $char[$i-1] . ')';
         }
     }
-
-    my $re = join '', $ope, $delimiter, q{\\G((?:$q_char)*?)}, @char, $end_delimiter;
-
-    # return ShiftJIS regexp string
-    if (not defined(USE_REGEXP_EVAL) or (USE_REGEXP_EVAL == 0)) {
-
-        #               (?{         (??{          (?p{
-        if ($re =~ m/ ( \(\s*\?\{ | \(\s*\?\?\{ | \(\s*\?p\{ ) /xms) {
-            die "esjis: $1 in regexp without 'use constant USE_REGEXP_EVAL => 1'";
-        }
-    }
-    return $re;
+    return join '', $ope, $delimiter, qq{\\G((?:$sjis_char)*?)}, @char, $end_delimiter;
 }
 
 #
 # escape string (s//here/)
 #
-sub e_s_qq {
-    my($ope,$delimiter,$end_delimiter,$string,$option,$re) = @_;
+sub e_s_qq($$$$$) {
+    my($ope,$delimiter,$end_delimiter,$string,$option) = @_;
+    $option ||= '';
+
+    $slash = 'div';
 
     my $metachar = {
-        's' => qr/[@\\]/xms,
-    }->{$ope} || die "esjis: system error (e_s_qq)";
-
-    # /i option
-    if ($option =~ /i/) {
-        while ($re =~ m{ \G ([^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?) }xmsg) {
-            my $char = $1;
-            if ($char =~ /^[$@]/) {
-                die "esjis: Can't use regexp /i option with variable interpolation. Use (?i:xxx) or \\L xxx \E to only alphabet.";
-            }
-            elsif ($char =~ /^[\x81-\x9F\xE0-\xFC]/) {
-                die "esjis: Can't use regexp /i option with double octet code. Use (?i:xxx) or \\L xxx \E to only alphabet.";
-            }
-        }
-    }
+        's' => qr/[\@\\]/oxms,
+    }->{$ope} || die 'esjis: system error (e_s_qq)';
 
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G (\$\d+|[\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /xmsg;
+    my @char = $string =~ m/ \G (\$\d+|[\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # rewrite $1,$2,$3 ... --> $2,$3,$4 ...
-        if ($char[$i] =~ m/\A (\$) ((\d)\d*) \z/xms) {
+        if ($char[$i] =~ m/\A (\$) ((\d)\d*) \z/oxms) {
             if (($3 eq '0') or ($2 >= 40)) {
             }
             else {
@@ -1483,24 +1789,24 @@ sub e_s_qq {
         }
 
         # \L \U \Q \E
-        elsif ($char[$i] =~ m/\A ([<>]) \z/xms) {
+        elsif ($char[$i] =~ m/\A ([<>]) \z/oxms) {
             if ($right_e < $left_e) {
                 $char[$i] = '\\' . $char[$i];
             }
         }
-        elsif ($char[$i] =~ m/\A \\L \z/xms) {
-            $char[$i] = '@{[Sjis::lc qq<';
+        elsif ($char[$i] eq '\\L') {
+            $char[$i] = '@{[Esjis::lc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\U \z/xms) {
-            $char[$i] = '@{[Sjis::uc qq<';
+        elsif ($char[$i] eq '\\U') {
+            $char[$i] = '@{[Esjis::uc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\Q \z/xms) {
+        elsif ($char[$i] eq '\\Q') {
             $char[$i] = '@{[CORE::quotemeta qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\E \z/xms) {
+        elsif ($char[$i] eq '\\E') {
             if ($right_e < $left_e) {
                 $char[$i] = '>]}';
                 $right_e++;
@@ -1512,51 +1818,49 @@ sub e_s_qq {
     }
 
     # return string
+    $option =~ tr/i//d;
     if ($left_e > $right_e) {
         return join '', $delimiter, @char, '>]}' x ($left_e - $right_e), $end_delimiter, $option;
     }
     else {
-        return join '', $delimiter, @char, $end_delimiter, $option;
+        return join '', $delimiter, @char, $end_delimiter,                               $option;
     }
 }
 
 #
 # escape q string (s{}'here')
 #
-sub e_s_q2 {
-    my($ope,$delimiter,$end_delimiter,$string,$option,$re) = @_;
+sub e_s_q2($$$$$) {
+    my($ope,$delimiter,$end_delimiter,$string,$option) = @_;
+    $option ||= '';
 
-    # /i option
-    if ($option =~ /i/) {
-        while ($re =~ m{ \G ([^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?) }xmsg) {
-            my $char = $1;
-            if ($char =~ /^[\x81-\x9F\xE0-\xFC]/) {
-                die "esjis: Can't use regexp /i option with double octet code. Use (?i:xxx) or \\L xxx \E to only alphabet.";
-            }
-        }
-    }
+    $slash = 'div';
 
-    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /xmsg;
+    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
     for (my $i=0; $i <= $#char-1; $i++) {
-        if (($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
+        if (($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/oxms) and
             (($char[$i+1] eq '\\') or ($char[$i+1] eq $end_delimiter))
         ) {
             $char[$i] .= '\\';
         }
     }
 
+    $option =~ tr/i//d;
     return join '', $ope, $delimiter, @char, $end_delimiter, $option;
 }
 
 #
 # escape regexp (qr//)
 #
-sub e_qr {
+sub e_qr($$$$$) {
     my($ope,$delimiter,$end_delimiter,$string,$option) = @_;
+    $option ||= '';
+
+    $slash = 'div';
 
     my $metachar = {
-        'qr' => qr/[@\\|[\]{]/xms,
-    }->{$ope} || die "esjis: system error (e_qr)";
+        'qr' => qr/[\@\\|[\]{]/oxms,
+    }->{$ope} || die 'esjis: system error (e_qr)';
 
     # split regexp
     my @char = $string =~ m{\G(
@@ -1564,10 +1868,11 @@ sub e_qr {
         \\x [0-9A-Fa-f]{2}     |
         \\x \{ [0-9A-Fa-f]+ \} |
         \\c [\x40-\x5F]        |
-        \\  (?:[^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?) |
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+        [\$\@] $qq_variable |
         \[\^ |
-            (?:[^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?)
-    )}xmsg;
+            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+    )}oxmsg;
 
     # unescape character
     my $left_e  = 0;
@@ -1580,37 +1885,15 @@ sub e_qr {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_qr(@char[$left+1..$right-1]);
 
-                    # replace character class if double octet code
-                    if (grep m/[\x81-\x9F\xE0-\xFC]/xms, @charlist) {
+                    # [...]
+                    splice(@char, $left, $right-$left+1, &charlist_qr(@char[$left+1..$right-1], $option));
 
-                        # escape character
-                        for my $char (@charlist) {
-
-                            # do not use quotemeta here
-                            if ($char =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
-                               $char = $1.'\\'.$2;
-                            }
-                            elsif ($char =~ m/\A [.|)] \z/xms) {
-                                $char = '\\' . $char;
-                            }
-                        }
-
-                        # [...]
-                        splice(@char, $left, $right-$left+1,
-                            '(?:' . join('|', @charlist) . ')'
-                        );
-
-                        $i = $left;
-                    }
-                    else {
-                        $i = $right;
-                    }
+                    $i = $left;
                     last;
                 }
             }
@@ -1621,28 +1904,13 @@ sub e_qr {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_not_qr(@char[$left+1..$right-1]);
-
-                    # escape character
-                    for my $char (@charlist) {
-
-                        # do not use quotemeta here
-                        if ($char =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
-                            $char = $1.'\\'.$2;
-                        }
-                        elsif ($char =~ m/\A [.|)] \z/xms) {
-                            $char = '\\' . $char;
-                        }
-                    }
 
                     # [^...]
-                    splice(@char, $left, $right-$left+1,
-                        '(?!' . join('|', @charlist) . ')(?:[^\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF])'
-                    );
+                    splice(@char, $left, $right-$left+1, &charlist_not_qr(@char[$left+1..$right-1], $option));
 
                     $i = $left;
                     last;
@@ -1650,89 +1918,87 @@ sub e_qr {
             }
         }
 
-        # replace character class or escape character
-        elsif (
-my $char = {
-
-'.'  => "(?:[^\x81-\x9F\xE0-\xFC]|[\x00-\xFF][\x00-\xFF])",
-'\d' => "[0-9]",
-'\w' => "[a-zA-Z_0-9]",
-'\s' => "[\x20\t\n\r\f]",
-'\D' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])",
-'\W' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])",
-'\S' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])",
-
-# do not add below
-# '\0' => "\0",
-# '\n' => "\n",
-# '\r' => "\r",
-# '\t' => "\t",
-# '\f' => "\f",
-# '\b' => "\b",
-# '\a' => "\a",
-# '\e' => "\e",
-
-}->{$char[$i]}
+        # rewrite character class or escape character
+        elsif (my $char = {
+            '.'  => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])',
+            }->{$char[$i]}
         ) {
             $char[$i] = $char;
         }
 
         # unescape for join separated double octet
-        #                              $    (    )    *    +    .    ?    [   \   ^   {   |
-        elsif ($char[$i] =~ m/\A \\ (?:0?44|0?50|0?51|0?52|0?53|0?56|0?77|133|134|136|173|174) \z/xms) {
+        #                              LF   CR   $    (    )    *    +    .    ?    [   \   ^   {   |
+        elsif ($char[$i] =~ m/\A \\ (?:0?12|0?15|0?44|0?50|0?51|0?52|0?53|0?56|0?77|133|134|136|173|174) \z/oxms) {
         }
-        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/xms) {
-            $char[$i] = CORE::chr(oct($1));
+        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
+            $char[$i] = chr(oct($1));
         }
-        #                               $  (  )  *  +  .  ?  [  \  ^  {  |
-        elsif ($char[$i] =~ m/\A \\x (?:24|28|29|2A|2B|2E|3F|5B|5C|5E|7B|7C) \z/xms) {
+        #                               LF  CR  $  (  )  *  +  .  ?  [  \  ^  {  |
+        elsif ($char[$i] =~ m/\A \\x (?:0?A|0?D|24|28|29|2A|2B|2E|3F|5B|5C|5E|7B|7C) \z/oxmsi) {
         }
-        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/xms) {
-            $char[$i] = CORE::chr(hex($1));
+        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
+            $char[$i] = chr(hex($1));
         }
-        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]+) \} \z/xms) {
+        #                                     LF  CR  $  (  )  *  +  .  ?  [  \  ^  {  |
+        elsif ($char[$i] =~ m/\A \\x \{ 0* (?:0?A|0?D|24|28|29|2A|2B|2E|3F|5B|5C|5E|7B|7C) \} \z/oxmsi) {
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]+) \} \z/oxms) {
             my $hex = (length($1) % 2) ? ('0' . $1) : $1;
-            $char[$i] = CORE::quotemeta pack('H*',$hex);
+            $char[$i] = quotemeta pack('H*',$hex);
         }
-        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/xms) {
-            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
+        #                                LF  CR
+        elsif ($char[$i] =~ m/\A \\c (?: J | M ) \z/oxmsi) {
+        }
+        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
+            $char[$i] = chr(ord($1) & 0x1F);
         }
 
         # /i option
-        if ($option =~ /i/) {
-            if ($char[$i] =~ /^[$@]/) {
-                die "esjis: Can't use regexp /i option with variable interpolation. Use (?i:xxx) or \\L xxx \E to only alphabet.";
-            }
-            elsif ($char[$i] =~ /^[\x81-\x9F\xE0-\xFC]/) {
-                die "esjis: Can't use regexp /i option with double octet code. Use (?i:xxx) or \\L xxx \E to only alphabet.";
+        elsif ($char[$i] =~ m/\A ([A-Za-z]) \z/oxms) {
+            my $c = $1;
+            if ($option =~ m/i/oxms) {
+                $char[$i] = '[' . uc($c) . lc($c) . ']';
             }
         }
 
         # \L \U \Q \E
-        elsif ($char[$i] =~ m/\A ([<>]) \z/xms) {
+        elsif ($char[$i] =~ m/\A ([<>]) \z/oxms) {
             if ($right_e < $left_e) {
                 $char[$i] = '\\' . $char[$i];
             }
         }
-        elsif ($char[$i] =~ m/\A \\L \z/xms) {
-            $char[$i] = '@{[Sjis::lc qq<';
+        elsif ($char[$i] eq '\\L') {
+            $char[$i] = '@{[Esjis::lc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\U \z/xms) {
-            $char[$i] = '@{[Sjis::uc qq<';
+        elsif ($char[$i] eq '\\U') {
+            $char[$i] = '@{[Esjis::uc qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\Q \z/xms) {
+        elsif ($char[$i] eq '\\Q') {
             $char[$i] = '@{[CORE::quotemeta qq<';
             $left_e++;
         }
-        elsif ($char[$i] =~ m/\A \\E \z/xms) {
+        elsif ($char[$i] eq '\\E') {
             if ($right_e < $left_e) {
                 $char[$i] = '>]}';
                 $right_e++;
             }
             else {
                 $char[$i] = '';
+            }
+        }
+
+        # $scalar or @array
+        elsif ($char[$i] =~ m/\A [\$\@].+ /oxms) {
+            if ($option =~ m/i/oxms) {
+                $char[$i] = '@{[Esjis::ignorecase(' . &e_string($char[$i]) . ')]}';
+            }
+            else {
+                $char[$i] = &e_string($char[$i]);
             }
         }
     }
@@ -1742,7 +2008,7 @@ my $char = {
         next if not defined $char[$i];
 
         # join separated double octet
-        if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/xms) {
+        if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
             if ($i < $#char) {
                 $char[$i] .= $char[$i+1];
                 splice(@char,$i+1,1);
@@ -1755,15 +2021,15 @@ my $char = {
         }
 
         # unescape double octet
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF]) \z/xms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF]) \z/oxms) {
             $char[$i] = $1;
         }
 
         # quote double octet character before ? + * {
         elsif (
             ($i >= 1) and
-            ($char[$i] =~ m/\A [\?\+\*\{] \z/xms) and
-            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] | \\[0-7]{2,3} | \\x[0-9A-Fa-f]{1,2} ) \z/xms)
+            ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
+            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] | \\[0-7]{2,3} | \\x[0-9A-Fa-f]{1,2} ) \z/oxms)
         ) {
             $char[$i-1] = '(?:' . $char[$i-1] . ')';
         }
@@ -1771,20 +2037,12 @@ my $char = {
 
     # make regexp string
     my $re;
+    $option =~ tr/i//d;
     if ($left_e > $right_e) {
-        $re = join '', $ope, $delimiter, $chargap, @char, '>]}' x ($left_e - $right_e), $end_delimiter;
+        $re = join '', $ope, $delimiter, $sjis_gap, @char, '>]}' x ($left_e - $right_e), $end_delimiter, $option;
     }
     else {
-        $re = join '', $ope, $delimiter, $chargap, @char, $end_delimiter, $option;
-    }
-
-    # return ShiftJIS regexp string
-    if (not defined(USE_REGEXP_EVAL) or (USE_REGEXP_EVAL == 0)) {
-
-        #               (?{         (??{          (?p{
-        if ($re =~ m/ ( \(\s*\?\{ | \(\s*\?\?\{ | \(\s*\?p\{ ) /xms) {
-            die "esjis: $1 in regexp without 'use constant USE_REGEXP_EVAL => 1'";
-        }
+        $re = join '', $ope, $delimiter, $sjis_gap, @char,                               $end_delimiter, $option;
     }
     return $re;
 }
@@ -1792,14 +2050,17 @@ my $char = {
 #
 # escape regexp (qr'')
 #
-sub e_qr_q {
+sub e_qr_q($$$$$) {
     my($ope,$delimiter,$end_delimiter,$string,$option) = @_;
+    $option ||= '';
+
+    $slash = 'div';
 
     # split regexp
     my @char = $string =~ m{\G(
         \[\^ |
-            (?:[^\\\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?)
-    )}xmsg;
+            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+    )}oxmsg;
 
     # unescape character
     for (my $i=0; $i <= $#char; $i++) {
@@ -1810,39 +2071,15 @@ sub e_qr_q {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_qr(@char[$left+1..$right-1]);
 
-                    # replace character class if double octet code
-                    if (grep m/[\x81-\x9F\xE0-\xFC]/xms, @charlist) {
+                    # [...]
+                    splice(@char, $left, $right-$left+1, &charlist_qr(@char[$left+1..$right-1], $option));
 
-                        # escape character
-                        for (my $i=0; $i <= $#charlist-1; $i++) {
-
-                            # do not use quotemeta here
-                            if (($charlist[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
-                                (($charlist[$i+1] eq '\\') or ($charlist[$i+1] eq $end_delimiter))
-                            ) {
-                                $charlist[$i] .= '\\';
-                            }
-                            elsif ($charlist[$i] =~ m/\A [.|)] \z/xms) {
-                                $charlist[$i] = '\\' . $charlist[$i];
-                            }
-                        }
-
-                        # [...]
-                        splice(@char, $left, $right-$left+1,
-                            '(?:' . join('|', @charlist) . ')'
-                        );
-
-                        $i = $left;
-                    }
-                    else {
-                        $i = $right;
-                    }
+                    $i = $left;
                     last;
                 }
             }
@@ -1853,30 +2090,13 @@ sub e_qr_q {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
-                    die "esjis: " . join('',@char[$left..$#char]) . " unmatched [] in regexp";
+                    die 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
                 }
                 if ($char[$i] eq ']') {
                     my $right = $i;
-                    my @charlist = &charlist_not_qr(@char[$left+1..$right-1]);
-
-                    # escape character
-                    for (my $i=0; $i <= $#charlist-1; $i++) {
-
-                        # do not use quotemeta here
-                        if (($charlist[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
-                            (($charlist[$i+1] eq '\\') or ($charlist[$i+1] eq $end_delimiter))
-                        ) {
-                            $charlist[$i] .= '\\';
-                        }
-                        elsif ($charlist[$i] =~ m/\A [.|)] \z/xms) {
-                            $charlist[$i] = '\\' . $charlist[$i];
-                        }
-                    }
 
                     # [^...]
-                    splice(@char, $left, $right-$left+1,
-                        '(?!' . join('|', @charlist) . ')(?:[^\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF])'
-                    );
+                    splice(@char, $left, $right-$left+1, &charlist_not_qr(@char[$left+1..$right-1], $option));
 
                     $i = $left;
                     last;
@@ -1884,37 +2104,22 @@ sub e_qr_q {
             }
         }
 
-        # replace character class or escape character
-        elsif (
-my $char = {
-
-'.'  => "(?:[^\x81-\x9F\xE0-\xFC]|[\x00-\xFF][\x00-\xFF])",
-'\d' => "[0-9]",
-'\w' => "[a-zA-Z_0-9]",
-'\s' => "[\x20\t\n\r\f]",
-'\D' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])",
-'\W' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])",
-'\S' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])",
-
-# do not add below
-# '\0' => "\0",
-# '\n' => "\n",
-# '\r' => "\r",
-# '\t' => "\t",
-# '\f' => "\f",
-# '\b' => "\b",
-# '\a' => "\a",
-# '\e' => "\e",
-
-}->{$char[$i]}
+        # rewrite character class or escape character
+        elsif (my $char = {
+            '.'  => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])',
+            }->{$char[$i]}
         ) {
             $char[$i] = $char;
         }
 
         # /i option
-        if ($option =~ /i/) {
-            if ($char[$i] =~ /^[\x81-\x9F\xE0-\xFC]/) {
-                die "esjis: Can't use regexp /i option with double octet code. Use (?i:xxx) or \\L xxx \E to only alphabet.";
+        elsif ($char[$i] =~ m/\A ([A-Za-z]) \z/oxms) {
+            my $c = $1;
+            if ($option =~ m/i/oxms) {
+                $char[$i] = '[' . uc($c) . lc($c) . ']';
             }
         }
     }
@@ -1925,7 +2130,7 @@ my $char = {
 
         # escape second octet of double octet
         if (($i <= $#char-1) and
-            ($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/xms) and
+            ($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) \\ \z/oxms) and
             (($char[$i+1] eq '\\') or ($char[$i+1] eq $end_delimiter))
         ) {
             $char[$i] .= '\\';
@@ -1934,31 +2139,23 @@ my $char = {
         # quote double octet character before ? + * {
         elsif (
             ($i >= 1) and
-            ($char[$i] =~ m/\A [\?\+\*\{] \z/xms) and
-            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] ) \z/xms)
+            ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
+            ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] (?: \\?[\x00-\xFF] ) \z/oxms)
         ) {
             $char[$i-1] = '(?:' . $char[$i-1] . ')';
         }
     }
 
-    my $re = join '', $ope, $delimiter, $chargap, @char, $end_delimiter, $option;
-
-    # return ShiftJIS regexp string
-    if (not defined(USE_REGEXP_EVAL) or (USE_REGEXP_EVAL == 0)) {
-
-        #               (?{         (??{          (?p{
-        if ($re =~ m/ ( \(\s*\?\{ | \(\s*\?\?\{ | \(\s*\?p\{ ) /xms) {
-            die "esjis: $1 in regexp without 'use constant USE_REGEXP_EVAL => 1'";
-        }
-    }
-    return $re;
+    $option =~ tr/i//d;
+    return join '', $ope, $delimiter, $sjis_gap, @char, $end_delimiter, $option;
 }
 
 #
 # ShiftJIS open character list for qr
 #
 sub charlist_qr(@) {
-    my(@char) = @_;
+    my $option = pop @_;
+    my @char = @_;
 
     # unescape character
     for (my $i=0; $i <= $#char; $i++) {
@@ -1970,150 +2167,229 @@ sub charlist_qr(@) {
                 $char[$i] = '...';
             }
         }
-        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/xms) {
-            $char[$i] = CORE::chr(oct($1));
+        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
+            $char[$i] = chr(oct($1));
         }
-        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/xms) {
-            $char[$i] = CORE::chr(hex($1));
+        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
+            $char[$i] = chr(hex($1));
         }
-        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,4}) \} \z/xms) {
-            $char[$i] = Sjis::chr(hex($1));
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/oxms) {
+            $char[$i] = pack('H2',$1);
         }
-        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/xms) {
-            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{3,4}) \} \z/oxms) {
+            $char[$i] = pack('H4',$1);
         }
-        elsif ($char[$i] =~ m/\A (\\ [0nrtfbaedDwWsS]) \z/xms) {
+        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
+            $char[$i] = chr(ord($1) & 0x1F);
+        }
+        elsif ($char[$i] =~ m/\A (\\ [0nrtfbaedDwWsS]) \z/oxms) {
             $char[$i] = {
                 '\0' => "\0",
                 '\n' => "\n",
                 '\r' => "\r",
                 '\t' => "\t",
                 '\f' => "\f",
-                '\b' => "\b", # \b means backspace in character class
+                '\b' => "\x08", # \b means backspace in character class
                 '\a' => "\a",
                 '\e' => "\e",
-                '\d' => "[0-9]",
-                '\w' => "[a-zA-Z_0-9]",
-                '\s' => "[\x20\t\n\r\f]",
-                '\D' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])",
-                '\W' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])",
-                '\S' => "(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])",
+                '\d' => '\d',
+                '\w' => '\w',
+                '\s' => '\s',
+                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])',
+                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])',
+                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])',
             }->{$1};
         }
-        elsif ($char[$i] =~ m/\A \\ ([^\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?) \z/xms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) \z/oxms) {
             $char[$i] = $1;
         }
     }
 
-    # join separated double octet
-    for (my $i=0; $i <= $#char-1; $i++) {
-        if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/xms) {
-            $char[$i] .= $char[$i+1];
-            splice(@char,$i+1,1);
+    # open character list
+    my @singleoctet = ();
+    my @charlist    = ();
+    if ((scalar(@char) == 1) or ((scalar(@char) >= 2) and ($char[1] ne '...'))) {
+        if ($char[0] =~ m/\A [\x00-\xFF] \z/oxms) {
+            push @singleoctet, $char[0];
+        }
+        else {
+            push @charlist, $char[0];
         }
     }
-
-    # open character list
-    for (my $i=$#char-1; $i >= 1; ) {
+    for (my $i=1; $i <= $#char-1; ) {
+        next if not defined $char[$i];
 
         # escaped -
         if ($char[$i] eq '...') {
-            my @range = ();
 
             # range of single octet code
             if (
-                ($char[$i-1] =~ m/\A [\x00-\xFF] \z/xms) and
-                ($char[$i+1] =~ m/\A [\x00-\xFF] \z/xms)
+                ($char[$i-1] =~ m/\A [\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x00-\xFF] \z/oxms)
             ) {
                 my $begin = unpack('C',$char[$i-1]);
                 my $end   = unpack('C',$char[$i+1]);
                 if ($begin > $end) {
-                    die 'esjis: /['.$char[$i-1].'-'.$char[$i+1]."]/: invalid [] range in regexp";
+                    die 'esjis: /[\\x'.unpack('H*',$char[$i-1]).'-\\x'.unpack('H*',$char[$i+1]).']/: invalid [] range in regexp';
                 }
                 else {
-                    for my $c ($begin..$end) {
-                        push(@range, pack('C',$c));
+                    if ($option =~ m/i/oxms) {
+                        my %range = ();
+                        for my $c ($begin .. $end) {
+                            $range{ord uc chr $c} = 1;
+                            $range{ord lc chr $c} = 1;
+                        }
+
+                        my @lt = grep {$_ < $begin} sort {$a <=> $b} keys %range;
+                        if (scalar(@lt) == 1) {
+                            push @singleoctet, sprintf(q{\\x%02X},         $lt[0]);
+                        }
+                        elsif (scalar(@lt) >= 2) {
+                            push @singleoctet, sprintf(q{\\x%02X-\\x%02X}, $lt[0], $lt[-1]);
+                        }
+
+                        push @singleoctet, sprintf(q{\\x%02X-\\x%02X},     $begin, $end);
+
+                        my @gt = grep {$_ > $end  } sort {$a <=> $b} keys %range;
+                        if (scalar(@gt) == 1) {
+                            push @singleoctet, sprintf(q{\\x%02X},         $gt[0]);
+                        }
+                        elsif (scalar(@gt) >= 2) {
+                            push @singleoctet, sprintf(q{\\x%02X-\\x%02X}, $gt[0], $gt[-1]);
+                        }
+                    }
+                    else {
+                        push @singleoctet, sprintf(q{\\x%02X-\\x%02X},     $begin, $end);
                     }
                 }
             }
 
             # range of double octet code
             elsif (
-                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/xms) and
-                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/xms)
+                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms)
             ) {
                 my($begin1,$begin2) = unpack('CC',$char[$i-1]);
-                my($end1,$end2)     = unpack('CC',$char[$i+1]);
+                my($end1,  $end2)   = unpack('CC',$char[$i+1]);
                 my $begin = $begin1 * 0x100 + $begin2;
                 my $end   = $end1   * 0x100 + $end2;
                 if ($begin > $end) {
-                    die 'esjis: /['.$char[$i-1].'-'.$char[$i+1]."]/: invalid [] range in regexp";
+                    die 'esjis: /[\\x'.unpack('H*',$char[$i-1]).'-\\x'.unpack('H*',$char[$i+1]).']/: invalid [] range in regexp';
                 }
-                elsif (
-my $range = {
-
-"\x81\x40-\x98\x72" => '(?:[\x81-\x97][\x40-\x7E\x80-\xFC]|\x98[\x40-\x72])',
-"\x81\x40-\xEA\x9E" => '(?:[\x81-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\x9E])',
-"\x81\x40-\xEA\xA2" => '(?:[\x81-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\xA2])',
-"\x81\x40-\xEA\xA4" => '(?:[\x81-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\xA4])',
-"\x81\x40-\xFC\xFC" => '(?:[\x81-\x9F\xE0-\xFC][\x40-\x7E\x80-\xFC])',
-"\x82\x4F-\x82\x58" => '(?:\x82[\x4F-\x58])',
-"\x82\x60-\x82\x79" => '(?:\x82[\x60-\x79])',
-"\x82\x81-\x82\x9A" => '(?:\x82[\x81-\x9A])',
-"\x82\x9F-\x82\xF1" => '(?:\x82[\x9F-\xF1])',
-"\x83\x40-\x83\x96" => '(?:\x83[\x40-\x7E\x80-\x96])',
-"\x83\x9F-\x83\xB6" => '(?:\x83[\x9F-\xB6])',
-"\x83\xBF-\x83\xD6" => '(?:\x83[\xBF-\xD6])',
-"\x84\x40-\x84\x60" => '(?:\x84[\x40-\x60])',
-"\x84\x70-\x84\x91" => '(?:\x84[\x70-\x91])',
-"\x84\x9F-\x84\xBE" => '(?:\x84[\x9F-\xBE])',
-"\x87\x40-\x87\x53" => '(?:\x87[\x40-\x53])',
-"\x87\x40-\x87\x9C" => '(?:\x87[\x40-\x5D\x5F-\x75\x7E\x80-\x9C])',
-"\x87\x54-\x87\x5D" => '(?:\x87[\x54-\x5D])',
-"\x88\x9F-\x98\x72" => '(?:\x88[\x9F-\xFC]|[\x89-\x97][\x40-\x7E\x80-\xFC]|\x98[\x40-\x72])',
-"\x88\x9F-\xEA\x9E" => '(?:\x88[\x9F-\xFC]|[\x89-\x97\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\x98[\x40-\x72]|\x98[\x9F-\xFC]|\xEA[\x40-\x7E\x80-\x9E])',
-"\x88\x9F-\xEA\xA2" => '(?:\x88[\x9F-\xFC]|[\x89-\x97\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\x98[\x40-\x72]|\x98[\x9F-\xFC]|\xEA[\x40-\x7E\x80-\xA2])',
-"\x88\x9F-\xEA\xA4" => '(?:\x88[\x9F-\xFC]|[\x89-\x97\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\x98[\x40-\x72]|\x98[\x9F-\xFC]|\xEA[\x40-\x7E\x80-\xA4])',
-"\x98\x9F-\xEA\x9E" => '(?:\x98[\x9F-\xFC]|[\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\x9E])',
-"\x98\x9F-\xEA\xA2" => '(?:\x98[\x9F-\xFC]|[\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\xA2])',
-"\x98\x9F-\xEA\xA4" => '(?:\x98[\x9F-\xFC]|[\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\xA4])',
-"\xED\x40-\xEE\xFC" => '(?:\xED[\x40-\x7E\x80-\xFC]|\xEE[\x40-\x7E\x80-\xEC\xEF-\xFC])',
-"\xFA\x40-\xFC\x4B" => '(?:[\xFA-\xFB][\x40-\x7E\x80-\xFC]|\xFC[\x40-\x4B])',
-
-}->{"$begin-$end"}
-                ) {
-                    push(@range, $range);
+                elsif ($begin1 == $end1) {
+                    push @charlist, sprintf(q{\\x%02X[\\x%02X-\\x%02X]}, $begin1, $begin2, $end2);
+                }
+                elsif (($begin1 + 1) == $end1) {
+                    push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},   $begin1, $begin2);
+                    push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},   $end1,   $end2);
                 }
                 else {
-                    for my $cc ($begin..$end) {
-                        my $char = pack('CC', int($cc / 0x100), $cc % 0x100);
-                        if ($char =~ m/\A [\x81-\x9F\xE0-\xFC] [\x40-\x7E\x80-\xFC] \z/xms) {
-                            push(@range, $char);
+                    my @middle = ();
+                    for my $c ($begin1+1 .. $end1-1) {
+                        if ((0x81 <= $c and $c <= 0x9F) or (0xE0 <= $c and $c <= 0xFC)) {
+                            push @middle, $c;
                         }
+                    }
+                    if (scalar(@middle) == 0) {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
+                    }
+                    elsif (scalar(@middle) == 1) {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\xFF]},           $middle[0]);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
+                    }
+                    else {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{[\\x%02X-\\x%02X][\\x00-\\xFF]}, $middle[0], $middle[-1]);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
                     }
                 }
             }
 
             # range error
             else {
-                die 'esjis: /['.$char[$i-1].'-'.$char[$i+1]."]/: invalid [] range in regexp";
+                die 'esjis: /[\\x'.unpack('H*',$char[$i-1]).'-\\x'.unpack('H*',$char[$i+1]).']/: invalid [] range in regexp';
             }
 
-            splice(@char, $i-1, 3, @range);
-            $i -= 2;
+            $i += 2;
+        }
+
+        # /i option
+        elsif (($char[$i] =~ m/\A ([A-Za-z]) \z/oxms) and (($i+1 > $#char) or ($char[$i+1] ne '...'))) {
+            my $c = $1;
+            if ($option =~ m/i/oxms) {
+                push @singleoctet, uc($c), lc($c);
+            }
+            else {
+                push @singleoctet, $c;
+            }
+            $i += 1;
+        }
+
+        # single character
+        elsif ($char[$i] =~ m/\A (?: [\x00-\xFF] | \\d | \\w | \\s )  \z/oxms) {
+            push @singleoctet, $char[$i];
+            $i += 1;
         }
         else {
-            $i -= 1;
+            push @charlist, $char[$i];
+            $i += 1;
         }
     }
-    return @char;
+    if ((scalar(@char) >= 2) and ($char[-2] ne '...')) {
+        if ($char[-1] =~ m/\A [\x00-\xFF] \z/oxms) {
+            push @singleoctet, $char[-1];
+        }
+        else {
+            push @charlist, $char[-1];
+        }
+    }
+
+    # quote metachar
+    for (@singleoctet) {
+        if (m/\A \n \z/oxms) {
+            $_ = '\\n';
+        }
+        elsif (m/\A \r \z/oxms) {
+            $_ = '\\r';
+        }
+        elsif (m/\A ([\x00-\x21\x7F-\xA0\xE0-\xFF]) \z/oxms) {
+            $_ = sprintf(q{\\x%02X}, ord $1);
+        }
+        elsif (m/\A ([\x00-\xFF]) \z/oxms) {
+            $_ = quotemeta $1;
+        }
+    }
+    for (@charlist) {
+        if (m/\A ([\x81-\x9F\xE0-\xFC]) ([\x00-\xFF]) \z/oxms) {
+            $_ = $1 . quotemeta $2;
+        }
+    }
+
+    # return character list
+    if (scalar(@singleoctet) == 0) {
+    }
+    elsif ((scalar(@singleoctet) == 1) and ($singleoctet[0] !~ m/\A .-. \z/oxms)) {
+        push @charlist, $singleoctet[0];
+    }
+    else {
+        push @charlist, '[' . join('',@singleoctet) . ']';
+    }
+    if(scalar(@charlist) >= 2) {
+        return '(?:' . join('|', @charlist) . ')';
+    }
+    else {
+        return @charlist;
+    }
 }
 
 #
 # ShiftJIS open character list for not qr
 #
 sub charlist_not_qr(@) {
-    my(@char) = @_;
+    my $option = pop @_;
+    my @char = @_;
 
     # unescape character
     for (my $i=0; $i <= $#char; $i++) {
@@ -2125,153 +2401,213 @@ sub charlist_not_qr(@) {
                 $char[$i] = '...';
             }
         }
-        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/xms) {
-            $char[$i] = CORE::chr(oct($1));
+        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
+            $char[$i] = chr(oct($1));
         }
-        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/xms) {
-            $char[$i] = CORE::chr(hex($1));
+        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
+            $char[$i] = chr(hex($1));
         }
-        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,4}) \} \z/xms) {
-            $char[$i] = Sjis::chr(hex($1));
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/oxms) {
+            $char[$i] = pack('H2',$1);
         }
-        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/xms) {
-            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{3,4}) \} \z/oxms) {
+            $char[$i] = pack('H4',$1);
         }
-        elsif ($char[$i] =~ m/\A (\\ [0nrtfbaedDwWsS]) \z/xms) {
+        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
+            $char[$i] = chr(ord($1) & 0x1F);
+        }
+        elsif ($char[$i] =~ m/\A (\\ [0nrtfbaedDwWsS]) \z/oxms) {
             $char[$i] = {
                 '\0' => "\0",
-                '\n' => '\n',
-                '\r' => '\r',
-                '\t' => '\t',
-                '\f' => '\f',
-                '\b' => "\b", # \b means backspace in character class
-                '\a' => '\a',
-                '\e' => '\e',
-                '\d' => '[0-9]',
-                '\w' => '[a-zA-Z_0-9]',
-                '\s' => '[\x20\t\n\r\f]',
+                '\n' => "\n",
+                '\r' => "\r",
+                '\t' => "\t",
+                '\f' => "\f",
+                '\b' => "\x08", # \b means backspace in character class
+                '\a' => "\a",
+                '\e' => "\e",
+                '\d' => '\d',
+                '\w' => '\w',
+                '\s' => '\s',
                 '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])',
                 '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])',
                 '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])',
             }->{$1};
         }
-        elsif ($char[$i] =~ m/\A \\ ([^\x81-\x9F\xE0-\xFC] | [\x00-\xFF][\x00-\xFF]?) \z/xms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) \z/oxms) {
             $char[$i] = $1;
         }
     }
 
-    # join separated double octet
-    for (my $i=0; $i <= $#char-1; $i++) {
-        if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/xms) {
-            $char[$i] .= $char[$i+1];
-            splice(@char,$i+1,1);
+    # open character list
+    my @singleoctet = ();
+    my @charlist    = ();
+    if ((scalar(@char) == 1) or ((scalar(@char) >= 2) and ($char[1] ne '...'))) {
+        if ($char[0] =~ m/\A [\x00-\xFF] \z/oxms) {
+            push @singleoctet, $char[0];
+        }
+        else {
+            push @charlist, $char[0];
         }
     }
-
-    # open character list
-    for (my $i=$#char-1; $i >= 1; ) {
+    for (my $i=1; $i <= $#char-1; ) {
+        next if not defined $char[$i];
 
         # escaped -
         if ($char[$i] eq '...') {
-            my @range = ();
-
-            # unescape character
-            for my $char ($char[$i-1], $char[$i+1]) {
-                $char = {
-                    '\n' => "\n",
-                    '\r' => "\r",
-                    '\t' => "\t",
-                    '\f' => "\f",
-                    '\a' => "\a",
-                    '\e' => "\e",
-                }->{$char} || $char;
-            }
 
             # range of single octet code
             if (
-                ($char[$i-1] =~ m/\A [\x00-\xFF] \z/xms) and
-                ($char[$i+1] =~ m/\A [\x00-\xFF] \z/xms)
+                ($char[$i-1] =~ m/\A [\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x00-\xFF] \z/oxms)
             ) {
                 my $begin = unpack('C',$char[$i-1]);
                 my $end   = unpack('C',$char[$i+1]);
                 if ($begin > $end) {
-                    die 'esjis: /['.$char[$i-1].'-'.$char[$i+1]."]/: invalid [] range in regexp";
+                    die 'esjis: /[\\x'.unpack('H*',$char[$i-1]).'-\\x'.unpack('H*',$char[$i+1]).']/: invalid [] range in regexp';
                 }
                 else {
-                    push @range, join('', '[', $char[$i-1], '-', $char[$i+1], ']');
+                    if ($option =~ m/i/oxms) {
+                        my %range = ();
+                        for my $c ($begin .. $end) {
+                            $range{ord uc chr $c} = 1;
+                            $range{ord lc chr $c} = 1;
+                        }
+
+                        my @lt = grep {$_ < $begin} sort {$a <=> $b} keys %range;
+                        if (scalar(@lt) == 1) {
+                            push @singleoctet, sprintf(q{\\x%02X},         $lt[0]);
+                        }
+                        elsif (scalar(@lt) >= 2) {
+                            push @singleoctet, sprintf(q{\\x%02X-\\x%02X}, $lt[0], $lt[-1]);
+                        }
+
+                        push @singleoctet, sprintf(q{\\x%02X-\\x%02X},     $begin, $end);
+
+                        my @gt = grep {$_ > $end  } sort {$a <=> $b} keys %range;
+                        if (scalar(@gt) == 1) {
+                            push @singleoctet, sprintf(q{\\x%02X},         $gt[0]);
+                        }
+                        elsif (scalar(@gt) >= 2) {
+                            push @singleoctet, sprintf(q{\\x%02X-\\x%02X}, $gt[0], $gt[-1]);
+                        }
+                    }
+                    else {
+                        push @singleoctet, sprintf(q{[\\x%02X-\\x%02X]},   $begin, $end);
+                    }
                 }
             }
 
             # range of double octet code
             elsif (
-                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/xms) and
-                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/xms)
+                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms)
             ) {
                 my($begin1,$begin2) = unpack('CC',$char[$i-1]);
-                my($end1,$end2)     = unpack('CC',$char[$i+1]);
+                my($end1,  $end2)   = unpack('CC',$char[$i+1]);
                 my $begin = $begin1 * 0x100 + $begin2;
                 my $end   = $end1   * 0x100 + $end2;
                 if ($begin > $end) {
-                    die 'esjis: /['.$char[$i-1].'-'.$char[$i+1]."]/: invalid [] range in regexp";
+                    die 'esjis: /[\\x'.unpack('H*',$char[$i-1]).'-\\x'.unpack('H*',$char[$i+1]).']/: invalid [] range in regexp';
                 }
-                elsif (
-my $range = {
-
-"\x81\x40-\x98\x72" => '(?:[\x81-\x97][\x40-\x7E\x80-\xFC]|\x98[\x40-\x72])',
-"\x81\x40-\xEA\x9E" => '(?:[\x81-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\x9E])',
-"\x81\x40-\xEA\xA2" => '(?:[\x81-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\xA2])',
-"\x81\x40-\xEA\xA4" => '(?:[\x81-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\xA4])',
-"\x81\x40-\xFC\xFC" => '(?:[\x81-\x9F\xE0-\xFC][\x40-\x7E\x80-\xFC])',
-"\x82\x4F-\x82\x58" => '(?:\x82[\x4F-\x58])',
-"\x82\x60-\x82\x79" => '(?:\x82[\x60-\x79])',
-"\x82\x81-\x82\x9A" => '(?:\x82[\x81-\x9A])',
-"\x82\x9F-\x82\xF1" => '(?:\x82[\x9F-\xF1])',
-"\x83\x40-\x83\x96" => '(?:\x83[\x40-\x7E\x80-\x96])',
-"\x83\x9F-\x83\xB6" => '(?:\x83[\x9F-\xB6])',
-"\x83\xBF-\x83\xD6" => '(?:\x83[\xBF-\xD6])',
-"\x84\x40-\x84\x60" => '(?:\x84[\x40-\x60])',
-"\x84\x70-\x84\x91" => '(?:\x84[\x70-\x91])',
-"\x84\x9F-\x84\xBE" => '(?:\x84[\x9F-\xBE])',
-"\x87\x40-\x87\x53" => '(?:\x87[\x40-\x53])',
-"\x87\x40-\x87\x9C" => '(?:\x87[\x40-\x5D\x5F-\x75\x7E\x80-\x9C])',
-"\x87\x54-\x87\x5D" => '(?:\x87[\x54-\x5D])',
-"\x88\x9F-\x98\x72" => '(?:\x88[\x9F-\xFC]|[\x89-\x97][\x40-\x7E\x80-\xFC]|\x98[\x40-\x72])',
-"\x88\x9F-\xEA\x9E" => '(?:\x88[\x9F-\xFC]|[\x89-\x97\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\x98[\x40-\x72]|\x98[\x9F-\xFC]|\xEA[\x40-\x7E\x80-\x9E])',
-"\x88\x9F-\xEA\xA2" => '(?:\x88[\x9F-\xFC]|[\x89-\x97\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\x98[\x40-\x72]|\x98[\x9F-\xFC]|\xEA[\x40-\x7E\x80-\xA2])',
-"\x88\x9F-\xEA\xA4" => '(?:\x88[\x9F-\xFC]|[\x89-\x97\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\x98[\x40-\x72]|\x98[\x9F-\xFC]|\xEA[\x40-\x7E\x80-\xA4])',
-"\x98\x9F-\xEA\x9E" => '(?:\x98[\x9F-\xFC]|[\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\x9E])',
-"\x98\x9F-\xEA\xA2" => '(?:\x98[\x9F-\xFC]|[\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\xA2])',
-"\x98\x9F-\xEA\xA4" => '(?:\x98[\x9F-\xFC]|[\x99-\x9F\xE0-\xE9][\x40-\x7E\x80-\xFC]|\xEA[\x40-\x7E\x80-\xA4])',
-"\xED\x40-\xEE\xFC" => '(?:\xED[\x40-\x7E\x80-\xFC]|\xEE[\x40-\x7E\x80-\xEC\xEF-\xFC])',
-"\xFA\x40-\xFC\x4B" => '(?:[\xFA-\xFB][\x40-\x7E\x80-\xFC]|\xFC[\x40-\x4B])',
-
-}->{"$begin-$end"}
-                ) {
-                    push(@range, $range);
+                elsif ($begin1 == $end1) {
+                    push @charlist, sprintf(q{\\x%02X[\\x%02X-\\x%02X]}, $begin1, $begin2, $end2);
+                }
+                elsif (($begin1 + 1) == $end1) {
+                    push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},   $begin1, $begin2);
+                    push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},   $end1,   $end2);
                 }
                 else {
-                    for my $cc ($begin..$end) {
-                        my $char = pack('CC', int($cc / 0x100), $cc % 0x100);
-                        if ($char =~ m/\A [\x81-\x9F\xE0-\xFC] [\x40-\x7E\x80-\xFC] \z/xms) {
-                            push(@range, $char);
+                    my @middle = ();
+                    for my $c ($begin1+1 .. $end1-1) {
+                        if ((0x81 <= $c and $c <= 0x9F) or (0xE0 <= $c and $c <= 0xFC)) {
+                            push @middle, $c;
                         }
+                    }
+                    if (scalar(@middle) == 0) {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
+                    }
+                    elsif (scalar(@middle) == 1) {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\xFF]},           $middle[0]);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
+                    }
+                    else {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{[\\x%02X-\\x%02X][\\x00-\\xFF]}, $middle[0], $middle[-1]);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
                     }
                 }
             }
 
             # range error
             else {
-                die 'esjis: /['.$char[$i-1].'-'.$char[$i+1]."]/: invalid [] range in regexp";
+                die 'esjis: /[\\x'.unpack('H*',$char[$i-1]).'-\\x'.unpack('H*',$char[$i+1]).']/: invalid [] range in regexp';
             }
 
-            splice(@char, $i-1, 3, @range);
-            $i -= 2;
+            $i += 2;
+        }
+
+        # /i option
+        elsif (($char[$i] =~ m/\A ([A-Za-z]) \z/oxms) and (($i+1 > $#char) or ($char[$i+1] ne '...'))) {
+            my $c = $1;
+            if ($option =~ m/i/oxms) {
+                push @singleoctet, uc($c), lc($c);
+            }
+            else {
+                push @singleoctet, $c;
+            }
+            $i += 1;
+        }
+
+        # single character
+        elsif ($char[$i] =~ m/\A (?: [\x00-\xFF] | \\d | \\w | \\s )  \z/oxms) {
+            push @singleoctet, $char[$i];
+            $i += 1;
         }
         else {
-            $i -= 1;
+            push @charlist, $char[$i];
+            $i += 1;
         }
     }
-    return @char;
+    if ((scalar(@char) >= 2) and ($char[-2] ne '...')) {
+        if ($char[-1] =~ m/\A [\x00-\xFF] \z/oxms) {
+            push @singleoctet, $char[-1];
+        }
+        else {
+            push @charlist, $char[-1];
+        }
+    }
+
+    # quote metachar
+    for (@singleoctet) {
+        if (m/\A \n \z/oxms) {
+            $_ = '\\n';
+        }
+        elsif (m/\A \r \z/oxms) {
+            $_ = '\\r';
+        }
+        elsif (m/\A ([\x00-\x21\x7F-\xA0\xE0-\xFF]) \z/oxms) {
+            $_ = sprintf(q{\\x%02X}, ord $1);
+        }
+        elsif (m/\A ([\x00-\xFF]) \z/oxms) {
+            $_ = quotemeta $_;
+        }
+    }
+    for (@charlist) {
+        if (m/\A ([\x81-\x9F\xE0-\xFC]) ([\x00-\xFF]) \z/oxms) {
+            $_ = $1 . quotemeta $2;
+        }
+    }
+
+    # return character list
+    if(scalar(@charlist) >= 1) {
+        return '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC'. join('', @singleoctet) . '])';
+    }
+    else {
+        return                                 '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC'. join('', @singleoctet) . '])';
+    }
 }
 
 1;
@@ -2290,22 +2626,33 @@ Esjis - Source code filter to escape ShiftJIS
   ShiftJIS_script.pl  --- script written in ShiftJIS
   Escaped_script.pl.e --- escaped script
 
-=head1 BACKWARD COMPATIBILITY
+=head1 ABSTRACT
+
+Let's start with a bit of history: jperl 4.019+1.3 introduced ShiftJIS support.
+You could apply chop() and regexps even to complex CJK characters -- so long as
+the script was written in ShiftJIS.
+
+Since Perl5.8, Encode module is supported for multilingual processing, and it was
+said that jperl became unnecessary. But is it really so?
+
+The UTF-8 is still rare on the Microsoft Windows -- most popular operating systems
+we love, so many users hope to write scripts in ShiftJIS encodings; without giving
+up a whole new feature of Perl5.8/5.10.
 
 The ShiftJIS was developed in order to maintain backward compatibility. In general,
-the operating systems and the programming language keep old interface.
+the operating systems and the programming language keep old interface. To maintain
+backward compatibility is an effective solution still now.
 
-To maintain backward compatibility is a effective solution still now.
+Shall we escape from the encode problem?
 
 =head1 DESCRIPTION
 
 JPerl is very useful software.
 
 Because it is Perl interpreter who can handle Japanese on the Microsoft Windows.
-However, the last version of JPerl is 5.005_03 and is not maintained now.
+However, the last version of JPerl is 5.005_04 and is not maintained now.
 
-A lot of persons hope to get new version of JPerl. So I made this software, I had
-thought that I wanted to solve the problem.
+So I made this software, I had thought that I wanted to solve the problem.
 
 This software is a source code filter to escape Perl script encoded by ShiftJIS.
 It outputs it to STDOUT escaping in the script given from STDIN or command line
@@ -2321,46 +2668,71 @@ This approach is suitable for the following case.
 
 =item * To handle real length of character string
 
-=item * To don't handle flag and functions not related to programming #'
+=item * To don't handle flag and functions not related to programming
 
 =item * Unnecessary internationalization programming
 
+=item * To don't handle program written by C language
+
 =back
 
-This software is still a pre-alpha version for expressing a concept to get <YOUR>
-help.
+This software is still an alpha version for expressing a concept.
 
 =head1 SOFTWARE COMPOSITION
 
-    jperl55.bat  --- jperl emulator by perl5.5 with esjis.pl and Sjis.pm
-    jperl510.bat --- jperl emulator by perl5.10 with esjis.pl and Sjis.pm
+    jperl55.bat  --- jperl emulator by perl5.5 with esjis.pl
+    jperl58.bat  --- jperl emulator by perl5.8 with esjis.pl
+    perl58.bat   --- find and run perl5.8 without %PATH% settings
+    jperl510.bat --- jperl emulator by perl5.10 with esjis.pl
     perl510.bat  --- find and run perl5.10 without %PATH% settings
+    pl2ebat      --- escape and wrap ShiftJIS perl code into a batch file
     esjis.pl     --- source code filter to escape ShiftJIS
-    Sjis.pm      --- run-time routine
+    Esjis.pm     --- run-time routines for esjis.pl
+    Sjis.pm      --- Source code filter for ShiftJIS script
 
 =head1 SOFTWARE COMBINATION
 
 =over 2
 
-=item * COMBINATION.1
+=item * COMBINATION #1
 
-    Sjis.pm
-    subroutines for ShiftJIS.
-
-=item * COMBINATION.2
-
-    esjis.pl + Sjis.pm
+    esjis.pl + Esjis.pm
     source code filter to escape ShiftJIS
 
-=item * COMBINATION.3
+=item * COMBINATION #2
 
-    jperl55.bat + esjis.pl + Sjis.pm
-    jperl emulator by perl5.5 with esjis.pl and Sjis.pm
+    jperl55.bat + esjis.pl + Esjis.pm
+    jperl emulator by perl5.5 with esjis.pl, Esjis.pm (I)
 
-=item * COMBINATION.4
+=item * COMBINATION #3
 
-    jperl510.bat + perl510.bat + esjis.pl + Sjis.pm
-    jperl emulator by perl5.10 with esjis.pl and Sjis.pm without %PATH% settings
+    Sjis.pm + esjis.pl + Esjis.pm
+    jperl emulator by perl with esjis.pl, Esjis.pm (II)
+
+=item * COMBINATION #4
+
+    jperl58.bat + perl58.bat + esjis.pl + Esjis.pm
+    jperl emulator by perl5.8 with esjis.pl, Esjis.pm without %PATH% settings (I)
+
+=item * COMBINATION #5
+
+    perl58.bat + Sjis.pm + esjis.pl + Esjis.pm
+    jperl emulator by perl5.8 with esjis.pl, Esjis.pm without %PATH% settings (II)
+
+=item * COMBINATION #6
+
+    jperl510.bat + perl510.bat + esjis.pl + Esjis.pm
+    jperl emulator by perl5.10 with esjis.pl, Esjis.pm without %PATH% settings (I)
+
+=item * COMBINATION #7
+
+    perl510.bat + Sjis.pm + esjis.pl + Esjis.pm
+    jperl emulator by perl5.10 with esjis.pl, Esjis.pm without %PATH% settings (II)
+
+=item * COMBINATION #8
+
+    pl2ebat.bat + esjis.pl + Esjis.pm
+    "pl2bat.bat" for ShiftJIS perl script
 
 =back
 
@@ -2404,17 +2776,21 @@ The following functions are enhanced more than JPerl.
 
 \x{XXXX} syntax can also be used.
 
+=item * tr/// or y///
+
+\x{XXXX} syntax can also be used.
+
 =item * chr
 
-double octet code can also be treated.
+double octet code can also be handled.
 
 =item * ord
 
-double octet code can also be treated.
+double octet code can also be handled.
 
 =item * reverse
 
-double octet code can also be treated in scalar context.
+double octet code can also be handled in scalar context.
 
 =back
 
@@ -2424,10 +2800,6 @@ The following functions are not compatible with JPerl. It is the same as
 original Perl. 
 
 =over 2
-
-=item * tr/// or y///
-
-You must use Sjis::trans function.
 
 =item * format
 
@@ -2445,43 +2817,18 @@ It is the same as the function of original Perl.
 
 =head1 BUGS AND LIMITATIONS
 
-This software is still a pre-alpha version for expressing a concept.
+This software is still an alpha version for expressing a concept.
 I write test code from now.
 
 Please test code, patches and report problems to author are welcome.
 
 =over 2
 
-=item * LIMITATION.1
-
-The regular expression's option "/i" of operator m//, s///, qr// and split(//)
-can't handle double octet code.
-
-When the second octet of a double octet code is the alphabet, for example
-katakana-"A" (\x83\x41: second octet is alphabet-"A"), contrary to expectation,
-it will be match also katakana-"Di", because second octet of "Di" is alphabet-"a".
-Therefore, when double octet code or a variable is in a regular expression, 
-error occurs at compile time, script can't be execute. #'
-
-By describing "(?i)" in inside regular expression, since the range can be
-restricted, a problem is partially solvable.
-
-=item * LIMITATION.2
-
-Since tr/// and y/// can't handle double octet code, it can't be used.
-
-Instead it, you have to use function Sjis::trans of Sjis module offers.
-When tr/// or y/// is described in script, error occurs at compile time,
-script can't be execute. #'
-Esjis.pl has no function to rewrite tr/// or y/// to Sjis::trans.
-
-Please this patches to author are very welcome.
-
-=item * LIMITATION.3
+=item * LIMITATION #1
 
 When two or more delimiters of here documents are in one line, if any one is
-a double quote type(<<"END", <<END or <<`END`), then all here documents were
-escaped for double quote type before it.
+a double quote type(<<"END", <<END or <<`END`), then all here documents will
+escape for double quote type.
 
     ex.1
         print <<'END';
@@ -2553,7 +2900,8 @@ escaped for double quote type before it.
         ============================================================
         END2
         ============================================================
-        Escaped for SINGLE quote document.   --- OK
+        Escaped for DOUBLE quote document "END3".
+        'END3' see string rewritten for "END2".
         ============================================================
         END3
 
@@ -2579,7 +2927,8 @@ escaped for double quote type before it.
 =head1 HISTORY
 
 This esjis.pl software first appeared in ActivePerl Build 522 Built under
-MSWin32 Compiled at Nov 2 1999 09:52:28
+MSWin32 Compiled at Nov 2 1999 09:52:28, created from 'jcode.pl' and the
+target is to achieve the same function as 'Jperl.exe'.
 
 =head1 AUTHOR
 
@@ -2660,7 +3009,7 @@ ShiftJIS. This software used two algorithms to handle ShiftJIS.
 
 =over 2
 
-=item * ALGORITHM.1
+=item * ALGORITHM #1
 
  When the character is taken out of the octet string, it is necessary to
 distinguish a single octet character and the double octet character.
@@ -2765,7 +3114,7 @@ See also code table:
 Final octet of string like first octet of double octet code
 
 Even if malformed, it is not ignored and not deleted automatically.
-For example, Sjis::Chop function returns this octet.
+For example, Esjis::chop function returns this octet.
 
    0 1 2 3 4 5 6 7 8 9 A B C D E F 
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2826,10 +3175,10 @@ L<http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html>
  Oracle Oracle7 (Release 7.1.3) 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x00-0xFF)
  Sybase SQL Server, Open Server 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
 
-=item * ALGORITHM.2
+=item * ALGORITHM #2
 
-Against algorithm.1, when the range of the character is specified, only the following
-character codes are effective.
+Against algorithm.1, when the range of the character by tr/// is specified, only the
+following character codes are effective.
 
     Single octet code is:
       0x00-0x80, 0xA0-0xDF and 0xFD-0xFF
@@ -2921,29 +3270,68 @@ See also code table:
 
 =back
 
+=head1 GOAL
+
+=over 2
+
+=item Goal #1:
+
+Old byte-oriented programs should not spontaneously break on the old
+byte-oriented data they used to work on.
+
+=item Goal #2:
+
+Old byte-oriented programs should magically start working on the new
+character-oriented data when appropriate.
+
+=item Goal #3:
+
+Programs should run just as fast in the new character-oriented mode
+as in the old byte-oriented mode.
+
+=item Goal #4:
+
+Perl should remain one language, rather than forking into a
+byte-oriented Perl and a character-oriented Perl.
+
+=item Goal #5:
+
+JPerl user can use the latest technology of Perl and can the latest
+maintain 'JPerl'.
+
+=back
+
 =head1 SEE ALSO
 
-C<Programming Perl, Third Edition>
-By Larry Wall, Tom Christiansen, Jon Orwant
-Third Edition  July 2000
-Pages: 1104
-ISBN 10: 0-596-00027-8 | ISBN 13:9780596000271
-L<http://www.oreilly.com/catalog/pperl3/index.html>
+ C<Programming Perl, Third Edition>
+ By Larry Wall, Tom Christiansen, Jon Orwant
+ Third Edition  July 2000
+ Pages: 1104
+ ISBN 10: 0-596-00027-8 | ISBN 13:9780596000271
+ L<http://www.oreilly.com/catalog/pperl3/index.html>
+ ISBN 4-87311-096-3
+ L<http://www.oreilly.co.jp/books/4873110963/>
+ ISBN 4-87311-097-1
+ L<http://www.oreilly.co.jp/books/4873110971/>
 
-C<CJKV Information Processing>
-Chinese, Japanese, Korean & Vietnamese Computing
-By Ken Lunde
-First Edition  January 1999
-Pages: 1128
-ISBN 10: 1-56592-224-7 | ISBN 13:9781565922242
-L<http://www.oreilly.com/catalog/cjkvinfo/index.html>
+ C<CJKV Information Processing>
+ Chinese, Japanese, Korean & Vietnamese Computing
+ By Ken Lunde
+ First Edition  January 1999
+ Pages: 1128
+ ISBN 10: 1-56592-224-7 | ISBN 13:9781565922242
+ L<http://www.oreilly.com/catalog/cjkvinfo/index.html>
+ ISBN 4-87311-108-0
+ L<http://www.oreilly.co.jp/books/4873111080/>
 
-C<Mastering Regular Expressions, Third Edition>
-By Jeffrey E. F. Friedl
-Third Edition  August 2006
-Pages: 542
-ISBN 10: 0-596-52812-4 | ISBN 13:9780596528126
-L<http://www.oreilly.com/catalog/regex3/index.html>
+ C<Mastering Regular Expressions, Third Edition>
+ By Jeffrey E. F. Friedl
+ Third Edition  August 2006
+ Pages: 542
+ ISBN 10: 0-596-52812-4 | ISBN 13:9780596528126
+ L<http://www.oreilly.com/catalog/regex3/index.html>
+ ISBN 978-4-87311-359-3
+ L<http://www.oreilly.co.jp/books/9784873113593/>
 
 =head1 ACKNOWLEDGEMENTS
 
@@ -2951,32 +3339,35 @@ This software was made, thanks to the following hackers or persons.
 Especially this POD was written referring from the Encode module.
 I am thankful to all persons.
 
-Rick Yamashita, ShiftJIS
-http://furukawablog.spaces.live.com/Blog/cns!1pmWgsL289nm7Shn7cS0jHzA!2225.entry
+ Rick Yamashita, ShiftJIS
+ http://furukawablog.spaces.live.com/Blog/cns!1pmWgsL289nm7Shn7cS0jHzA!2225.entry
 
-Larry Wall, Perl
-L<http://www.perl.org/>
+ Larry Wall, Perl
+ L<http://www.perl.org/>
 
-Kazumasa Utashiro, jcode.pl
-L<http://www.srekcah.org/jcode/>
+ Kazumasa Utashiro, jcode.pl
+ L<http://www.srekcah.org/jcode/>
 
-Jeffrey E. F. Friedl, Mastering Regular Expressions
-L<http://www.oreilly.com/catalog/regex/index.html>
+ Jeffrey E. F. Friedl, Mastering Regular Expressions
+ L<http://www.oreilly.com/catalog/regex/index.html>
 
-SADAHIRO Tomoyuki, The right way of using ShiftJIS
-L<http://homepage1.nifty.com/nomenclator/perl/shiftjis.htm>
+ SADAHIRO Tomoyuki, The right way of using ShiftJIS
+ L<http://homepage1.nifty.com/nomenclator/perl/shiftjis.htm>
 
-jscripter, For jperl users
-L<http://homepage1.nifty.com/kazuf/jperl.html>
+ jscripter, For jperl users
+ L<http://homepage1.nifty.com/kazuf/jperl.html>
 
-Hizumi, Perl5.8/Perl5.10 is not useful on the Windows.
-L<http://www.aritia.org/hizumi/perl/perlwin.html>
+ Hizumi, Perl5.8/Perl5.10 is not useful on the Windows.
+ L<http://www.aritia.org/hizumi/perl/perlwin.html>
 
-SUZUKI Norio, Jperl
-L<http://homepage2.nifty.com/kipp/perl/jperl/>
+ SUZUKI Norio, Jperl
+ L<http://homepage2.nifty.com/kipp/perl/jperl/>
 
-Dan Kogai, Encode module
-L<http://search.cpan.org/dist/Encode/>
+ Hirofumi Watanabe, Jperl
+ L<http://search.cpan.org/~watanabe/>
+
+ Dan Kogai, Encode module
+ L<http://search.cpan.org/dist/Encode/>
 
 =cut
 
