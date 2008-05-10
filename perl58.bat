@@ -101,7 +101,7 @@ for $drive (sort @harddrive) {
 
 # perl5.8 not found
 if (@drive == 0) {
-    die "perl58: nothing \\Perl58\\bin\\perl.exe anywhere.\n";
+    die "perl58: nothing \\Perl58\\bin\\perl.exe nowhere.\n";
 }
 
 # only one perl5.8 found
@@ -144,19 +144,19 @@ B<perl58> [perlscript.pl]
 
 =head1 DESCRIPTION
 
-This program is useful when perl5.5 and perl5.8 are used on the same disk.
+This program is useful when perl5.5 and perl5.8 are used on the one computer.
 Set perl5.5's bin directory to environment variable %PATH%, do not set perl5.8's
 bin directory to %PATH%.
 
 It is necessary to install perl5.8 in "\Perl58\bin" directory of the drive of
 either. This program is executed by perl5.5, and find the perl5.8 and execute it.
 
-Find perl5.8 order by,
-  1st, C:\Perl58\bin\perl.exe
-  2nd, D:\Perl58\bin\perl.exe
-  3rd, E:\Perl58\bin\perl.exe
-                :
-                :
+ Find perl5.8 order by,
+   1st, C:\Perl58\bin\perl.exe
+   2nd, D:\Perl58\bin\perl.exe
+   3rd, E:\Perl58\bin\perl.exe
+                 :
+                 :
 
 When found it, then execute perlscript on the its perl.exe.
 

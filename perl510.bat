@@ -101,7 +101,7 @@ for $drive (sort @harddrive) {
 
 # perl5.10 not found
 if (@drive == 0) {
-    die "perl510: nothing \\Perl510\\bin\\perl.exe anywhere.\n";
+    die "perl510: nothing \\Perl510\\bin\\perl.exe nowhere.\n";
 }
 
 # only one perl5.10 found
@@ -144,19 +144,19 @@ B<perl510> [perlscript.pl]
 
 =head1 DESCRIPTION
 
-This program is useful when perl5.5 and perl5.10 are used on the same disk.
+This program is useful when perl5.5 and perl5.10 are on the one computer.
 Set perl5.5's bin directory to environment variable %PATH%, do not set perl5.10's
 bin directory to %PATH%.
 
 It is necessary to install perl5.10 in "\Perl510\bin" directory of the drive of
 either. This program is executed by perl5.5, and find the perl5.10 and execute it.
 
-Find perl5.10 order by,
-  1st, C:\Perl510\bin\perl.exe
-  2nd, D:\Perl510\bin\perl.exe
-  3rd, E:\Perl510\bin\perl.exe
-                :
-                :
+ Find perl5.10 order by,
+   1st, C:\Perl510\bin\perl.exe
+   2nd, D:\Perl510\bin\perl.exe
+   3rd, E:\Perl510\bin\perl.exe
+                 :
+                 :
 
 When found it, then execute perlscript on the its perl.exe.
 

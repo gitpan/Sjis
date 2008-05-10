@@ -1,8 +1,7 @@
 use strict;
-use FindBin;
 
 # make make.bat
-open(MAKEBAT,">$FindBin::Bin/make.bat") || die "Can't open file: $FindBin::Bin/make.bat\n";
+open(MAKEBAT,">make.bat") || die "Can't open file: make.bat\n";
 print MAKEBAT <DATA>;
 close(MAKEBAT);
 
@@ -25,7 +24,6 @@ goto endofperl
 
 undef @rem;
 use strict;
-use FindBin;
 use File::Path;
 use File::Copy;
 use File::Basename;
@@ -45,40 +43,35 @@ usage: make tar.bat
 END
 }
 
+# get file list
+open(MANIFEST,"MANIFEST") || die "Can't open file: MANIFEST\n";
+chomp(my @file = <MANIFEST>);
+close(MANIFEST);
+
 for my $target (@ARGV) {
     if ($target eq 'test') {
-        runtests(<$FindBin::Bin/test.pl $FindBin::Bin/t/*.t>);
+        my @test = grep m{ \A (?: test\.pl | t/.+\.t ) \z }xmsi, @file;
+        runtests(@test);
     }
     elsif ($target eq 'install') {
 
         # install *.pm files to /Perl/site/lib
-        my($perl_site_lib) = grep(m{/site/}i, @INC);
-        while (<$FindBin::Bin/*.pm>) {
+        my($perl_site_lib) = grep(m{/site/}xmsi, @INC);
+        for (grep m/ \. pm \z /xmsi, @file) {
+            print STDERR "copy $_ $perl_site_lib\n";
             copy($_, $perl_site_lib);
         }
 
         # install *.pl and *.bat files to /Perl/bin
         my($perl_bin) = $^X =~ /^(.*)\\[^\\]*$/;
-        while (<$FindBin::Bin/*.pl $FindBin::Bin/*.bat>) {
+        for (grep m/ \. (?: pl | bat ) \z /xmsi, @file) {
+            next if m/(?: Makefile | test ) \.pl  $/xmsi;
+            next if m/(?: make | tar )      \.bat $/xmsi;
+            print STDERR "copy $_ $perl_bin\n";
             copy($_, $perl_bin);
-        }
-
-        # install into perl5.8 directory too
-        if (($] < 5.008) and -e 'perl58.bat') {
-            system($^X, qw(perl58.bat make.bat install));
-        }
-
-        # install into perl5.10 directory too
-        if (($] < 5.010) and -e 'perl510.bat') {
-            system($^X, qw(perl510.bat make.bat install));
         }
     }
     elsif ($target eq 'dist') {
-
-        # get file list
-        open(MANIFEST,"$FindBin::Bin/MANIFEST") || die "Can't open $FindBin::Bin/MANIFEST\n";
-        chomp(my @file = <MANIFEST>);
-        close(MANIFEST);
 
         # make work directory
         open(SCRIPT,$file[0]) || die "Can't open file: $file[0]\n";
@@ -86,7 +79,7 @@ for my $target (@ARGV) {
         close(SCRIPT);
 
         use vars qw($VERSION);
-        my($version) = m/(\$VERSION\s*=\s*.+?;)/xms;
+        my($version) = m/( \$VERSION \s* = \s* .+? ; )/xms;
         eval $version; # get $VERSION
 
         my $basename = basename($file[0], '.pm','.pl','.bat');
@@ -98,6 +91,7 @@ for my $target (@ARGV) {
         for my $file (@file) {
             if (-e $file) {
                 mkpath(dirname("$tardir/$file"),0,0777);
+                print STDERR "copy $file $tardir/$file\n";
                 copy($file, "$tardir/$file");
                 $tar->add_files("$tardir/$file");
             }
@@ -121,7 +115,7 @@ for my $target (@ARGV) {
     elsif ($target eq 'tar.bat') {
 
         # make tar.bat
-        open(TARBAT,">$FindBin::Bin/tar.bat") || die "Can't open file: $FindBin::Bin/tar.bat\n";
+        open(TARBAT,">tar.bat") || die "Can't open file: tar.bat\n";
         print TARBAT <DATA>;
         close(TARBAT);
     }
@@ -161,10 +155,10 @@ usage: tar xzvf file1.tar.gz file2.tar.gz ...
 END
 }
 
-for my $gzfile (grep /\.tar\.gz$/i, @ARGV) {
+for my $gzfile (grep m/\.tar\.gz$/xmsi, @ARGV) {
 
     my $gz = gzopen($gzfile, 'rb');
-    (my $tarfile = $gzfile) =~ s/\.gz$//i;
+    (my $tarfile = $gzfile) =~ s/\.gz$//xmsi;
     open(TAR,">$tarfile") || die "Can't open file: $tarfile\n";
     binmode(TAR);
     while ($gz->gzreadline(my $line)) {

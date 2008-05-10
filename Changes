@@ -1,4 +1,4 @@
-Revision history for Perl extension Esjis.
+Revision history for Perl extension Sjis.
 
 0.10  2008/04/01 00:00:00
 	- original version; created by INABA Hitoshi
@@ -20,4 +20,7 @@ Revision history for Perl extension Esjis.
 
 0.16  2008/05/09 12:00:00
 	- separate run-time routines Esjis.pm, add Sjis.pm; created by INABA Hitoshi
+
+0.17  2008/05/10 00:00:00
+	- correct the document; created by INABA Hitoshi
 

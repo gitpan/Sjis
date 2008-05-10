@@ -1,7 +1,7 @@
 --- #YAML:1.0
-name: esjis
-abstract: Source code filter to escape ShiftJIS
-version: 0.16
+name: Sjis
+abstract: Source code filter for ShiftJIS script
+version: 0.17
 author:
   - INABA Hitoshi <ina@cpan.org>
 license: perl
@@ -14,7 +14,6 @@ requires:
   File::Basename: 2.6
   File::Copy: 2.02
   File::Path: 1.0401
-  FindBin: 1.42
   Getopt::Std: 1.01
   Test: 1.122
   Test::Harness: 1.1602

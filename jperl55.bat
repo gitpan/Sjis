@@ -118,6 +118,9 @@ can be executed by original perl5.5 on DOS-like operating systems.
 
 If the up-to-date escaped file already exists, it is not made again.
 
+This software is not superior to JPerl for two points of the function
+and the speed.
+
 =head1 EXAMPLES
 
     C:\> jperl55 foo.pl

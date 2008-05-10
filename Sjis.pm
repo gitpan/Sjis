@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.16 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.17 $ =~ m/(\d+)/xmsg;
 
 sub import() {}
 sub unimport() {}
@@ -116,8 +116,11 @@ Sjis - Source code filter for ShiftJIS script
 
 =head1 ABSTRACT
 
-By describing, "use Sjis;" in your script, jperl55.bat, jperl58.bat and jperl510.bat
-becomes unnecessary.
+By describing, "use Sjis;" in your script, jperl55.bat, jperl58.bat and
+jperl510.bat becomes unnecessary.
+
+However, jperl.exe must note a necessary thing still. Please recall that this
+software is a bridge software. The bridge software needs two shores.
 
 =head1 BUGS AND LIMITATIONS
 

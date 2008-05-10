@@ -1,29 +1,34 @@
 NAME
-       Esjis - Source code filter to escape ShiftJIS
+
+       Sjis - Source code filter for ShiftJIS script
 
 SYNOPSIS
-           jperl55  yourscript.pl  param1  param2 ...
-           perl     yourscript.pl  param1  param2 ...
-                      with "use Sjis;"
 
-           jperl58  yourscript.pl  param1  param2 ...
-           perl58   yourscript.pl  param1  param2 ...
-                      with "use Sjis;"
+    In your script:
 
-           jperl510  yourscript.pl  param1  param2 ...
-           perl510   yourscript.pl  param1  param2 ...
-                       with "use Sjis;"
+      use Sjis;
 
-           perl  esjis.pl  ShiftJIS_script.pl  >  Escaped_script.pl.e
+    At command prompt:
 
-           pl2ebat.bat  ShiftJIS_script.pl
+      without "use Sjis;" in your script
+        jperl55.bat   yourscript.pl  param1  param2 ...
+        jperl58.bat   yourscript.pl  param1  param2 ...
+        jperl510.bat  yourscript.pl  param1  param2 ...
+
+      with "use Sjis;" in your script
+        perl.exe     yourscript.pl    param1  param2 ...
+        perl58.bat   yourscript.pl    param1  param2 ...
+        perl510.bat  yourscript.pl    param1  param2 ...
 
 DESCRIPTION
-       This software provides the interfaces between Perl's
-       strings and the rest of the system.  Perl strings are
-       sequences of characters also bytes.
 
-       This software is still an alpha version for expressing a concept.
+      This software is "JPerl" written by Perl.
+      We can write the script in ShiftJIS again.
+
+      This is software that does the bridge from JPerl to Perl of the
+      latest version.
+
+      This software is still an alpha version for expressing a concept.
 
 INSTALLATION
 
@@ -32,21 +37,27 @@ To install this software, type the following:
    perl Makefile.PL    --- Makefile.PL makes "make.bat" only, and ...
    make.bat
    make.bat test
-   make.bat install
+
+   make.bat install              --- install to current using Perl
+   perl58.bat make.bat instal    --- install to Perl5.8
+   perl510.bat make.bat install  --- install to Perl5.10
+
+MAKE OTHER
+
    make.bat dist       --- make distribution package
    make.bat tar.bat    --- make perl script "tar.bat"
 
 PROGRAM COMPOSITION
 
-    jperl55.bat  --- jperl emulator by perl5.5 with esjis.pl
-    jperl58.bat  --- jperl emulator by perl5.8 with esjis.pl
-    perl58.bat   --- find and run perl5.8 without %PATH% settings
-    jperl510.bat --- jperl emulator by perl5.10 with esjis.pl
-    perl510.bat  --- find and run perl5.10 without %PATH% settings
-    pl2ebat      --- escape and wrap ShiftJIS perl code into a batch file
+    Sjis.pm      --- source code filter for ShiftJIS script
     esjis.pl     --- source code filter to escape ShiftJIS
     Esjis.pm     --- run-time routines for esjis.pl
-    Sjis.pm      --- Source code filter for ShiftJIS script
+    jperl55.bat  --- jperl emulator by perl5.5  with esjis.pl
+    jperl58.bat  --- jperl emulator by perl5.8  with esjis.pl
+    jperl510.bat --- jperl emulator by perl5.10 with esjis.pl
+    perl58.bat   --- find and run perl5.8  without %PATH% settings
+    perl510.bat  --- find and run perl5.10 without %PATH% settings
+    pl2ebat      --- escape and wrap ShiftJIS perl code into a batch file
 
 DEPENDENCIES
 
