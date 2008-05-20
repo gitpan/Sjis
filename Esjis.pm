@@ -11,9 +11,11 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.17 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.18 $ =~ m/(\d+)/xmsg;
 
 use Carp qw(carp croak confess cluck verbose);
+use Symbol qw(qualify_to_ref);
+
 use constant DEBUG => 1;
 local $SIG{__WARN__} = sub { cluck @_ } if DEBUG;
 $_warning = $^W; # push warning, warning on
@@ -120,28 +122,50 @@ sub Esjis::split(;$$$) {
 #
 sub Esjis::tr($$$;$) {
 
-    my @char            = $_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg;
     my $searchlist      = $_[1];
     my $replacementlist = $_[2];
     my $opt             = $_[3] || '';
 
-    my @searchlist = &_charlist_tr($searchlist =~ m{\G(
-        \\     [0-7]{2,3}          |
-        \\x    [0-9A-Fa-f]{2}      |
-        \\x \{ [0-9A-Fa-f]{1,4} \} |
-        \\c    [\x40-\x5F]         |
-        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
-            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
-    )}oxmsg);
+    my @char            = ();
+    my @searchlist      = ();
+    my @replacementlist = ();
 
-    my @replacementlist = &_charlist_tr($replacementlist =~ m{\G(
-        \\     [0-7]{2,3}          |
-        \\x    [0-9A-Fa-f]{2}      |
-        \\x \{ [0-9A-Fa-f]{1,4} \} |
-        \\c    [\x40-\x5F]         |
-        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
-            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
-    )}oxmsg);
+    if ($opt =~ m/B/oxms) {
+        @char = $_[0] =~ m/\G ([\x00-\xFF]) /oxmsg;
+        @searchlist = _charlist_tr($searchlist =~ m{\G(
+            \\  [0-7]{2,3}     |
+            \\x [0-9A-Fa-f]{2} |
+            \\c [\x40-\x5F]    |
+            \\  [\x00-\xFF]    |
+                [\x00-\xFF]
+        )}oxmsg);
+        @replacementlist = _charlist_tr($replacementlist =~ m{\G(
+            \\  [0-7]{2,3}     |
+            \\x [0-9A-Fa-f]{2} |
+            \\c [\x40-\x5F]    |
+            \\  [\x00-\xFF]    |
+                [\x00-\xFF]
+        )}oxmsg);
+    }
+    else {
+        @char = $_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg;
+        @searchlist = _charlist_tr($searchlist =~ m{\G(
+            \\     [0-7]{2,3}          |
+            \\x    [0-9A-Fa-f]{2}      |
+            \\x \{ [0-9A-Fa-f]{1,4} \} |
+            \\c    [\x40-\x5F]         |
+            \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+                (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
+        )}oxmsg);
+        @replacementlist = _charlist_tr($replacementlist =~ m{\G(
+            \\     [0-7]{2,3}          |
+            \\x    [0-9A-Fa-f]{2}      |
+            \\x \{ [0-9A-Fa-f]{1,4} \} |
+            \\c    [\x40-\x5F]         |
+            \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+                (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
+        )}oxmsg);
+    }
 
     my %tr = ();
     for (my $i=0; $i <= $#searchlist; $i++) {
@@ -538,9 +562,123 @@ sub Esjis::reverse(@) {
 }
 
 #
+# ShiftJIS file test -B
+#
+sub Esjis::B(;*) {
+    local *FH;
+    my $block;
+
+    if (@_ == 0) {
+        local *FH;
+        open(FH, $_) || return undef;
+        read(FH, $block, 512);
+        close(FH);
+    }
+    else {
+        my $fh = qualify_to_ref($_[0], caller);
+        if (fileno($fh)) {
+            read($fh, $block, 512);
+            close($fh);
+        }
+        else {
+            local *FH;
+            open(FH, $_[0]) || return undef;
+            read(FH, $block, 512);
+            close(FH);
+        }
+    }
+
+    return 1 if $block eq '';
+    return 1 if $block =~ /[\x00\xFF]/;
+    if (($block =~ tr/\x00-\x07\x0B\x0E-\x1A\x1C-\x1F\xFF// * 10) > length($block)) {
+        return 1;
+    }
+    else {
+        return '';
+    }
+}
+
+#
+# ShiftJIS file test -B FILEHANDLE
+#
+sub Esjis::B_fh(*) {
+    local *FH;
+    my $block;
+
+    my $fh = qualify_to_ref($_[0], caller);
+    read($fh, $block, 512);
+    close($fh);
+
+    return 1 if $block eq '';
+    return 1 if $block =~ /[\x00\xFF]/;
+    if (($block =~ tr/\x00-\x07\x0B\x0E-\x1A\x1C-\x1F\xFF// * 10) > length($block)) {
+        return 1;
+    }
+    else {
+        return '';
+    }
+}
+
+#
+# ShiftJIS file test -T
+#
+sub Esjis::T(;*) {
+    my $block;
+
+    if (@_ == 0) {
+        local *FH;
+        open(FH, $_) || return undef;
+        read(FH, $block, 512);
+        close(FH);
+    }
+    else {
+        my $fh = qualify_to_ref($_[0], caller);
+        if (fileno($fh)) {
+            read($fh, $block, 512);
+            close($fh);
+        }
+        else {
+            local *FH;
+            open(FH, $_[0]) || return undef;
+            read(FH, $block, 512);
+            close(FH);
+        }
+    }
+
+    return 1  if $block eq '';
+    return '' if $block =~ /[\x00\xFF]/;
+    if (($block =~ tr/\x00-\x07\x0B\x0E-\x1A\x1C-\x1F\xFF// * 10) <= length($block)) {
+        return 1;
+    }
+    else {
+        return '';
+    }
+}
+
+#
+# ShiftJIS file test -T FILEHANDLE
+#
+sub Esjis::T_fh(*) {
+    my $block;
+
+    my $fh = qualify_to_ref($_[0], caller);
+    read($fh, $block, 512);
+    close($fh);
+
+    return 1  if $block eq '';
+    return '' if $block =~ /[\x00\xFF]/;
+    if (($block =~ tr/\x00-\x07\x0B\x0E-\x1A\x1C-\x1F\xFF// * 10) <= length($block)) {
+        return 1;
+    }
+    else {
+        return '';
+    }
+}
+
+#
 # ShiftJIS open character list for tr
 #
-sub _charlist_tr(@) {
+sub _charlist_tr {
 
     my(@char) = @_;
 

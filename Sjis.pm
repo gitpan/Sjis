@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.17 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.18 $ =~ m/(\d+)/xmsg;
 
 sub import() {}
 sub unimport() {}
@@ -32,10 +32,10 @@ else {
         my $mtime = (stat(qq{$script.e}))[9];
 
         # if script.e is older than other files
-        if (($mtime < (stat($script))             [9]) or
-            ($mtime < (stat(&abspath('esjis.pl')))[9]) or
-            ($mtime < (stat(&abspath('Esjis.pm')))[9]) or
-            ($mtime < (stat(&abspath('Sjis.pm'))) [9])
+        if (($mtime < (stat($script))            [9]) or
+            ($mtime < (stat(abspath('esjis.pl')))[9]) or
+            ($mtime < (stat(abspath('Esjis.pm')))[9]) or
+            ($mtime < (stat(abspath('Sjis.pm'))) [9])
         ) {
 
             # check before filter if jperl exists
@@ -73,7 +73,7 @@ else {
 }
 
 # find absolute path
-sub abspath($) {
+sub abspath {
     my($file) = @_;
 
     # when .pl file
@@ -102,6 +102,7 @@ sub abspath($) {
 }
 
 __END__
+
 =pod
 
 =head1 NAME

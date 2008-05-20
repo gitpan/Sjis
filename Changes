@@ -24,3 +24,6 @@ Revision history for Perl extension Sjis.
 0.17  2008/05/10 00:00:00
 	- correct the document; created by INABA Hitoshi
 
+0.18  2008/05/11 00:00:00
+	- tr///B support; created by INABA Hitoshi
+

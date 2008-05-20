@@ -132,6 +132,7 @@ elsif (@drive > 1) {
 }
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -167,7 +168,6 @@ When found it, then execute perlscript on the its perl.exe.
 
 =head1 BUGS AND LIMITATIONS
 
-This software is still an alpha version for expressing a concept.
 Please test code, patches and report problems to author are welcome.
 
 =head1 AUTHOR
