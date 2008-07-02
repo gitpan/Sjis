@@ -54,8 +54,8 @@ if ($] =~ /^5\.010/) {
 }
 
 # get drive list by 'net share' command
-# Windows NT, Windows 2000, Windows XP, Windows Server 2003
-# maybe also Windows Vista, Windows Server 2008
+# Windows NT, Windows 2000, Windows XP, Windows Server 2003, Windows Vista
+# maybe also Windows Server 2008
 @harddrive = ();
 while (`net share 2>NUL` =~ /\b([A-Z])\$ +\1:\\ +Default share\b/ig) {
     push @harddrive, $1;
@@ -168,7 +168,7 @@ When found it, then execute perlscript on the its perl.exe.
 
 =head1 BUGS AND LIMITATIONS
 
-Please test code, patches and report problems to author are welcome.
+Please patches and report problems to author are welcome.
 
 =head1 AUTHOR
 

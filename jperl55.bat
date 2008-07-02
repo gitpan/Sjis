@@ -129,7 +129,7 @@ and the speed.
 
 =head1 BUGS AND LIMITATIONS
 
-Please test code, patches and report problems to author are welcome.
+Please patches and report problems to author are welcome.
 
 =head1 AUTHOR
 

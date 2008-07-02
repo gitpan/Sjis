@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.18 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.19 $ =~ m/(\d+)/xmsg;
 
 sub import() {}
 sub unimport() {}
@@ -38,12 +38,12 @@ else {
             ($mtime < (stat(abspath('Sjis.pm'))) [9])
         ) {
 
-            # check before filter if jperl exists
-            if (system(qq{jperl -v > NUL}) == 0) {
-                if ((my $rc = system(qq{jperl -c $script})) != 0) {
-                    exit $rc;
-                }
-            }
+#           # check before filter if jperl exists
+#           if (system(qq{jperl -v > NUL}) == 0) {
+#               if ((my $rc = system(qq{jperl -c $script})) != 0) {
+#                   exit $rc;
+#               }
+#           }
 
             # escape script
             if (system(qq{$^X -S esjis.pl $script > $script.e}) != 0) {
@@ -55,12 +55,12 @@ else {
     # not exists script.e
     else {
 
-        # check before filter if jperl exists
-        if (system(qq{jperl -v > NUL}) == 0) {
-            if ((my $rc = system(qq{jperl -c $script})) != 0) {
-                exit $rc;
-            }
-        }
+#       # check before filter if jperl exists
+#       if (system(qq{jperl -v > NUL}) == 0) {
+#           if ((my $rc = system(qq{jperl -c $script})) != 0) {
+#               exit $rc;
+#           }
+#       }
 
         # escape script
         if (system(qq{$^X -S esjis.pl $script > $script.e}) != 0) {
@@ -127,7 +127,7 @@ software is a bridge software. The bridge software needs two shores.
 
 This software is still an alpha version for expressing a concept.
 
-Please test code, patches and report problems to author are welcome.
+Please patches and report problems to author are welcome.
 
 =head1 HISTORY
 

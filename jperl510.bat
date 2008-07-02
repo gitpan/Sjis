@@ -63,6 +63,9 @@ for (@ARGV) {
         if (system(qq{$^X -S esjis.pl $_ > $tmpnam}) == 0) {
             rename($tmpnam,"$_.e") or unlink $tmpnam;
         }
+        elsif (system(qq{perl510.bat -S esjis.pl $_ > $tmpnam}) == 0) {
+            rename($tmpnam,"$_.e") or unlink $tmpnam;
+        }
         else {
             unlink $tmpnam;
             die "jperl510: Can't execute script: $_";
@@ -129,7 +132,7 @@ by perl510.bat.
 
 =head1 BUGS AND LIMITATIONS
 
-Please test code, patches and report problems to author are welcome.
+Please patches and report problems to author are welcome.
 
 =head1 AUTHOR
 
