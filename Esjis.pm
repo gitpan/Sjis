@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.19 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.20 $ =~ m/(\d+)/xmsg;
 
 use Carp qw(carp croak confess cluck verbose);
 use Symbol qw(qualify_to_ref);
@@ -23,7 +23,7 @@ local $^W = 1;
 
 BEGIN {
     if ($^X =~ m/jperl/xmsi) {
-        croak "Esjis: need perl(not jperl) 5.00503 or later. (\$^X==$^X)";
+        croak "$0 need perl(not jperl) 5.00503 or later. (\$^X==$^X)";
     }
 }
 
@@ -44,7 +44,7 @@ sub Esjis::split(;$$$) {
                 return      m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
             }
             else {
-                cluck 'Use of implicit split to @_ is deprecated' if $^W;
+                cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
                 return @_ = m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
             }
         }
@@ -58,7 +58,7 @@ sub Esjis::split(;$$$) {
                 return      $_[1] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
             }
             else {
-                cluck 'Use of implicit split to @_ is deprecated' if $^W;
+                cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
                 return @_ = $_[1] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
             }
         }
@@ -73,7 +73,7 @@ sub Esjis::split(;$$$) {
                     return      $_[1] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
                 }
                 else {
-                    cluck 'Use of implicit split to @_ is deprecated' if $^W;
+                    cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
                     return @_ = $_[1] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
                 }
             }
@@ -87,7 +87,7 @@ sub Esjis::split(;$$$) {
                         return      @split, '';
                     }
                     else {
-                        cluck 'Use of implicit split to @_ is deprecated' if $^W;
+                        cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
                         return @_ = @split, '';
                     }
                 }
@@ -96,7 +96,7 @@ sub Esjis::split(;$$$) {
                         return      @split;
                     }
                     else {
-                        cluck 'Use of implicit split to @_ is deprecated' if $^W;
+                        cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
                         return @_ = @split;
                     }
                 }
@@ -105,7 +105,7 @@ sub Esjis::split(;$$$) {
                         return      @split[0..$_[2]-2], join '', @split[$_[2]-1..$#split];
                     }
                     else {
-                        cluck 'Use of implicit split to @_ is deprecated' if $^W;
+                        cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
                         return @_ = @split[0..$_[2]-2], join '', @split[$_[2]-1..$#split];
                     }
                 }
@@ -130,7 +130,7 @@ sub Esjis::tr($$$;$) {
     my @searchlist      = ();
     my @replacementlist = ();
 
-    if ($opt =~ m/B/oxms) {
+    if ($opt =~ m/[bB]/oxms) {
         @char = $_[0] =~ m/\G ([\x00-\xFF]) /oxmsg;
         @searchlist = _charlist_tr($searchlist =~ m{\G(
             \\  [0-7]{2,3}     |
@@ -368,7 +368,7 @@ sub Esjis::ignorecase(@) {
                 my $left = $i;
                 while (1) {
                     if (++$i > $#char) {
-                        confess 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
+                        confess "$0: unmatched [] in regexp";
                     }
                     if ($char[$i] eq ']') {
                         my $right = $i;
@@ -387,9 +387,7 @@ sub Esjis::ignorecase(@) {
                         }
 
                         # [...]
-                        splice(@char, $left, $right-$left+1,
-                            '(?:' . join('|', @charlist) . ')'
-                        );
+                        splice @char, $left, $right-$left+1, '(?:' . join('|', @charlist) . ')';
 
                         $i = $left;
                         last;
@@ -402,7 +400,7 @@ sub Esjis::ignorecase(@) {
                 my $left = $i;
                 while (1) {
                     if (++$i > $#char) {
-                        confess 'esjis: ' . join('',@char[$left..$#char]) . ' unmatched [] in regexp';
+                        confess "$0: unmatched [] in regexp";
                     }
                     if ($char[$i] eq ']') {
                         my $right = $i;
@@ -413,7 +411,7 @@ sub Esjis::ignorecase(@) {
 
                             # do not use quotemeta here
                             if ($char =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar) \z/oxms) {
-                                $char = $1.'\\'.$2;
+                                $char = $1 . '\\' . $2;
                             }
                             elsif ($char =~ m/\A [.|)] \z/oxms) {
                                 $char = '\\' . $char;
@@ -421,9 +419,7 @@ sub Esjis::ignorecase(@) {
                         }
 
                         # [^...]
-                        splice(@char, $left, $right-$left+1,
-                            '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])'
-                        );
+                        splice @char, $left, $right-$left+1, '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])';
 
                         $i = $left;
                         last;
@@ -433,10 +429,11 @@ sub Esjis::ignorecase(@) {
 
             # rewrite character class or escape character
             elsif (my $char = {
-                '.'  => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])',
-                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC0-9])',
-                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFCa-zA-Z_0-9])',
-                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\x20\t\n\r\f])',
+                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
+                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
+                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
+                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
+                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
                 }->{$char[$i]}
             ) {
                 $char[$i] = $char;
@@ -457,13 +454,13 @@ sub Esjis::ignorecase(@) {
             if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
                 if ($i < $#char) {
                     $char[$i] .= $char[$i+1];
-                    splice(@char,$i+1,1);
+                    splice @char, $i+1, 1;
                 }
             }
 
             # escape second octet of double octet
             if ($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar) \z/oxms) {
-                $char[$i] = $1.'\\'.$2;
+                $char[$i] = $1 . '\\' . $2;
             }
 
             # quote double octet character before ? + * {
@@ -579,13 +576,13 @@ sub _charlist_tr {
             }
         }
         elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
-            $char[$i] = CORE::chr(oct($1));
+            $char[$i] = CORE::chr(oct $1);
         }
         elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
-            $char[$i] = CORE::chr(hex($1));
+            $char[$i] = CORE::chr(hex $1);
         }
         elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,4}) \} \z/oxms) {
-            $char[$i] = Esjis::chr(hex($1));
+            $char[$i] = Esjis::chr(hex $1);
         }
         elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
             $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
@@ -611,7 +608,7 @@ sub _charlist_tr {
     for (my $i=0; $i <= $#char-1; $i++) {
         if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
             $char[$i] .= $char[$i+1];
-            splice(@char,$i+1,1);
+            splice @char, $i+1, 1;
         }
     }
 
@@ -627,15 +624,15 @@ sub _charlist_tr {
                 ($char[$i-1] =~ m/\A [\x00-\xFF] \z/oxms) and
                 ($char[$i+1] =~ m/\A [\x00-\xFF] \z/oxms)
             ) {
-                my $begin = unpack('C',$char[$i-1]);
-                my $end   = unpack('C',$char[$i+1]);
+                my $begin = unpack 'C', $char[$i-1];
+                my $end   = unpack 'C', $char[$i+1];
                 if ($begin <= $end) {
                     for my $c ($begin..$end) {
-                        push(@range, pack('C',$c));
+                        push @range, pack 'C', $c;
                     }
                 }
                 else {
-                    confess 'esjis: /[\\x'.unpack('H*',$char[$i-1]).'-\\x'.unpack('H*',$char[$i+1]).']/: invalid [] range in regexp';
+                    confess "$0: invalid [] range \"\\x" . unpack('H*',$char[$i-1]) . '-\\x' . unpack('H*',$char[$i+1]) . '" in regexp';
                 }
             }
 
@@ -644,29 +641,29 @@ sub _charlist_tr {
                 ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms) and
                 ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms)
             ) {
-                my($begin1,$begin2) = unpack('CC',$char[$i-1]);
-                my($end1,$end2)     = unpack('CC',$char[$i+1]);
+                my($begin1,$begin2) = unpack 'CC', $char[$i-1];
+                my($end1,$end2)     = unpack 'CC', $char[$i+1];
                 my $begin = $begin1 * 0x100 + $begin2;
                 my $end   = $end1   * 0x100 + $end2;
                 if ($begin <= $end) {
                     for my $cc ($begin..$end) {
                         my $char = pack('CC', int($cc / 0x100), $cc % 0x100);
                         if ($char =~ m/\A [\x81-\x9F\xE0-\xFC] [\x40-\x7E\x80-\xFC] \z/oxms) {
-                            push(@range, $char);
+                            push @range, $char;
                         }
                     }
                 }
                 else {
-                    confess 'esjis: /[\\x'.unpack('H*',$char[$i-1]).'-\\x'.unpack('H*',$char[$i+1]).']/: invalid [] range in regexp';
+                    confess "$0: invalid [] range \"\\x" . unpack('H*',$char[$i-1]) . '-\\x' . unpack('H*',$char[$i+1]) . '" in regexp';
                 }
             }
 
             # range error
             else {
-                confess 'esjis: /[\\x'.unpack('H*',$char[$i-1]).'-\\x'.unpack('H*',$char[$i+1]).']/: invalid [] range in regexp';
+                confess "$0: invalid [] range \"\\x" . unpack('H*',$char[$i-1]) . '-\\x' . unpack('H*',$char[$i+1]) . '" in regexp';
             }
 
-            splice(@char, $i-1, 3, @range);
+            splice @char, $i-1, 3, @range;
             $i -= 2;
         }
         else {

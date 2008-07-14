@@ -30,3 +30,19 @@ Revision history for Perl extension Sjis.
 0.19  2008/07/03 00:00:00
 	- add code for perl5.10; created by INABA Hitoshi
 
+0.20  2008/07/14 00:00:00
+	- disable below.
+	  - delimiter tr''(), tr''{}, tr''[] and tr''<> of tr///.
+	  - delimiter  y''(),  y''{},  y''[] and  y''<> of y///.
+	  - delimiter  s''(),  s''{},  s''[] and  s''<> of s///.
+	- limit modifier.
+	  - only c, d, s, b and B of tr///.
+	  - only c, d, s, b and B of y///.
+	  - only c, g, i, m, o, s and x of m//.
+	  - only c, g, i, m, o, s and x of //.
+	  - only i, m, s, o and x of qr//.
+	  - only e, g, i, m, o, s and x of s///.
+	- change new line code to LF.
+	- more comment.
+	; created by INABA Hitoshi
+
