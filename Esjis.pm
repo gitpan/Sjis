@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.20 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.21 $ =~ m/(\d+)/xmsg;
 
 use Carp qw(carp croak confess cluck verbose);
 use Symbol qw(qualify_to_ref);
@@ -315,6 +315,10 @@ sub Esjis::lc(;@) {
     }
     else {
         local $^W = 0;
+
+        # P.95 Named Unary and File Test Operators
+        # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
         return join('', map {$lc{$_}||$_} ($_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])/oxmsg)), @_[1..$#_];
     }
 }
@@ -338,6 +342,10 @@ sub Esjis::uc(;@) {
     }
     else {
         local $^W = 0;
+
+        # P.95 Named Unary and File Test Operators
+        # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
         return join('', map {$uc{$_}||$_} ($_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg)), @_[1..$#_];
     }
 }
@@ -502,6 +510,10 @@ sub Esjis::chr(;@) {
         }
     }
     else {
+
+        # P.95 Named Unary and File Test Operators
+        # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
         if ($_[0] > 0xFF) {
             return pack('CC', int($_[0] / 0x100), $_[0] % 0x100), @_[1..$#_];
         }
@@ -535,6 +547,10 @@ sub Esjis::ord(;@) {
         }
     }
     else {
+
+        # P.95 Named Unary and File Test Operators
+        # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
         if ($_[0] =~ m/\A [\x81-\x9F\xE0-\xFC] /oxms) {
             my($ord1,$ord2) = unpack('CC', $_[0]);
             return $ord1 * 0x100 + $ord2, @_[1..$#_];

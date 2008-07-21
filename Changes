@@ -46,3 +46,15 @@ Revision history for Perl extension Sjis.
 	- more comment.
 	; created by INABA Hitoshi
 
+0.21  2008/07/22 00:00:00
+	- add smoke test script.
+	- remove below bugs.
+	  - remove return $ope of function &e_s2_q.
+	  - remove parameter $ope of function &e_s2 and &e_s2_q.
+	  - add q operator to parameter of function &e_tr_q when delimiter is '/' or '#'.
+	  - add \c@ .. \c_ to $qq_char, $qq_paren, $qq_brace, $qq_bracket and $qq_angle.
+	  - remove unescape and re-escape logic from function &e_m, &e_s1 and &e_qr.
+	  - any characters meaning .*? in qw { } and qw [ ] to (?:$q_char)*?.
+	  - change \s* to \s+ of between split and m.
+	; created by INABA Hitoshi
+
