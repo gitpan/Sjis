@@ -37,7 +37,7 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
             next;
         }
         else {
-            print SCRIPT 'qw', $delimiter, $c, $end_delimiter, ";\n";
+            print SCRIPT 'print qw', $delimiter, $c, $end_delimiter, ", \"\\n\";\n";
         }
     }
 
@@ -54,7 +54,7 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
                 next;
             }
             else {
-                print SCRIPT 'qw', $delimiter, chr($c1), chr($c2), ' ', $end_delimiter, ";\n";
+                print SCRIPT 'print qw', $delimiter, chr($c1), chr($c2), ' ', $end_delimiter, ", \"\\n\";\n";
             }
         }
     }

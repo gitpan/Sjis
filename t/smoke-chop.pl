@@ -3,7 +3,7 @@ use strict;
 mkdir('chop', 0777);
 
 my @c = (
-    (map {chr($_)} (0x20..0x7E, 0xA1..0xDF)),
+    grep {$_ ne '\\c['} (map {chr($_)} (0x20..0x7E, 0xA1..0xDF)),
 );
 
 my $script = "chop\\chop.pl";
@@ -14,22 +14,17 @@ open(SCRIPT,">$script") || die "Can't open file: $script\n";
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "\$_ = '\\", $c, "'; chop; print \$_;\n";
+        print SCRIPT "\$_ = '\\", $c, "'; chop; print \$_, \"\\n\";\n";
     }
     else {
-        print SCRIPT "\$_ = '", $c, "'; chop; print \$_;\n";
+        print SCRIPT "\$_ = '", $c, "'; chop; print \$_, \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; chop; print \$_;\n";
+        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; chop; print \$_, \"\\n\";\n";
     }
 }
 
@@ -38,22 +33,17 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "\$_ = '\\", $c, "'; chop \$_; print \$_;\n";
+        print SCRIPT "\$_ = '\\", $c, "'; chop \$_; print \$_, \"\\n\";\n";
     }
     else {
-        print SCRIPT "\$_ = '", $c, "'; chop \$_; print \$_;\n";
+        print SCRIPT "\$_ = '", $c, "'; chop \$_; print \$_, \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; chop \$_; print \$_;\n";
+        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; chop \$_; print \$_, \"\\n\";\n";
     }
 }
 
@@ -62,22 +52,17 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "\$_ = '\\", $c, "'; chop(\$_); print \$_;\n";
+        print SCRIPT "\$_ = '\\", $c, "'; chop(\$_); print \$_, \"\\n\";\n";
     }
     else {
-        print SCRIPT "\$_ = '", $c, "'; chop(\$_); print \$_;\n";
+        print SCRIPT "\$_ = '", $c, "'; chop(\$_); print \$_, \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; chop(\$_); print \$_;\n";
+        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; chop(\$_); print \$_, \"\\n\";\n";
     }
 }
 
@@ -86,22 +71,17 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "\@_ = (", "'\\", $c, "','\\", $c, "','\\", $c, "'", "); chop \@_; print \@_;\n";
+        print SCRIPT "\@_ = (", "'\\", $c, "','\\", $c, "','\\", $c, "'", "); chop \@_; print \@_, \"\\n\";\n";
     }
     else {
-        print SCRIPT "\@_ = (", "'", $c, "','", $c, "','", $c, "'", "); chop \@_; print \@_;\n";
+        print SCRIPT "\@_ = (", "'", $c, "','", $c, "','", $c, "'", "); chop \@_; print \@_, \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\@_ = (", "'", chr($c1), chr($c2), "','", chr($c1), chr($c2), "','", chr($c1), chr($c2), "'", "); chop \@_; print \@_;\n";
+        print SCRIPT "\@_ = (", "'", chr($c1), chr($c2), "','", chr($c1), chr($c2), "','", chr($c1), chr($c2), "'", "); chop \@_; print \@_, \"\\n\";\n";
     }
 }
 
@@ -110,22 +90,17 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "\@_ = (", "'\\", $c, "','\\", $c, "','\\", $c, "'", "); chop(\@_); print \@_;\n";
+        print SCRIPT "\@_ = (", "'\\", $c, "','\\", $c, "','\\", $c, "'", "); chop(\@_); print \@_, \"\\n\";\n";
     }
     else {
-        print SCRIPT "\@_ = (", "'", $c, "','", $c, "','", $c, "'", "); chop(\@_); print \@_;\n";
+        print SCRIPT "\@_ = (", "'", $c, "','", $c, "','", $c, "'", "); chop(\@_); print \@_, \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\@_ = (", "'", chr($c1), chr($c2), "','", chr($c1), chr($c2), "','", chr($c1), chr($c2), "'", "); chop(\@_); print \@_;\n";
+        print SCRIPT "\@_ = (", "'", chr($c1), chr($c2), "','", chr($c1), chr($c2), "','", chr($c1), chr($c2), "'", "); chop(\@_); print \@_, \"\\n\";\n";
     }
 }
 

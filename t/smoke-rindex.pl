@@ -25,7 +25,7 @@ for my $i (0 .. $#c) {
     my $b = $c[($i+1) % scalar(@c)] x 2;
     my $c = $c[$i];
     my $string = ($a . $b . $c) x 3;
-    print SCRIPT "print rindex '", $string, "', '", $c, "';\n";
+    print SCRIPT "print rindex '", $string, "', '", $c, "'; print \"\\n\";\n";
 }
 
 for my $i (0 .. $#w) {
@@ -33,7 +33,7 @@ for my $i (0 .. $#w) {
     my $b = $w[($i+1) % scalar(@c)] x 2;
     my $c = $w[$i];
     my $string = ($a . $b . $c) x 3;
-    print SCRIPT "print rindex '", $string, "', '", $c, "';\n";
+    print SCRIPT "print rindex '", $string, "', '", $c, "'; print \"\\n\";\n";
 }
 
 #----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ for my $i (0 .. $#c) {
     my $b = $c[($i+1) % scalar(@c)] x 2;
     my $c = $c[$i];
     my $string = ($a . $b . $c) x 3;
-    print SCRIPT "print rindex('", $string, "', '", $c, "');\n";
+    print SCRIPT "print rindex('", $string, "', '", $c, "'), \"\\n\";\n";
 }
 
 for my $i (0 .. $#w) {
@@ -53,7 +53,7 @@ for my $i (0 .. $#w) {
     my $b = $w[($i+1) % scalar(@c)] x 2;
     my $c = $w[$i];
     my $string = ($a . $b . $c) x 3;
-    print SCRIPT "print rindex('", $string, "', '", $c, "');\n";
+    print SCRIPT "print rindex('", $string, "', '", $c, "'), \"\\n\";\n";
 }
 
 #----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ for my $start (15,14,13,12) {
         my $b = $c[($i+1) % scalar(@c)] x 2;
         my $c = $c[$i];
         my $string = ($a . $b . $c) x 3;
-        print SCRIPT "print rindex '", $string, "', '", $c, "', ", $start, ";\n";
+        print SCRIPT "print rindex '", $string, "', '", $c, "', ", $start, "; print \"\\n\";\n";
     }
 }
 
@@ -76,7 +76,7 @@ for my $start (30,28,26,24) {
         my $b = $w[($i+1) % scalar(@c)] x 2;
         my $c = $w[$i];
         my $string = ($a . $b . $c) x 3;
-        print SCRIPT "print rindex '", $string, "', '", $c, "', ", $start, ";\n";
+        print SCRIPT "print rindex '", $string, "', '", $c, "', ", $start, "; print \"\\n\";\n";
     }
 }
 
@@ -90,7 +90,7 @@ for my $start (15,14,13,12) {
         my $b = $c[($i+1) % scalar(@c)] x 2;
         my $c = $c[$i];
         my $string = ($a . $b . $c) x 3;
-        print SCRIPT "print rindex('", $string, "', '", $c, "', ", $start, ");\n";
+        print SCRIPT "print rindex('", $string, "', '", $c, "', ", $start, "), \"\\n\";\n";
     }
 }
 
@@ -100,7 +100,7 @@ for my $start (30,28,26,24) {
         my $b = $w[($i+1) % scalar(@c)] x 2;
         my $c = $w[$i];
         my $string = ($a . $b . $c) x 3;
-        print SCRIPT "print rindex('", $string, "', '", $c, "', ", $start, ");\n";
+        print SCRIPT "print rindex('", $string, "', '", $c, "', ", $start, "), \"\\n\";\n";
     }
 }
 

@@ -3,7 +3,7 @@ use strict;
 mkdir('lc', 0777);
 
 my @c = (
-    (map {chr($_)} (0x20..0x7E, 0xA1..0xDF)),
+    grep {$_ ne '\\c['} (map {chr($_)} (0x20..0x7E, 0xA1..0xDF)),
 );
 
 my $script = "lc\\lc.pl";
@@ -14,22 +14,17 @@ open(SCRIPT,">$script") || die "Can't open file: $script\n";
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "\$_ = '\\", $c, "'; print lc;\n";
+        print SCRIPT "\$_ = '\\", $c, "'; print lc, \"\\n\";\n";
     }
     else {
-        print SCRIPT "\$_ = '", $c, "'; print lc;\n";
+        print SCRIPT "\$_ = '", $c, "'; print lc, \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; print lc;\n";
+        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; print lc, \"\\n\";\n";
     }
 }
 
@@ -38,22 +33,17 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "\$_ = '\\", $c, "'; print lc \$_;\n";
+        print SCRIPT "\$_ = '\\", $c, "'; print lc \$_, \"\\n\";\n";
     }
     else {
-        print SCRIPT "\$_ = '", $c, "'; print lc \$_;\n";
+        print SCRIPT "\$_ = '", $c, "'; print lc \$_, \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; print lc \$_;\n";
+        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; print lc \$_, \"\\n\";\n";
     }
 }
 
@@ -62,22 +52,17 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "\$_ = '\\", $c, "'; print lc(\$_);\n";
+        print SCRIPT "\$_ = '\\", $c, "'; print lc(\$_), \"\\n\";\n";
     }
     else {
-        print SCRIPT "\$_ = '", $c, "'; print lc(\$_);\n";
+        print SCRIPT "\$_ = '", $c, "'; print lc(\$_), \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; print lc(\$_);\n";
+        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; print lc(\$_), \"\\n\";\n";
     }
 }
 
@@ -86,22 +71,17 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "\$_ = '\\", $c, "'; print lc \$_, 'A', 'B', 'C';\n";
+        print SCRIPT "\$_ = '\\", $c, "'; print lc \$_, 'A', 'B', 'C'; print \"\\n\";\n";
     }
     else {
-        print SCRIPT "\$_ = '", $c, "'; print lc \$_, 'A', 'B', 'C';\n";
+        print SCRIPT "\$_ = '", $c, "'; print lc \$_, 'A', 'B', 'C'; print \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; print lc \$_, 'A', 'B', 'C';\n";
+        print SCRIPT "\$_ = '", chr($c1), chr($c2), "'; print lc \$_, 'A', 'B', 'C'; print \"\\n\";\n";
     }
 }
 
@@ -110,22 +90,17 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "print lc '\\", $c, "';\n";
+        print SCRIPT "print lc '\\", $c, "', \"\\n\";\n";
     }
     else {
-        print SCRIPT "print lc '", $c, "';\n";
+        print SCRIPT "print lc '", $c, "', \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "print lc '", chr($c1), chr($c2), "';\n";
+        print SCRIPT "print lc '", chr($c1), chr($c2), "', \"\\n\";\n";
     }
 }
 
@@ -134,22 +109,17 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "print lc('\\", $c, "');\n";
+        print SCRIPT "print lc('\\", $c, "'), \"\\n\";\n";
     }
     else {
-        print SCRIPT "print lc('", $c, "');\n";
+        print SCRIPT "print lc('", $c, "'), \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "print lc('", chr($c1), chr($c2), "');\n";
+        print SCRIPT "print lc('", chr($c1), chr($c2), "'), \"\\n\";\n";
     }
 }
 
@@ -158,22 +128,17 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-
-    if ($c eq "\\c[") {
-        next;
-    }
-
     if ($c =~ /^['\\]$/) {
-        print SCRIPT "print lc '\\", $c, "', 'A', 'B', 'C';\n";
+        print SCRIPT "print lc '\\", $c, "', 'A', 'B', 'C'; print \"\\n\";\n";
     }
     else {
-        print SCRIPT "print lc '", $c, "', 'A', 'B', 'C';\n";
+        print SCRIPT "print lc '", $c, "', 'A', 'B', 'C'; print \"\\n\";\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "print lc '", chr($c1), chr($c2), "', 'A', 'B', 'C';\n";
+        print SCRIPT "print lc '", chr($c1), chr($c2), "', 'A', 'B', 'C'; print \"\\n\";\n";
     }
 }
 

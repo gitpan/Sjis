@@ -20,16 +20,16 @@ open(SCRIPT,">$script") || die "Can't open file: $script\n";
 
 for my $c (@c) {
     if ($c =~ /^["\\\$\@]$/) {
-        print SCRIPT '"\\', $c, '";', "\n";
+        print SCRIPT 'print "\\', $c, '", "\\n";', "\n";
     }
     else {
-        print SCRIPT '"', $c, '";', "\n";
+        print SCRIPT 'print "', $c, '", "\\n";', "\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT '"', chr($c1), chr($c2), '";', "\n";
+        print SCRIPT 'print "', chr($c1), chr($c2), '", "\\n";', "\n";
     }
 }
 
@@ -39,16 +39,16 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 
 for my $c (@c) {
     if ($c =~ /^[\\\$\@]$/) {
-        print SCRIPT '<<"HEREDOC";', "\n", '\\', $c, "\nHEREDOC\n";
+        print SCRIPT 'print <<"HEREDOC";', "\n", '\\', $c, "\nHEREDOC\n";
     }
     else {
-        print SCRIPT '<<"HEREDOC";', "\n", $c, "\nHEREDOC\n";
+        print SCRIPT 'print <<"HEREDOC";', "\n", $c, "\nHEREDOC\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT '<<"HEREDOC";', "\n", chr($c1), chr($c2), "\nHEREDOC\n";
+        print SCRIPT 'print <<"HEREDOC";', "\n", chr($c1), chr($c2), "\nHEREDOC\n";
     }
 }
 
@@ -58,16 +58,16 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 
 for my $c (@c) {
     if ($c =~ /^[\\\$\@]$/) {
-        print SCRIPT '<<HEREDOC;', "\n", '\\', $c, "\nHEREDOC\n";
+        print SCRIPT 'print <<HEREDOC;', "\n", '\\', $c, "\nHEREDOC\n";
     }
     else {
-        print SCRIPT '<<HEREDOC;', "\n", $c, "\nHEREDOC\n";
+        print SCRIPT 'print <<HEREDOC;', "\n", $c, "\nHEREDOC\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT '<<HEREDOC;', "\n", chr($c1), chr($c2), "\nHEREDOC\n";
+        print SCRIPT 'print <<HEREDOC;', "\n", chr($c1), chr($c2), "\nHEREDOC\n";
     }
 }
 
@@ -102,27 +102,27 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
         if (($delimiter eq '$') and ($c eq '$')) {
             next;
         }
-        if (($delimiter eq "'") and ($c eq "\\c[")) {
+        if (($delimiter eq "'") and ($c eq '\\c[')) {
             next;
         }
-        if (($delimiter eq '@') and ($c eq "\\c\@")) {
+        if (($delimiter eq '@') and ($c eq '\\c@')) {
             next;
         }
-        if (($delimiter eq '^') and ($c eq "\\c^")) {
+        if (($delimiter eq '^') and ($c eq '\\c^')) {
             next;
         }
 
         if ($c =~ /^([\\\$\@]|\Q$delimiter\E|\Q$end_delimiter\E)$/) {
-            print SCRIPT 'qq', $delimiter, '\\', $c, $end_delimiter, ";\n";
+            print SCRIPT 'print qq', $delimiter, '\\', $c, $end_delimiter, ", \"\\n\";\n";
         }
         else {
-            print SCRIPT 'qq', $delimiter, $c, $end_delimiter, ";\n";
+            print SCRIPT 'print qq', $delimiter, $c, $end_delimiter, ", \"\\n\";\n";
         }
     }
 
     for my $c1 (0x81..0x9F, 0xE0..0xFC) {
         for my $c2 (0x40..0x7E, 0x80..0xFC) {
-            print SCRIPT 'qq', $delimiter, chr($c1), chr($c2), $end_delimiter, ";\n";
+            print SCRIPT 'print qq', $delimiter, chr($c1), chr($c2), $end_delimiter, ", \"\\n\";\n";
         }
     }
 

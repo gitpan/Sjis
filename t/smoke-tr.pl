@@ -50,8 +50,16 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
                     }->{$delimiter2} || $delimiter2;
 
             for my $c (@c) {
+
+                if ($c =~ /^["\\\$\@]$/) {
+                    print SCRIPT '$_ = "\\', $c, '"; ';
+                }
+                else {
+                    print SCRIPT '$_ = "',   $c, '"; ';
+                }
+
                 if ($c =~ /^([\\\-]|\Q$delimiter\E|\Q$end_delimiter\E)$/) {
-                    print SCRIPT 'tr';
+                    print SCRIPT 'print tr';
                     print SCRIPT $delimiter, '\\', $c, $end_delimiter;
                     if ($c =~ /^([\\\-]|\Q$delimiter2\E|\Q$end_delimiter2\E)$/) {
                         print SCRIPT $delimiter2, '\\', $c, $end_delimiter2;
@@ -59,10 +67,10 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
                     else {
                         print SCRIPT $delimiter2, $c, $end_delimiter2;
                     }
-                    print SCRIPT ";\n";
+                    print SCRIPT ", \"\\n\";\n";
                 }
                 else {
-                    print SCRIPT 'tr';
+                    print SCRIPT 'print tr';
                     print SCRIPT $delimiter, $c, $end_delimiter;
                     if ($c =~ /^([\\\-]|\Q$delimiter2\E|\Q$end_delimiter2\E)$/) {
                         print SCRIPT $delimiter2, '\\', $c, $end_delimiter2;
@@ -70,16 +78,16 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
                     else {
                         print SCRIPT $delimiter2, $c, $end_delimiter2;
                     }
-                    print SCRIPT ";\n";
+                    print SCRIPT ", \"\\n\";\n";
                 }
             }
 
             for my $c1 (0x81..0x9F, 0xE0..0xFC) {
                 for my $c2 (0x40..0x7E, 0x80..0xFC) {
-                    print SCRIPT 'tr';
+                    print SCRIPT "\$_ = \"", chr($c1), chr($c2), "\"; print tr";
                     print SCRIPT $delimiter,  chr($c1), chr($c2), $end_delimiter;
                     print SCRIPT $delimiter2, chr($c1), chr($c2), $end_delimiter2;
-                    print SCRIPT ";\n";
+                    print SCRIPT ", \"\\n\";\n";
                 }
             }
 
@@ -101,17 +109,24 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
                 next;
             }
 
-            if ($c =~ /^([\\\-]|\Q$delimiter\E|\Q$delimiter\E)$/) {
-                print SCRIPT 'tr', $delimiter, '\\', $c, $delimiter, '\\', $c, $delimiter, ";\n";
+            if ($c =~ /^["\\\$\@]$/) {
+                print SCRIPT '$_ = "\\', $c, '"; ';
             }
             else {
-                print SCRIPT 'tr', $delimiter, $c, $delimiter, $c, $delimiter, ";\n";
+                print SCRIPT '$_ = "',   $c, '"; ';
+            }
+
+            if ($c =~ /^([\\\-]|\Q$delimiter\E|\Q$delimiter\E)$/) {
+                print SCRIPT 'print tr', $delimiter, '\\', $c, $delimiter, '\\', $c, $delimiter, ", \"\\n\";\n";
+            }
+            else {
+                print SCRIPT 'print tr', $delimiter, $c, $delimiter, $c, $delimiter, ", \"\\n\";\n";
             }
         }
 
         for my $c1 (0x81..0x9F, 0xE0..0xFC) {
             for my $c2 (0x40..0x7E, 0x80..0xFC) {
-                print SCRIPT 'tr', $delimiter, chr($c1), chr($c2), $delimiter, chr($c1), chr($c2), $delimiter, ";\n";
+                print SCRIPT "\$_ = \"", chr($c1), chr($c2), "\"; print tr", $delimiter, chr($c1), chr($c2), $delimiter, chr($c1), chr($c2), $delimiter, ", \"\\n\";\n";
             }
         }
 

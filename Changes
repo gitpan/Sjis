@@ -58,3 +58,33 @@ Revision history for Perl extension Sjis.
 	  - change \s* to \s+ of between split and m.
 	; created by INABA Hitoshi
 
+0.22  2008/08/05 00:00:00
+	- support bareword tr, index, rindex and reverse.
+	- avoid "Error: Runtime Exception" of q, qq, '', "" and ``.
+	- remove below bugs.
+	  - escape second octet of double octet code at last q / / string.
+	  - escape second octet \ of double octet code before \ in q / / string.
+	  - / means m / / after print operator.
+	  - m * * rewrite to m { }.
+	  - m - - rewrite to m { }.
+	  - m : : rewrite to m { }.
+	  - m ? ? rewrite to m { }.
+	  - m \ \ rewrite to m { }.
+	  - m ^ ^ rewrite to m { }.
+	  - m | | rewrite to m { }.
+	  - s * * * rewrite to s { } { }.
+	  - s - - - rewrite to s { } { }.
+	  - s : : : rewrite to s { } { }.
+	  - s ? ? ? rewrite to s { } { }.
+	  - s \ \ \ rewrite to s { } { }.
+	  - s ^ ^ ^ rewrite to s { } { }.
+	  - s | | | rewrite to s { } { }.
+	  - qr * * rewrite to qr { }.
+	  - qr - - rewrite to qr { }.
+	  - qr : : rewrite to qr { }.
+	  - qr ? ? rewrite to qr { }.
+	  - qr \ \ rewrite to qr { }.
+	  - qr ^ ^ rewrite to qr { }.
+	  - qr | | rewrite to qr { }.
+	; created by INABA Hitoshi
+

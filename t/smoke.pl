@@ -21,8 +21,12 @@ my $m = 1;
 #     die "$0: mile unknown.\n";
 # }
 
+my $test = '';
+
 if ($m == 1) {
     for my $smoke (split(/\n/,`dir /b smoke-*.pl 2>NUL`)) {
+next if $test and $smoke !~ /\b$test\b/;
+
         system("perl $smoke");
     }
 }
@@ -37,6 +41,7 @@ my %diff_file = ();
 for my $dir (split(/\n/,`dir /ad /b *.* 2>NUL`)) {
 
     for my $script (split(/\n/,`dir /s /b $dir\\*.pl 2>NUL`)) {
+next if $test and $script !~ /\b$test\b/;
 
         my $basemile = $script;
         if ($m >= 2) {

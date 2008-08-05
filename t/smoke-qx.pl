@@ -2,13 +2,10 @@ use strict;
 
 mkdir('qx', 0777);
 
-my @c = (
+my @c = grep ! /^[.?*:\\<>|"&]$/, (
     (map {chr($_)}                 (0x20..0x7E, 0xA1..0xDF)),
-    qw( \n \r \t \f \b \a \e ),
-    (map {sprintf('\\%03o',$_)}    (0x20..0x7E, 0xA1..0xDF)),
-    (map {sprintf('\\x%02x',$_)}   (0x20..0x7E, 0xA1..0xDF)),
-    (map {sprintf('\\c%c',$_)}     (0x40..0x5B, 0x5D..0x5F)),
-    (map {sprintf('\\x{%02x}',$_)} (0x20..0x7E, 0xA1..0xDF)),
+#   (map {sprintf('\\%03o',$_)}    (0x20..0x7E, 0xA1..0xDF)),
+#   (map {sprintf('\\x%02x',$_)}   (0x20..0x7E, 0xA1..0xDF)),
 );
 
 my $script = "qx\\qx.pl";
@@ -20,16 +17,16 @@ open(SCRIPT,">$script") || die "Can't open file: $script\n";
 
 for my $c (@c) {
     if ($c =~ /^[`\\\$\@]$/) {
-        print SCRIPT '`\\', $c, "`;\n";
+        print SCRIPT 'print `qx\\\\\\', $c, "`;\n";
     }
     else {
-        print SCRIPT '`', $c, "`;\n";
+        print SCRIPT 'print `qx\\\\', $c, "`;\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT '`', chr($c1), chr($c2), "`;\n";
+        print SCRIPT 'print `qx\\\\', chr($c1), chr($c2), "`;\n";
     }
 }
 
@@ -39,16 +36,16 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 
 for my $c (@c) {
     if ($c =~ /^[\\\$\@]$/) {
-        print SCRIPT '<<`HEREDOC`;', "\n", '\\', $c, "\nHEREDOC\n";
+        print SCRIPT 'print <<`HEREDOC`;', "\n", 'qx\\\\\\', $c, "\nHEREDOC\n";
     }
     else {
-        print SCRIPT '<<`HEREDOC`;', "\n", $c, "\nHEREDOC\n";
+        print SCRIPT 'print <<`HEREDOC`;', "\n", 'qx\\\\', $c, "\nHEREDOC\n";
     }
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT '<<`HEREDOC`;', "\n", chr($c1), chr($c2), "\nHEREDOC\n";
+        print SCRIPT 'print <<`HEREDOC`;', "\n", 'qx\\\\', chr($c1), chr($c2), "\nHEREDOC\n";
     }
 }
 
@@ -83,7 +80,7 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
         if (($delimiter eq '$') and ($c eq '$')) {
             next;
         }
-        if (($delimiter eq "'") and ($c eq "\\c[")) {
+        if (($delimiter eq "'") and ($c eq '\\c[')) {
             next;
         }
         if (($delimiter eq '@') and ($c eq '\\c@')) {
@@ -94,20 +91,40 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
         }
 
         if ($c =~ /^([\\\$\@]|\Q$delimiter\E|\Q$end_delimiter\E)$/) {
-            print SCRIPT 'qx', $delimiter, '\\', $c, $end_delimiter, ";\n";
+            print SCRIPT 'print qx', $delimiter, 'qx\\\\\\', $c, $end_delimiter, ";\n";
         }
         else {
-            print SCRIPT 'qx', $delimiter, $c, $end_delimiter, ";\n";
+            print SCRIPT 'print qx', $delimiter, 'qx\\\\', $c, $end_delimiter, ";\n";
         }
     }
 
     for my $c1 (0x81..0x9F, 0xE0..0xFC) {
         for my $c2 (0x40..0x7E, 0x80..0xFC) {
-            print SCRIPT 'qx', $delimiter, chr($c1), chr($c2), $end_delimiter, ";\n";
+            print SCRIPT 'print qx', $delimiter, 'qx\\\\', chr($c1), chr($c2), $end_delimiter, ";\n";
         }
     }
 
     close(SCRIPT);
+}
+
+#----------------------------------------------------------------------------
+# *.BAT
+#----------------------------------------------------------------------------
+
+for my $c (@c) {
+    open(BAT,">qx\\$c.bat") || die "Can't open file: qx\\$c.bat";
+    print BAT "\@echo off\n";
+    print BAT "echo ", $c, "\n";
+    close BAT;
+}
+
+for my $c1 (0x81..0x9F, 0xE0..0xFC) {
+    for my $c2 (0x40..0x7E, 0x80..0xFC) {
+        open(BAT,">qx\\".chr($c1).chr($c2).".bat") || die "Can't open file: qx\\", chr($c1), chr($c2), ".bat";
+        print BAT "\@echo off\n";
+        print BAT "echo ", chr($c1), chr($c2), "\n";
+        close BAT;
+    }
 }
 
 #----------------------------------------------------------------------------

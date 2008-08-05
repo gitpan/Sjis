@@ -14,12 +14,12 @@ open(SCRIPT,">$script") || die "Can't open file: $script\n";
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-    print SCRIPT "\$_ = $c; print chr;\n";
+    print SCRIPT "\$_ = $c; print chr, \"\\n\";\n";
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = ", $c1 * 256 + $c2, "; print chr;\n";
+        print SCRIPT "\$_ = ", $c1 * 256 + $c2, "; print chr, \"\\n\";\n";
     }
 }
 
@@ -28,12 +28,12 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-    print SCRIPT "\$_ = $c; print chr \$_;\n";
+    print SCRIPT "\$_ = $c; print chr \$_, \"\\n\";\n";
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = ", $c1 * 256 + $c2, "; print chr \$_;\n";
+        print SCRIPT "\$_ = ", $c1 * 256 + $c2, "; print chr \$_, \"\\n\";\n";
     }
 }
 
@@ -42,12 +42,12 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-    print SCRIPT "\$_ = $c; print chr(\$_);\n";
+    print SCRIPT "\$_ = $c; print chr(\$_), \"\\n\";\n";
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = ", $c1 * 256 + $c2, "; print chr(\$_);\n";
+        print SCRIPT "\$_ = ", $c1 * 256 + $c2, "; print chr(\$_), \"\\n\";\n";
     }
 }
 
@@ -56,12 +56,12 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-    print SCRIPT "\$_ = $c; print chr \$_, 0x41, 0x42, 0x43;\n";
+    print SCRIPT "\$_ = $c; print chr \$_, 0x41, 0x42, 0x43, \"\\n\";\n";
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "\$_ = ", $c1 * 256 + $c2, "; print chr \$_, 0x41, 0x42, 0x43;\n";
+        print SCRIPT "\$_ = ", $c1 * 256 + $c2, "; print chr \$_, 0x41, 0x42, 0x43, \"\\n\";\n";
     }
 }
 
@@ -70,12 +70,12 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-    print SCRIPT "print chr $c;\n";
+    print SCRIPT "print chr $c, \"\\n\";\n";
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "print chr ", $c1 * 256 + $c2, ";\n";
+        print SCRIPT "print chr ", $c1 * 256 + $c2, ", \"\\n\";\n";
     }
 }
 
@@ -84,12 +84,12 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-    print SCRIPT "print chr($c);\n";
+    print SCRIPT "print chr($c), \"\\n\";\n";
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "print chr(", $c1 * 256 + $c2, ");\n";
+        print SCRIPT "print chr(", $c1 * 256 + $c2, "), \"\\n\";\n";
     }
 }
 
@@ -98,12 +98,12 @@ for my $c1 (0x81..0x9F, 0xE0..0xFC) {
 #----------------------------------------------------------------------------
 
 for my $c (@c) {
-    print SCRIPT "print chr $c, 0x41, 0x42, 0x43;\n";
+    print SCRIPT "print chr $c, 0x41, 0x42, 0x43, \"\\n\";\n";
 }
 
 for my $c1 (0x81..0x9F, 0xE0..0xFC) {
     for my $c2 (0x40..0x7E, 0x80..0xFC) {
-        print SCRIPT "print chr ", $c1 * 256 + $c2, ", 0x41, 0x42, 0x43;\n";
+        print SCRIPT "print chr ", $c1 * 256 + $c2, ", 0x41, 0x42, 0x43, \"\\n\";\n";
     }
 }
 

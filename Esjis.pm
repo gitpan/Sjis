@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.21 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.22 $ =~ m/(\d+)/xmsg;
 
 use Carp qw(carp croak confess cluck verbose);
 use Symbol qw(qualify_to_ref);
@@ -130,42 +130,23 @@ sub Esjis::tr($$$;$) {
     my @searchlist      = ();
     my @replacementlist = ();
 
-    if ($opt =~ m/[bB]/oxms) {
-        @char = $_[0] =~ m/\G ([\x00-\xFF]) /oxmsg;
-        @searchlist = _charlist_tr($searchlist =~ m{\G(
-            \\  [0-7]{2,3}     |
-            \\x [0-9A-Fa-f]{2} |
-            \\c [\x40-\x5F]    |
-            \\  [\x00-\xFF]    |
-                [\x00-\xFF]
-        )}oxmsg);
-        @replacementlist = _charlist_tr($replacementlist =~ m{\G(
-            \\  [0-7]{2,3}     |
-            \\x [0-9A-Fa-f]{2} |
-            \\c [\x40-\x5F]    |
-            \\  [\x00-\xFF]    |
-                [\x00-\xFF]
-        )}oxmsg);
-    }
-    else {
-        @char = $_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg;
-        @searchlist = _charlist_tr($searchlist =~ m{\G(
-            \\     [0-7]{2,3}          |
-            \\x    [0-9A-Fa-f]{2}      |
-            \\x \{ [0-9A-Fa-f]{1,4} \} |
-            \\c    [\x40-\x5F]         |
-            \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
-                (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
-        )}oxmsg);
-        @replacementlist = _charlist_tr($replacementlist =~ m{\G(
-            \\     [0-7]{2,3}          |
-            \\x    [0-9A-Fa-f]{2}      |
-            \\x \{ [0-9A-Fa-f]{1,4} \} |
-            \\c    [\x40-\x5F]         |
-            \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
-                (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
-        )}oxmsg);
-    }
+    @char = $_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg;
+    @searchlist = _charlist_tr($searchlist =~ m{\G(
+        \\     [0-7]{2,3}          |
+        \\x    [0-9A-Fa-f]{2}      |
+        \\x \{ [0-9A-Fa-f]{1,4} \} |
+        \\c    [\x40-\x5F]         |
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
+    )}oxmsg);
+    @replacementlist = _charlist_tr($replacementlist =~ m{\G(
+        \\     [0-7]{2,3}          |
+        \\x    [0-9A-Fa-f]{2}      |
+        \\x \{ [0-9A-Fa-f]{1,4} \} |
+        \\c    [\x40-\x5F]         |
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
+    )}oxmsg);
 
     my %tr = ();
     for (my $i=0; $i <= $#searchlist; $i++) {
@@ -726,48 +707,6 @@ Esjis - Run-time routines for esjis.pl
 It output "use Esjis;" automatically when esjis.pl converts your script.
 So you need not use this module directly.
 
-=head1 NOT SCOPED
-
-The module is a per script, not a per block lexical.  Only the last
-C<use Esjis> matters, and it affects B<the whole script>.
-And the C<no Esjis> is not supported and B<use Esjis> can appear as many
-times as you want in a given script.
-The multiple use of this module is discouraged.
-
-By the same reason, the use this module inside modules is also
-discouraged (though not as strongly discouraged as the case above.
-See below).
-
-If you still have to write a module with Esjis module, be very careful
-of the load order.  See the codes below;
-
-  # called module
-  package Module_IN_BAR;
-  use Esjis;
-  # stuff ShiftJIS string here
-  1;
-  __END__
-
-  # caller script
-  use Module_IN_BAR;
-  # surprise! use Esjis is in effect.
-  __END__
-
-The best way to avoid this oddity is to use this module RIGHT AFTER
-other modules are loaded.  i.e.
-
-  # called module
-  package Module_IN_BAR;
-  # no stuff ShiftJIS string here
-  1;
-  __END__
-
-  # caller script
-  use Module_IN_BAR;
-  use Esjis;
-  # stuff ShiftJIS string here
-  __END__
-
 =head1 BUGS AND LIMITATIONS
 
 Please patches and report problems to author are welcome.
@@ -844,7 +783,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
   @ignorecase = Esjis::ignorecase(@string);
 
-  This function is internal use to qq/ \L...\E / and qq/ \U...\E /.
+  This function is internal use to m/ /i, s/ / /i and qr/ /i.
 
 =item Make character
 
