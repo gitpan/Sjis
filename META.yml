@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name: Sjis
 abstract: Source code filter for ShiftJIS script
-version: 0.22
+version: 0.23
 author:
   - INABA Hitoshi <ina@cpan.org>
 license: perl

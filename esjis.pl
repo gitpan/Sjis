@@ -10,7 +10,7 @@ use strict;
 use 5.00503;
 
 use vars qw($VERSION);
-$VERSION = sprintf '%d.%02d', q$Revision: 0.22 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.23 $ =~ m/(\d+)/oxmsg;
 
 use constant DEBUG => 1;
 local $SIG{__WARN__} = sub { die "$0: ", @_ } if DEBUG;
@@ -32,7 +32,7 @@ my $your_char = q{[^\x81-\x9F\xE0-\xFC]|[\x81-\x9F\xE0-\xFC][\x00-\xFF]};
 # P.1023 Appendix W.9 Multibyte Anchoring
 # of ISBN 1-56592-224-7 CJKV Information Processing
 
-my $your_gap  = q{\G(?:[\x81-\x9F\xE0-\xFC]{2})*?|[^\x81-\x9F\xE0-\xFC](?:[\x81-\x9F\xE0-\xFC]{2})*?};
+my $your_gap  = q{\G(?:(?:[\x81-\x9F\xE0-\xFC]{2})*?|[^\x81-\x9F\xE0-\xFC](?:[\x81-\x9F\xE0-\xFC]{2})*?)};
 
 use vars qw($nest);
 
@@ -1277,12 +1277,20 @@ sub e_qq {
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
+    my @char = $string =~ m/ \G (\\x\{[0-9A-Fa-f]{1,4}\}|[\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape second octet of double octet
         if ($char[$i] =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
             $char[$i] = $1 . '\\' . $2;
+        }
+
+        # remove brace
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/xms) {
+            $char[$i] = '\\x' . $1;
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) ([0-9A-Fa-f]{2}) \} \z/xms) {
+            $char[$i] = '\\x' . $1 . '\\x' . $2;
         }
 
         # \L \U \Q \E
@@ -1470,7 +1478,7 @@ sub e_m {
 
     $slash = 'div';
 
-    my $metachar = qr/[\@\\|[\]{]/oxms;
+    my $metachar = qr/[\@\\|[\]{^]/oxms;
 
     # split regexp
     my @char = $string =~ m{\G(
@@ -1491,8 +1499,41 @@ sub e_m {
     my $right_e = 0;
     for (my $i=0; $i <= $#char; $i++) {
 
+        # escape second octet of double octet
+        if ($char[$i] =~ m/\A \\? ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # remove brace
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/xms) {
+            $char[$i] = '\\x' . $1;
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) ([0-9A-Fa-f]{2}) \} \z/xms) {
+            $char[$i] = '\\x' . $1 . '\\x' . $2;
+        }
+
+        # join separated double octet
+        elsif ($char[$i] =~ m/\A \\ (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) \z/oxms) {
+            if ($i < $#char) {
+                $char[$i] .= $char[$i+1];
+                splice @char, $i+1, 1;
+            }
+        }
+        elsif ($char[$i] =~ m/\A \\x (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \z/oxms) {
+            if ($i < $#char) {
+                $char[$i] .= $char[$i+1];
+                splice @char, $i+1, 1;
+            }
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \} \z/oxms) {
+            if ($i < $#char) {
+                $char[$i] .= $char[$i+1];
+                splice @char, $i+1, 1;
+            }
+        }
+
         # open character class [...]
-        if ($char[$i] eq '[') {
+        elsif ($char[$i] eq '[') {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
@@ -1542,28 +1583,6 @@ sub e_m {
             }->{$char[$i]}
         ) {
             $char[$i] = $char;
-        }
-
-        # join separated double octet
-        elsif ($char[$i] =~ m/\A \\ (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) \z/oxms) {
-            if ($i < $#char) {
-                $char[$i] .= $char[$i+1];
-                splice @char, $i+1, 1;
-            }
-        }
-        elsif ($char[$i] =~ m/\A \\x (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \z/oxms) {
-            if ($i < $#char) {
-                $char[$i] .= $char[$i+1];
-                splice @char, $i+1, 1;
-            }
-        }
-        elsif ($char[$i] =~ m/\A \\x \{ (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \} \z/oxms) {
-            if ($i < $#char) {
-                $char[$i] .= $char[$i+1];
-                splice @char, $i+1, 1;
-            }
-        }
-        elsif ($char[$i] =~ m/\A \\c [\x40-\x5F] \z/oxms) {
         }
 
         # /i modifier
@@ -1616,29 +1635,21 @@ sub e_m {
     # characterize
     for (my $i=0; $i <= $#char; $i++) {
 
-        # escape second octet of double octet
-        if ($char[$i] =~ m/\A \\? ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
-            $char[$i] = $1 . '\\' . $2;
-        }
-
         # quote double octet character before ? + * {
-        elsif (
+        if (
             ($i >= 1) and
             ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
             ($char[$i-1] =~ m/\A 
                 (?:
-                           [\x81-\x9F\xE0\xFC] | 
-                    \\     (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) |
-                    \\x    (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) |
-                    \\x \{ (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \}
+                        [\x81-\x9F\xE0\xFC] | 
+                    \\  (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) |
+                    \\x (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c])
                 )
-                (?:        [\x00-\xFF] |
-                    \\     [0-7]{2,3} |
-                    \\x    [0-9-A-Fa-f]{1,2} |
-                    \\x \{ [0-9-A-Fa-f]{1,2} \}
+                (?:
+                        [\x00-\xFF] |
+                    \\  [0-7]{2,3} |
+                    \\x [0-9-A-Fa-f]{1,2}
                 )
-            |
-                (?: \\x \{ (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) [0-9-A-Fa-f]{2} \} )
              \z/oxms)
         ) {
             $char[$i-1] = '(?:' . $char[$i-1] . ')';
@@ -1770,7 +1781,7 @@ sub e_s1 {
 
     $slash = 'div';
 
-    my $metachar = qr/[\@\\|[\]{]/oxms;
+    my $metachar = qr/[\@\\|[\]{^]/oxms;
 
     # split regexp
     my @char = $string =~ m{\G(
@@ -1791,8 +1802,41 @@ sub e_s1 {
     my $right_e = 0;
     for (my $i=0; $i <= $#char; $i++) {
 
+        # escape second octet of double octet
+        if ($char[$i] =~ m/\A \\? ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # remove brace
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/xms) {
+            $char[$i] = '\\x' . $1;
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) ([0-9A-Fa-f]{2}) \} \z/xms) {
+            $char[$i] = '\\x' . $1 . '\\x' . $2;
+        }
+
+        # join separated double octet
+        elsif ($char[$i] =~ m/\A \\ (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) \z/oxms) {
+            if ($i < $#char) {
+                $char[$i] .= $char[$i+1];
+                splice @char, $i+1, 1;
+            }
+        }
+        elsif ($char[$i] =~ m/\A \\x (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \z/oxms) {
+            if ($i < $#char) {
+                $char[$i] .= $char[$i+1];
+                splice @char, $i+1, 1;
+            }
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \} \z/oxms) {
+            if ($i < $#char) {
+                $char[$i] .= $char[$i+1];
+                splice @char, $i+1, 1;
+            }
+        }
+
         # open character class [...]
-        if ($char[$i] eq '[') {
+        elsif ($char[$i] eq '[') {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
@@ -1842,28 +1886,6 @@ sub e_s1 {
             }->{$char[$i]}
         ) {
             $char[$i] = $char;
-        }
-
-        # join separated double octet
-        elsif ($char[$i] =~ m/\A \\ (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) \z/oxms) {
-            if ($i < $#char) {
-                $char[$i] .= $char[$i+1];
-                splice @char, $i+1, 1;
-            }
-        }
-        elsif ($char[$i] =~ m/\A \\x (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \z/oxms) {
-            if ($i < $#char) {
-                $char[$i] .= $char[$i+1];
-                splice @char, $i+1, 1;
-            }
-        }
-        elsif ($char[$i] =~ m/\A \\x \{ (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \} \z/oxms) {
-            if ($i < $#char) {
-                $char[$i] .= $char[$i+1];
-                splice @char, $i+1, 1;
-            }
-        }
-        elsif ($char[$i] =~ m/\A \\c [\x40-\x5F] \z/oxms) {
         }
 
         # /i modifier
@@ -1916,29 +1938,21 @@ sub e_s1 {
     # characterize
     for (my $i=0; $i <= $#char; $i++) {
 
-        # escape second octet of double octet
-        if ($char[$i] =~ m/\A \\? ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
-            $char[$i] = $1 . '\\' . $2;
-        }
-
         # quote double octet character before ? + * {
-        elsif (
+        if (
             ($i >= 1) and
             ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
             ($char[$i-1] =~ m/\A 
                 (?:
-                           [\x81-\x9F\xE0\xFC] | 
-                    \\     (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) |
-                    \\x    (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) |
-                    \\x \{ (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \}
+                        [\x81-\x9F\xE0\xFC] | 
+                    \\  (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) |
+                    \\x (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c])
                 )
-                (?:        [\x00-\xFF] |
-                    \\     [0-7]{2,3} |
-                    \\x    [0-9-A-Fa-f]{1,2} |
-                    \\x \{ [0-9-A-Fa-f]{1,2} \}
+                (?:
+                        [\x00-\xFF] |
+                    \\  [0-7]{2,3} |
+                    \\x [0-9-A-Fa-f]{1,2}
                 )
-            |
-                (?: \\x \{ (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) [0-9-A-Fa-f]{2} \} )
              \z/oxms)
         ) {
             $char[$i-1] = '(?:' . $char[$i-1] . ')';
@@ -2177,7 +2191,7 @@ sub e_qr {
 
     $slash = 'div';
 
-    my $metachar = qr/[\@\\|[\]{]/oxms;
+    my $metachar = qr/[\@\\|[\]{^]/oxms;
 
     # split regexp
     my @char = $string =~ m{\G(
@@ -2198,8 +2212,41 @@ sub e_qr {
     my $right_e = 0;
     for (my $i=0; $i <= $#char; $i++) {
 
+        # escape second octet of double octet
+        if ($char[$i] =~ m/\A \\? ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
+            $char[$i] = $1 . '\\' . $2;
+        }
+
+        # remove brace
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/xms) {
+            $char[$i] = '\\x' . $1;
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) ([0-9A-Fa-f]{2}) \} \z/xms) {
+            $char[$i] = '\\x' . $1 . '\\x' . $2;
+        }
+
+        # join separated double octet
+        elsif ($char[$i] =~ m/\A \\ (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) \z/oxms) {
+            if ($i < $#char) {
+                $char[$i] .= $char[$i+1];
+                splice @char, $i+1, 1;
+            }
+        }
+        elsif ($char[$i] =~ m/\A \\x (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \z/oxms) {
+            if ($i < $#char) {
+                $char[$i] .= $char[$i+1];
+                splice @char, $i+1, 1;
+            }
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \} \z/oxms) {
+            if ($i < $#char) {
+                $char[$i] .= $char[$i+1];
+                splice @char, $i+1, 1;
+            }
+        }
+
         # open character class [...]
-        if ($char[$i] eq '[') {
+        elsif ($char[$i] eq '[') {
             my $left = $i;
             while (1) {
                 if (++$i > $#char) {
@@ -2249,28 +2296,6 @@ sub e_qr {
             }->{$char[$i]}
         ) {
             $char[$i] = $char;
-        }
-
-        # join separated double octet
-        elsif ($char[$i] =~ m/\A \\ (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) \z/oxms) {
-            if ($i < $#char) {
-                $char[$i] .= $char[$i+1];
-                splice @char, $i+1, 1;
-            }
-        }
-        elsif ($char[$i] =~ m/\A \\x (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \z/oxms) {
-            if ($i < $#char) {
-                $char[$i] .= $char[$i+1];
-                splice @char, $i+1, 1;
-            }
-        }
-        elsif ($char[$i] =~ m/\A \\x \{ (?:[8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \} \z/oxms) {
-            if ($i < $#char) {
-                $char[$i] .= $char[$i+1];
-                splice @char, $i+1, 1;
-            }
-        }
-        elsif ($char[$i] =~ m/\A \\c [\x40-\x5F] \z/oxms) {
         }
 
         # /i modifier
@@ -2323,29 +2348,21 @@ sub e_qr {
     # characterize
     for (my $i=0; $i <= $#char; $i++) {
 
-        # escape second octet of double octet
-        if ($char[$i] =~ m/\A \\? ([\x81-\x9F\xE0-\xFC]) ($metachar|\Q$delimiter\E|\Q$end_delimiter\E) \z/xms) {
-            $char[$i] = $1 . '\\' . $2;
-        }
-
         # quote double octet character before ? + * {
-        elsif (
+        if (
             ($i >= 1) and
             ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
             ($char[$i-1] =~ m/\A 
                 (?:
-                           [\x81-\x9F\xE0\xFC] | 
-                    \\     (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) |
-                    \\x    (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) |
-                    \\x \{ (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) \}
+                        [\x81-\x9F\xE0\xFC] | 
+                    \\  (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) |
+                    \\x (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c])
                 )
-                (?:        [\x00-\xFF] |
-                    \\     [0-7]{2,3} |
-                    \\x    [0-9-A-Fa-f]{1,2} |
-                    \\x \{ [0-9-A-Fa-f]{1,2} \}
+                (?:
+                        [\x00-\xFF] |
+                    \\  [0-7]{2,3} |
+                    \\x [0-9-A-Fa-f]{1,2}
                 )
-            |
-                (?: \\x \{ (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c]) [0-9-A-Fa-f]{2} \} )
              \z/oxms)
         ) {
             $char[$i-1] = '(?:' . $char[$i-1] . ')';

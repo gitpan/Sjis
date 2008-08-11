@@ -37,7 +37,8 @@ To install this software, type the following:
    perl Makefile.PL    --- Makefile.PL makes "make.bat" only, and ...
    make.bat
    make.bat test
-   perl t/smoke.pl
+   perl t\smoke.pl
+   perl t\shiftjis.htm\shiftjis.htm.pl
 
    make.bat install              --- install to current using Perl
    perl58.bat make.bat instal    --- install to Perl5.8

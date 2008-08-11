@@ -88,3 +88,8 @@ Revision history for Perl extension Sjis.
 	  - qr | | rewrite to qr { }.
 	; created by INABA Hitoshi
 
+0.23  2008/08/XX 00:00:00
+	- escape second octet ^ of double octet code in m, s and qr.
+	- remove brace of \x{HHHH} in qq, m, s snd qr.
+	; created at cafe mocca in Nagareyama-Otakanomori S.C.
+

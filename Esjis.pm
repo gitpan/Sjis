@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.22 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.23 $ =~ m/(\d+)/xmsg;
 
 use Carp qw(carp croak confess cluck verbose);
 use Symbol qw(qualify_to_ref);

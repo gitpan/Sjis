@@ -18,7 +18,8 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
     }
 
     my $script = sprintf("qw\\qw-%02X.pl", $delim);
-    open(SCRIPT,">$script") || die "Can't open file: $script\n";
+    open(SCRIPT,">$script")      || die "Can't open file: $script\n";
+    open(WANT,  ">$script.want") || die "Can't open file: $script.want\n";
 
     my $end_delimiter = {
                         '(' => ')',
@@ -38,6 +39,7 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
         }
         else {
             print SCRIPT 'print qw', $delimiter, $c, $end_delimiter, ", \"\\n\";\n";
+            print WANT $c, "\n";
         }
     }
 
@@ -55,11 +57,13 @@ for my $delim (0x20..0x7E, 0xA1..0xDF) {
             }
             else {
                 print SCRIPT 'print qw', $delimiter, chr($c1), chr($c2), ' ', $end_delimiter, ", \"\\n\";\n";
+                print WANT chr($c1), chr($c2), "\n";
             }
         }
     }
 
     close(SCRIPT);
+    close(WANT);
 }
 
 #----------------------------------------------------------------------------
