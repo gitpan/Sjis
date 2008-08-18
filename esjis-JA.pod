@@ -1,0 +1,1074 @@
+# This file is encoded in ShiftJIS.
+1;
+__END__
+
+=pod
+
+=head1 NAME
+
+esjis.pl - ShiftJIS ƒ\[ƒXƒR[ƒhƒtƒBƒ‹ƒ^
+
+=head1 SYNOPSIS
+
+  C:\>perl esjis.pl ShiftJIS_script.pl > Escaped_script.pl.e
+
+  ShiftJIS_script.pl  --- ShiftJIS ‚Å‘‚©‚ê‚½ƒXƒNƒŠƒvƒg
+  Escaped_script.pl.e --- ƒGƒXƒP[ƒv‚³‚ê‚½ƒXƒNƒŠƒvƒg
+
+=head1 —v–ñ
+
+‚±‚ê‚Ü‚Å‚Ì—ðŽj‚©‚ç‚Í‚¶‚ß‚Ü‚µ‚å‚¤BShiftJIS ‚ÌƒTƒ|[ƒg‚Í jperl 4.019+1.3 ‚©‚çŽn
+‚Ü‚è‚Ü‚µ‚½B‚±‚ê‚É‚æ‚Á‚Ä chop() ‚â³‹K•\Œ»‚ð•¡ŽG‚È CJK •¶Žš‚É‘Î‚µ‚Ä‚à“K—p‚Å‚«‚é
+‚æ‚¤‚É‚È‚è‚Ü‚µ‚½ -- ‚»‚ÌƒXƒNƒŠƒvƒg‚ª ShiftJIS ‚Å‘‚©‚ê‚Ä‚¢‚ê‚Î‚Å‚·‚ªB
+
+Perl5.8 ˆÈ~‚Í Encode ƒ‚ƒWƒ…[ƒ‹‚É‚æ‚Á‚Äƒ}ƒ‹ƒ`ƒŠƒ“ƒKƒ‹ˆ—‚ªƒTƒ|[ƒg‚³‚êAjperl
+‚Í•s—v‚É‚È‚Á‚½‚ÆŒ¾‚í‚ê‚Ä‚¢‚Ü‚·B‚Å‚·‚ªA–{“–‚É‚»‚¤‚Å‚µ‚å‚¤‚©H
+
+UTF-8 ‚ÍÅ‚à•‹y‚µ‚Ä‚¢‚éƒIƒyƒŒ[ƒeƒBƒ“ƒOƒVƒXƒeƒ€‚Å‚ ‚é(Ž„‚½‚¿‚Ì‘åD‚«‚ÈG)
+Microsoft Windows ã‚Å—˜—p‚³‚ê‚é‚±‚Æ‚ÍA‚Ü‚¾‚Ü‚ê‚Å‚·B‚È‚Ì‚Å‘½‚­‚Ìƒ†[ƒU‚ª 
+ShiftJIS ‚ÅƒXƒNƒŠƒvƒg‚ð‘‚«‚½‚¢‚Æ–]‚ñ‚Å‚¢‚Ü‚·B‚µ‚©‚à Perl5.8/5.10 ‚ÌV‹@”\‚ð
+—˜—p‚µ‚ÄB
+
+ShiftJIS ‚Í‚à‚Æ‚à‚Æ‰ß‹Ž‚Ì‹KŠi‚Æ‚ÌŒÝŠ·«‚ðl—¶‚µ‚ÄŠJ”­‚³‚ê‚Ü‚µ‚½Bˆê”Ê“I‚ÉƒIƒy
+ƒŒ[ƒeƒBƒ“ƒOƒVƒXƒeƒ€‚âƒvƒƒOƒ‰ƒ~ƒ“ƒOŒ¾Œê‚Í‰ß‹Ž‚Ì‹KŠi‚É‰ˆ‚Á‚Äì‚ç‚ê‚Ä‚¢‚Ü‚·B
+‰ß‹Ž‚Ì‹KŠi‚ðŽg‚¢‘±‚¯‚é‚±‚Æ‚Í¡‚Å‚à—LŒø‚È‰ðŒˆô‚Å‚·B
+
+‚ ‚È‚½‚àƒGƒ“ƒR[ƒh‚Ì–â‘è‚©‚çƒGƒXƒP[ƒv‚µ‚Ü‚¹‚ñ‚©H
+
+=head1 JPerl ‚Ì–¢—ˆ
+
+JPerl ‚Í‚Æ‚Ä‚à—D‚ê‚½ƒ\ƒtƒgƒEƒFƒA‚Å‚·B
+‚µ‚©‚µ‚È‚ª‚çÅIƒo[ƒWƒ‡ƒ“‚Í 5.005_4 ‚ÅA¡‚Íƒƒ“ƒeƒiƒ“ƒX‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB
+
+‘å•ÏŽc”O‚È‚±‚Æ‚ÉAJPerl‚ÌŠJ”­‚ðs‚Á‚½“n•Ó ”Ž•¶‚³‚ñ‚Í The Perl Confernce Japan
+1998 ‚É‚Ä
+
+  "‚í‚½‚È‚×‚Í”æ‚ê‚½‚©‚çŽŸ‚Ìl‚æ‚ë‚µ‚­‚Ë"
+
+‚Æ‚¢‚¤ƒƒbƒZ[ƒW‚ðŽc‚µAPerl ‚©‚ç—£‚ê‚Ä‚¢‚Á‚Ä‚µ‚Ü‚¢‚Ü‚µ‚½B
+
+ƒXƒ‰ƒCƒh15 "jperl ‚Ì¡Œã"
+L<ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt>
+
+Ž„‚Í‚Ç‚¤‚µ‚Ä‚à—~‚µ‚©‚Á‚½‚Ì‚Å‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚ðì‚è‚Ü‚µ‚½B
+
+‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚Í•W€“ü—Í‚Ü‚½‚ÍƒRƒ}ƒ“ƒhƒ‰ƒCƒ“ƒpƒ‰ƒ[ƒ^‚É—^‚¦‚ç‚ê‚½ ShiftJIS 
+‚Å‘‚©‚ê‚½ Perl ƒXƒNƒŠƒvƒg‚ðƒGƒXƒP[ƒvˆ—‚·‚é‚½‚ß‚Ìƒ\[ƒXƒR[ƒhƒtƒBƒ‹ƒ^‚Å‚·B
+ƒGƒXƒP[ƒvˆ—‚É‚æ‚Á‚Ä•¶ŽšƒR[ƒh‚ª•Ï‰»‚·‚é‚±‚Æ‚Í‚ ‚è‚Ü‚¹‚ñB
+
+‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚É‚æ‚Á‚Ä
+
+=over 2
+
+=item * ShiftJIS ‚»‚Ì‚Ü‚Ü‚Ì’l‚ðˆµ‚¤
+
+=item * ShiftJIS •¶Žš—ñ‚Ì’·‚³‚ðˆµ‚¤
+
+=item * UTF8 ƒtƒ‰ƒO‚ðˆµ‚í‚È‚¢‚Å‚·‚Þ
+
+=item * C ƒvƒƒOƒ‰ƒ~ƒ“ƒO‚ðs‚í‚È‚¢‚Å‚·‚Þ
+
+=back
+
+‚±‚Æ‚ª‚Å‚«‚Ü‚·B
+
+‚³‚ AJPerl ‚Ì–¢—ˆ‚ðì‚è‚Ü‚µ‚å‚¤B
+
+=head1 SOFTWARE COMPOSITION
+
+    jperl55.bat  --- perl5.5 ‚Æ esjis.pl ‚É‚æ‚é jperl
+    jperl58.bat  --- perl5.8 ‚Æ esjis.pl ‚É‚æ‚é jperl
+    perl58.bat   --- ŠÂ‹«•Ï” PATH ‚ÌÝ’è‚È‚µ‚É perl5.8 ‚ð’T‚µ‚ÄŽÀs‚·‚é
+    jperl510.bat --- perl5.10 ‚Æ esjis.pl ‚É‚æ‚é jperl
+    perl510.bat  --- ŠÂ‹«•Ï” PATH ‚ÌÝ’è‚È‚µ‚É perl5.10 ‚ð’T‚µ‚ÄŽÀs‚·‚é
+    pl2ebat      --- ShiftJIS ‚Å‘‚©‚ê‚½ƒXƒNƒŠƒvƒg‚ðƒoƒbƒ`ƒtƒ@ƒCƒ‹‚É‚·‚é
+    esjis.pl     --- ShiftJIS ƒ\[ƒXƒR[ƒhƒtƒBƒ‹ƒ^
+    Esjis.pm     --- esjis.pl ‚Ìƒ‰ƒ“ƒ^ƒCƒ€ƒ‹[ƒ`ƒ“
+    Sjis.pm      --- ShiftJIS ƒ\[ƒXƒR[ƒhƒtƒBƒ‹ƒ^ƒ‚ƒWƒ…[ƒ‹
+
+=head1 SOFTWARE COMBINATION
+
+‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚ÍˆÈ‰º‚Ì‘g‡‚¹‚ÅŽg‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚·B
+
+=over 2
+
+=item * ‘g‡‚¹ 1
+
+    esjis.pl + Esjis.pm
+
+    ShiftJIS ƒXƒNƒŠƒvƒg‚ð esjis.pl ‚ÅƒGƒXƒP[ƒv‚µ‚ÄV‚µ‚¢ƒXƒNƒŠƒvƒg‚ðì¬‚Å‚«‚Ü
+    ‚·BƒGƒXƒP[ƒv‚³‚ê‚½ƒXƒNƒŠƒvƒg‚Íƒ‰ƒ“ƒ^ƒCƒ€ƒ‹[ƒ`ƒ“‚Æ‚µ‚Ä "use Esjis;" ‚Æ‚¢
+    ‚¤‹Lq‚ðŠÜ‚Ý‚Ü‚·B
+
+=item * ‘g‡‚¹ 2
+
+    jperl55.bat + esjis.pl + Esjis.pm
+
+    jperl55.bat ‚É‚æ‚Á‚Ä‘g‡‚¹ 1 ‚ÌŽÀs‚ªs‚í‚êA‚³‚ç‚ÉƒGƒXƒP[ƒv‚³‚ê‚½ƒXƒNƒŠ
+    ƒvƒg‚ð perl5.5 ‚É‚æ‚Á‚ÄŽÀs‚µ‚Ü‚·B
+    ‚±‚Ì‘g‡‚¹‚ÍŽå‚É Jperl.exe ‚Æ‚ÌŒÝŠ·«‚ðŒŸØ‚·‚é–Ú“I‚ÅŽg‚í‚ê‚Ü‚·B
+
+=item * ‘g‡‚¹ 3
+
+    Sjis.pm + esjis.pl + Esjis.pm
+
+    ƒXƒNƒŠƒvƒg’†‚É "use Sjis;" ‚Æ‹Lq‚·‚é‚Æ perl ‚ðŽg‚Á‚ÄŽÀs‚Å‚«‚é‚æ‚¤‚É‚È‚è‚Ü
+    ‚·BSjis ƒ‚ƒWƒ…[ƒ‹‚Í“à•”“I‚É esjis.pl ‚ðŒÄ‚Ño‚µAƒXƒNƒŠƒvƒgŽ©g‚ðƒGƒXƒP[
+    ƒv‚µAƒGƒXƒP[ƒv‚µ‚Ä‚Å‚«‚½ƒtƒ@ƒCƒ‹‚ðŽÀs‚µ‚Ü‚·B
+    ‚Â‚Ü‚è "use Sjis;" ‚Æ‚³‚¦‹Lq‚·‚ê‚ÎAƒRƒ}ƒ“ƒhŽÀsŽž‚É perl ‚Æ jperl ‚ðŽg‚¢
+    •ª‚¯‚é•K—v‚ª‚È‚¢‚½‚ß•Ö—˜‚Å‚·B
+
+=item * ‘g‡‚¹ 4
+
+    jperl58.bat + perl58.bat + esjis.pl + Esjis.pm
+
+    ‘g‡‚¹ 2 ‚Ì perl5.8 ”Å‚Å‚·Bperl5.5 ‚Æ perl5.8 ‚ð“¯‚¶ƒRƒ“ƒsƒ…[ƒ^ŠÂ‹«‚ÉƒCƒ“
+    ƒXƒg[ƒ‹‚µ‚ÄŽg‚¢•ª‚¯‚éê‡AŠÂ‹«•Ï” PATH ‚É‚Í perl5.8 ‚ÌƒpƒX‚ðÝ’è‚µ‚È‚¢A
+    ‚Æ‚¢‚¤•û–@‚ª‚ ‚è‚Ü‚·B
+    ‚»‚Ì‚æ‚¤‚Èê‡‚Å‚à perl58.bat ‚É‚æ‚Á‚Ä perl5.8 ‚ÌƒCƒ“ƒ^ƒvƒŠƒ^‚ð’T‚µo‚µA
+    ‹N“®‚Å‚«‚Ü‚·Bperl5.8 ‚ÌŽÀsƒtƒ@ƒCƒ‹‚Í”CˆÓ‚Ìƒhƒ‰ƒCƒu‚Ì \Perl58\bin ‚É‘¶Ý
+    ‚·‚é•K—v‚ª‚ ‚è‚Ü‚·B
+
+=item * ‘g‡‚¹ 5
+
+    perl58.bat + Sjis.pm + esjis.pl + Esjis.pm
+
+    ‘g‡‚¹ 3 ‚Ì perl5.8 ”Å‚Å‚·Bperl58.bat ‚Å‹N“®‚·‚éƒXƒNƒŠƒvƒg‚É‚Í "use Sjis;"
+    ‚Ì‹Lq‚ª•K—v‚Å‚·B
+
+=item * ‘g‡‚¹ 6
+
+    jperl510.bat + perl510.bat + esjis.pl + Esjis.pm
+
+    ‘g‡‚¹ 2 ‚Ì perl5.10 ”Å‚Å‚·Bjperl510.bat ‚Å‹N“®‚·‚éƒXƒNƒŠƒvƒg‚É‚Í
+    "use Sjis;" ‚Ì‹Lq‚Í•s—v‚Å‚·Bperl5.10 ‚ÌŽÀsƒtƒ@ƒCƒ‹‚Í”CˆÓ‚Ìƒhƒ‰ƒCƒu‚Ì
+    \Perl510\bin ‚É‘¶Ý‚·‚é•K—v‚ª‚ ‚è‚Ü‚·B
+
+=item * ‘g‡‚¹ 7
+
+    perl510.bat + Sjis.pm + esjis.pl + Esjis.pm
+
+    ‘g‡‚¹ 3 ‚Ì perl5.10 ”Å‚Å‚·Bperl510.bat ‚Å‹N“®‚·‚éƒXƒNƒŠƒvƒg‚É‚Í
+    "use Sjis;" ‚Ì‹Lq‚ª•K—v‚Å‚·B
+
+=item * ‘g‡‚¹ 8
+
+    pl2ebat.bat + esjis.pl + Esjis.pm
+
+    ShiftJIS ‚Å‘‚©‚ê‚½ƒXƒNƒŠƒvƒg—p‚Ì "pl2bat.bat" ‚Å‚·B
+
+=back
+
+=head1 JPerl ŒÝŠ·‚Ì‹@”\
+
+ˆÈ‰º‚ÌŠÖ”‚Í JPerl ‚Æ“¯—l‚É‹@”\‚µ‚Ü‚·B
+‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚É‚æ‚Á‚Ä‘‚«Š·‚í‚éŠÖ”‚ª‚ ‚è‚Ü‚·B
+
+=over 2
+
+=item * ƒVƒ“ƒOƒ‹ƒNƒH[ƒg’†‚Ì2ƒIƒNƒeƒbƒgƒR[ƒh•¶Žš—ñ‚Ìˆµ‚¢
+
+=item * ƒ_ƒuƒ‹ƒNƒH[ƒg’†‚Ì2ƒIƒNƒeƒbƒgƒR[ƒh•¶Žš—ñ‚Ìˆµ‚¢
+
+=item * ƒVƒ“ƒOƒ‹ƒNƒH[ƒg’†‚Ì2ƒIƒNƒeƒbƒgƒR[ƒh³‹K•\Œ»‚Ìˆµ‚¢
+
+=item * ƒ_ƒuƒ‹ƒNƒH[ƒg’†‚Ì2ƒIƒNƒeƒbƒgƒR[ƒh³‹K•\Œ»‚Ìˆµ‚¢
+
+=item * chop ‚Í Esjis::chop ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+=item * split ‚Í Esjis::split ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+=item * substr ‚Í‚»‚Ì‚Ü‚Ü‚Å‚·
+
+=item * index ‚Í Esjis::index ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+=item * rindex ‚Í Esjis::rindex ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+=item * lc ‚Í Esjis::lc ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+=item * uc ‚Í Esjis::uc ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+=item * tr/// ‚Ü‚½‚Í y///
+
+/b ‚Æ /B CüŽq‚ª—˜—p‚Å‚«‚Ü‚·B
+
+=back
+
+=head1 JPerl ãˆÊŒÝŠ·‚Ì‹@”\
+
+ˆÈ‰º‚ÌŠÖ”‚Ì‹@”\‚Í JPerl ‚æ‚è‚àŠg’£‚³‚ê‚Ä‚¢‚Ü‚·B
+
+=over 2
+
+=item * chr ‚Í Esjis::chr ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+2ƒIƒNƒeƒbƒgƒR[ƒh‚ðˆµ‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚·B
+
+=item * ord ‚Í Esjis::ord ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+2ƒIƒNƒeƒbƒgƒR[ƒh‚ðˆµ‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚·B
+
+=item * reverse ‚Í Esjis::reverse ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+ƒXƒJƒ‰ƒRƒ“ƒeƒLƒXƒg‚Å‚Í2ƒIƒNƒeƒbƒgƒR[ƒh‚ðˆµ‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚·B
+‚Â‚Ü‚è2ƒIƒNƒeƒbƒgƒR[ƒh‚Å‚à•¶Žš‚²‚Æ‚É”½‘Î‚É•À‚×‚Ü‚·B
+
+=back
+
+=head1 JPerl ‚ÆŒÝŠ·«‚Ì‚È‚¢‹@”\
+
+ˆÈ‰º‚Ì‹@”\‚Í JPerl ‚ÆŒÝŠ·«‚ª‚ ‚è‚Ü‚¹‚ñBƒIƒŠƒWƒiƒ‹ Perl ‚Æ“¯‚¶‹@”\‚É‚È‚è‚Ü‚·B
+
+=over 2
+
+=item * format
+
+ƒIƒŠƒWƒiƒ‹‚Ì Perl ‚Æ‹@”\‚ª“¯‚¶‚Å‚·(ShiftJIS ‚É‘Î‰ž‚µ‚Ä‚¢‚Ü‚¹‚ñ)B
+
+=item * -B
+
+ƒIƒŠƒWƒiƒ‹‚Ì Perl ‚Æ‹@”\‚ª“¯‚¶‚Å‚·B
+
+=item * -T
+
+ƒIƒŠƒWƒiƒ‹‚Ì Perl ‚Æ‹@”\‚ª“¯‚¶‚Å‚·B
+
+=back
+
+=head1 ƒoƒO‚Æ§ŒÀŽ–€
+
+ƒoƒO•ñAƒpƒbƒ`‚ðŠ½Œ}‚µ‚Ü‚·B
+
+=over 2
+
+=item * §ŒÀŽ–€ 1
+
+ƒtƒ@ƒCƒ‹ƒeƒXƒg‰‰ŽZŽq -T ‚¨‚æ‚Ñ -B ‚Ì‹@”\‚ÍƒIƒŠƒWƒiƒ‹‚Ì Perl ‚Æ“¯‚¶‚Å‚·B
+
+=item * §ŒÀŽ–€ 2
+
+format ŠÖ”‚Í2ƒIƒNƒeƒbƒgƒR[ƒh‚É‘Î‰ž‚µ‚Ä‚¢‚Ü‚¹‚ñB
+
+=item * §ŒÀŽ–€ 3
+
+ƒXƒNƒŠƒvƒg‚Ì1s‚ÉƒqƒAƒhƒLƒ…ƒƒ“ƒg‚ÌƒfƒŠƒ~ƒ^‚ð2‚ÂˆÈãŽw’è‚µ‚½ê‡A‚»‚ê‚ç‚Ì‚¤‚¿
+1‚Â‚Å‚àƒ_ƒuƒ‹ƒNƒH[ƒgƒ‰ƒCƒN‚È‚à‚Ì(<<"END", <<END, <<`END`)‚ª‚ ‚ê‚ÎŽc‚è‚ÌƒfƒŠƒ~
+ƒ^‚É‚Â‚¢‚Ä‚àA‚·‚×‚Äƒ_ƒuƒ‹ƒNƒH[ƒgˆµ‚¢‚É‚È‚è‚Ü‚·B
+
+    —á1
+        print <<'END';
+        ============================================================
+        ƒVƒ“ƒOƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B   --- OK
+        ============================================================
+        END
+
+    —á2
+        print <<\END;
+        ============================================================
+        ƒVƒ“ƒOƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B   --- OK
+        ============================================================
+        END
+
+    —á3
+        print <<"END";
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B     --- OK
+        ============================================================
+        END
+
+    —á4
+        print <<END;
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B     --- OK
+        ============================================================
+        END
+
+    —á5
+        print <<`END`;
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B     --- OK
+        ============================================================
+        END
+
+    —á6
+        print <<'END1', <<'END2';
+        ============================================================
+        ƒVƒ“ƒOƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B   --- OK
+        ============================================================
+        END1
+        ============================================================
+        ƒVƒ“ƒOƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B   --- OK
+        ============================================================
+        END2
+
+    —á7
+        print <<"END1", <<"END2";
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B     --- OK
+        ============================================================
+        END1
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B     --- OK
+        ============================================================
+        END2
+
+    —á8
+        print <<'END1', <<"END2", <<'END3';
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B
+        'END1' ‚Æ 'END3' ‚Í "END2" ‚Ì‚¹‚¢‚Åƒ_ƒuƒ‹ƒNƒH[ƒg‚³‚ê‚½
+        •¶Žš—ñ‚É‚È‚è‚Ü‚·B
+        ============================================================
+        END1
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B
+        'END3' ‚Í "END2" ‚Ì‚¹‚¢‚Åƒ_ƒuƒ‹ƒNƒH[ƒg‚³‚ê‚½•¶Žš—ñ‚É‚È‚è
+        ‚Ü‚·B
+        ============================================================
+        END2
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B
+        'END3' ‚Í "END2" ‚Ì‚¹‚¢‚Åƒ_ƒuƒ‹ƒNƒH[ƒg‚³‚ê‚½•¶Žš—ñ‚É‚È‚è
+        ‚Ü‚·B
+        ============================================================
+        END3
+
+    —á9
+        print <<"END1", <<'END2', "END3";
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B
+        'END2' ‚Í "END1" ‚Æ "END3" ‚Ì‚¹‚¢‚Åƒ_ƒuƒ‹ƒNƒH[ƒg‚³‚ê‚½
+        •¶Žš—ñ‚É‚È‚è‚Ü‚·B
+        ============================================================
+        END1
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B
+        'END2' ‚Í "END3" ‚Ì‚¹‚¢‚Åƒ_ƒuƒ‹ƒNƒH[ƒg‚³‚ê‚½•¶Žš—ñ‚É‚È‚è
+        ‚Ü‚·B
+        ============================================================
+        END2
+        ============================================================
+        ƒ_ƒuƒ‹ƒNƒH[ƒg‚Æ‚µ‚ÄƒGƒXƒP[ƒv‚³‚ê‚Ü‚·B     --- OK
+        ============================================================
+        END3
+
+=back
+
+=head1 —š—ð
+
+‚±‚Ì esjis.pl ‚Í 'jcode.pl' ‚Ìƒ\[ƒXƒR[ƒh‚ðŠî‚É‚µ‚ÄA'Jperl.exe' ‚Æ“¯“™‚Ì
+‹@”\‚ð–ÚŽw‚µ‚Ä ActivePerl Build 522 Built under MSWin32 Compiled at Nov 2
+1999 09:52:28 ‚Å—˜—p‰Â”\‚È‚æ‚¤‚Éì‚ç‚ê‚Ü‚µ‚½B
+
+=head1 ìŽÒ
+
+‚±‚ÌƒvƒƒWƒFƒNƒg‚Í ˆî—t € E<lt>ina@cpan.orgE<gt> ‚É‚æ‚Á‚ÄŽn‚Ü‚è‚Ü‚µ‚½B
+‚±‚Ìƒtƒ@ƒCƒ‹‚ð•ª‚©‚¿‡‚¢‚Ü‚µ‚å‚¤B
+
+=head1 ’˜ìŒ 
+
+‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚ÍƒtƒŠ[ƒ\ƒtƒgƒEƒFƒA‚Å‚·B‚ ‚È‚½‚Í Perl ‚Æ“¯‚¶ƒ‰ƒCƒZƒ“ƒX
+‚ÌŒ³‚ÅÄ”z•z‹y‚Ñ•ÏX‚ðs‚¤‚±‚Æ‚ªo—ˆ‚Ü‚·BÚ‚µ‚­‚Í L<perlartistic> ‚ð
+ŽQÆ‚µ‚Ä‚­‚¾‚³‚¢B
+
+‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚Í—L—p‚Å‚ ‚é‚±‚Æ‚ðŠè‚Á‚Ä”Ð•z‚³‚ê‚Ü‚·‚ªA*‘S‚­‚Ì–³•ÛØ* 
+‚Å‚·B¤‹Æ‰Â”\«‚Ì•ÛØ‚â“Á’è‚Ì–Ú“I‚Ö‚Ì“K‡«‚ÍAŒ¾ŠO‚ÉŽ¦‚³‚ê‚½‚à‚Ì‚àŠÜ
+‚ß‘S‚­‘¶Ý‚µ‚Ü‚¹‚ñB
+
+=head1 ƒEƒBƒLƒyƒfƒBƒA‚É‚æ‚éuShift_JISv‚Ì’è‹`
+
+Shift_JIS (2008.08.12 23:24:00 JST). In Wikipedia: The Free Encyclopedia.
+Retrieved from
+L<http://ja.wikipedia.org/wiki/Shift_JIS>
+
+o“T: ƒtƒŠ[•S‰ÈŽ–“TwƒEƒBƒLƒyƒfƒBƒAiWikipediajx
+
+Shift_JISiIANA‚Ö‚Ì“o˜^–¼B“Ç‚Ý•û‚ÍwƒVƒtƒgƒWƒXxj‚ÍAŒ»Ý‘½‚­‚Ìƒpƒ\ƒRƒ“ã‚Å
+“ú–{Œê‚ð•\‚·‚½‚ß‚ÉŽg‚í‚ê‚Ä‚¢‚é•¶ŽšƒR[ƒh‚Å‚ ‚éB“ÆŽ©‚ÌƒR[ƒh‚ðŽg‚Á‚Ä‚¢‚½‰ïŽÐ
+‚ª‚ ‚Á‚½‚ªAŒ»Ý‚Í•W€‰»‚µ‚Ä‚¢‚éJIS X 0208‚Ì•‘®‘1‚Å‹K’è‚µ‚Ä‚¢‚éB
+
+Microsoft“™‚ÌŠeƒxƒ“ƒ_‚ªŽÀ‘•‚·‚éShift_JIS‚ÌˆŸŽí‚É‚Â‚¢‚Ä‚ÍwMicrosoftƒR[ƒhƒy[
+ƒW932x‚ðŽQÆ‚Ì‚±‚ÆB
+
+Shift_JIS‚Ì’a¶
+1980”N‘ãAƒpƒ\ƒRƒ“—p16ƒrƒbƒgCPU‚Ì•‹y‚à‚ ‚¢‚Ü‚Á‚ÄAŠ¿Žš‚ð•\Ž¦‰Â”\‚Èƒn[ƒhƒEƒF
+ƒA‚ð”õ‚¦‚½ƒpƒ\ƒRƒ“‚ª‘±X‚Æ”­”„‚³‚ê‚½B‚»‚Ì‚½‚ßA‚±‚ê‚çƒpƒ\ƒRƒ“—p‚Ì•¶Žš•„†‰»
+•ûŽ®‚ð–Íõ‚µ‚Ä‚¢‚½B
+
+Shift_JIS‚ðuƒVƒtƒgJISƒR[ƒhv‚ÆŒÄ‚ñ‚Å•„†‰»•¶ŽšW‡i•¶ŽšƒR[ƒhj‚Ì–Ê‚Ì‚Ý‚ð
+l‚¦‚é‹c˜_‚ª‚ ‚é‚ªA‚±‚±‚Å‚Í•¶Žš•„†‰»•ûŽ®‚Ì–Ê‚ÉÅ“_‚ð“–‚Ä‚éB
+
+‚±‚Ì•¶Žš•„†‰»•ûŽ®‚É‚ÍAæs‚µ‚Ä‚æ‚­—˜—p‚µ‚Ä‚¢‚½JIS C 6220iŒ»Ý‚ÌJIS X 0201j
+‚Ì8ƒrƒbƒg•„†iˆÈ‰ºu‰p”ŽšE”¼ŠpƒJƒivj‚ÆAJIS C 6226iŒ»Ý‚ÌJIS X 0208A
+ˆÈ‰ºuŠ¿Žšvj‚Ì—¼•¶ŽšW‡‚ðA•\Œ»‚µ‚æ‚¤‚Æ‚µ‚½Bƒtƒ@ƒCƒ‹‚Ì‘å‚«‚³Aˆ—ŽžŠÔ‚Ì
+’Zk‚ð}‚é‚½‚ßƒGƒXƒP[ƒvƒV[ƒPƒ“ƒX‚È‚µ‚Å¬Ý‰Â”\‚É‚·‚é‚±‚Æ‚ðlˆÄ‚µ‚½B
+
+JIS C 6220‚ÆJIS C 6226‚Ì2‚Â‚Í‚Æ‚à‚ÉAISO 2022‚Å•¶ŽšW‡‚ðØ‚è‘Ö‚¦‚Ä—˜—p‚·‚é
+ÝŒv‚ª‚ ‚Á‚½BISO 2022‚É‚à‚Æ‚Ã‚­•¶Žš•„†‰»•ûŽ®‚Å‚ÍA‰p”ŽšA”¼ŠpƒJƒiAŠ¿Žš‚Í
+‚»‚ê‚¼‚êA8ƒrƒbƒg•„†‹óŠÔ‚Ì’†‚ÌGL/GR‚Æ‚¢‚¤—Ìˆæ‚Ì1‚Â‚ði‚½‚¾‚µŠ¿Žš‚Í2‰ñjŽg‚¤
+‚±‚Æ‚Å•\Œ»‚Å‚«‚éB‚à‚µ‰p”Žš‚ÆŠ¿Žš‚Ì2‚Â‚ðƒGƒXƒP[ƒvƒV[ƒPƒ“ƒX‚È‚µ‚Å¬Ý‚µ‚½‚¢
+‚È‚çA‰p”Žš‚ðGLAŠ¿Žš‚ðGR‚ÉŠ„‚è“–‚Ä‚é•û–@‚ª‚ ‚éBEUC-JP‚ÍA‚¨‚¨‚æ‚»‚»‚Ì‚æ‚¤
+‚ÉŽÀ‘•‚µ‚Ä‚¢‚éB
+
+‚µ‚©‚µAƒpƒ\ƒRƒ“‚Å‚Í‚·‚Å‚ÉAJIS X 0201‚Ì8ƒrƒbƒg•„†A‚Â‚Ü‚èAGL‚É‰p”ŽšAGR‚É
+‚PƒoƒCƒgƒJƒ^ƒJƒii”¼ŠpƒJƒ^ƒJƒij‚ðŠ„‚è“–‚Ä‚é‚±‚Æ‚ª•‹y‚µ‚Ä‚¢‚½B‰p”Žš‚Æ‚PƒoƒC
+ƒgƒJƒ^ƒJƒi‚Ì2‚Â‚ð“®‚©‚·‚±‚Æ‚ÍA•¶Žš‰»‚¯‚ÌŒ´ˆö‚É‚È‚é‚½‚ß”ð‚¯‚é•K—v‚ª‚ ‚Á‚½B
+‚»‚Ì‚½‚ßAISO 2022‚Ì˜g“à‚Ì—Ìˆæ‚ÉŠ¿Žš‚ð¬Ý‚³‚¹‚é‚±‚Æ‚Í¢“ï‚¾‚Á‚½‚Ì‚Å‚ ‚éB
+
+1982”NAŠ¿Žš‚Ì•„†ˆÊ’u‚ð•¡ŽG‚ÉˆÚ“®iƒVƒtƒgj‚µA•„†‹óŠÔ‚ÌŒ„ŠÔ‚É‰Ÿ‚µž‚Þ
+Shift_JIS‚ª’a¶‚µ‚½B‚±‚ê‚ðŽÀŒ»‚·‚é‚½‚ß‚É‚ÍAŠ¿Žš‚Ì1ƒoƒCƒg–Ú‚Æ‚µ‚ÄAISO 2022
+‚É‚¨‚¯‚éGRiA1(16)-FE(16)j—Ìˆæ‚É3•ª‚Ì1Žc‚µ‚Ä‚¢‚½–¢Žg—p—Ìˆæ‚É‚­‚í‚¦AISO 2022
+‚É‚¨‚¢‚Ä”ñŽg—p‚ÌCRi80(16)-9F(16)j—Ìˆæ‚ðŽg—p‚·‚é‚±‚Æ‚Æ‚µ‚½B‚½‚¾‚µAGL
+i21(16)-7E(16)j—Ìˆæ‚É‚¨‚¢‚Ä‚ÍAJIS X 0201‚Ì‹L†‚É“–‚½‚é•”•ª‚Í‹É—Í”ð‚¯‚½B
+‚³‚ç‚É2ƒoƒCƒg–Ú‚É‚ÍISO 2022‚Æ‚ÍˆÙ‚È‚èA‰p”ŽšE”¼ŠpƒJƒi‚ÉŽg—pÏ‚Ý‚Ì—Ìˆæ‚ð‚à
+ŠÜ‚ÞAGLACRAGR‚É‚ ‚½‚éŠe—Ìˆæ‚Ì‚Ù‚Ú‘S‚Ä‚ðŽg‚¤•K—v‚ª‚ ‚Á‚½B
+
+ƒ}ƒCƒNƒƒ\ƒtƒgi“ú–{–@ljŒ³‰ï’·‚ÌŒÃì‹‚É‚æ‚é‚ÆAShift_JIS‚Ì§’è‚É‚ÍAƒAƒX
+ƒL[Aƒ}ƒCƒNƒƒ\ƒtƒgi•ÄjAŽO•H“d‹@Aƒ}ƒCƒNƒƒ\ƒtƒgƒEƒFƒAEƒAƒ\ƒVƒGƒCƒcA
+ƒfƒWƒ^ƒ‹ƒŠƒT[ƒ`i•Äj‚ªŠÖ‚í‚èA“Á‚ÉƒAƒXƒL[‚ÌŽR‰º—Ç‘ ‚ª’†S‚Æ‚È‚Á‚Äì¬‚µ‚½
+‚à‚Ì‚¾‚Æ‚¢‚¤B‚±‚ê‚É‘Î‚·‚éˆÙà‚Æ‚µ‚ÄA‹ž“s‘åŠw•‹³Žö‚ÌˆÀ‰ªFˆê‚ÍAƒ}ƒCƒNƒƒ\ƒt
+ƒgƒEƒFƒAEƒAƒ\ƒVƒGƒCƒc‚ÆŽO•H“d‹@‚Ì‚Ý‚Ì‹¤“¯ŠJ”­‚¾‚ÆŽå’£‚µ‚Ä‚¢‚éB
+
+Shift_JIS‚Ì•W€‰»
+Shift_JIS‚ÍA•„†‰»•¶ŽšW‡‚Æ‚»‚Ì•¶Žš•„†‰»•ûŽ®‚Ì—¼•û‚ðŠÜ‚ÞŒ»ŽÀ‚Ì–â‘è‚ð‰ðŒˆ
+‚·‚é‚½‚ß‚Ì‹Zp‚Å‚ ‚éB‚»‚ê‚ä‚¦AJIS X 0208‚Ì•¶ŽšW‡‚ð—˜—p‚µ‚Ä‚Í‚¢‚é‚à‚Ì‚ÌA
+ISO 2022‚Ì•„†‰»‚Ì•ûj‚Ì”ÍˆÍ‚ÌŠO‚É‚ ‚éB
+
+‚µ‚©‚µ‚È‚ª‚çAŒ»Ý‚Å‚ÍAJIS X 0208:1997‚Ì•‘®‘1‚É‚ÄuƒVƒtƒg•„†‰»•\Œ»v‚Æ‚¢‚¤
+–¼‘O‚ÅAŽd—l‚ª’è‹`‚³‚ê‚Ä‚¢‚éB‚±‚ê‚ÍAƒfƒtƒ@ƒNƒgƒXƒ^ƒ“ƒ_[ƒh‚Æ‚È‚Á‚Ä‚¢‚é‹Zp
+‚É‚Â‚¢‚Ä‚ÍoŽ©‚ð–â‘è‚Æ‚¹‚¸A‚Æ‚à‚©‚­•W€‰»‚µ‚Ä‚µ‚Ü‚¨‚¤‚Æ‚¢‚¤ˆÓ}‚ª“ú–{H‹Æ•W€
+’²¸‰ï (JISC) ‚É‚ ‚Á‚Ä‚Ì‚±‚Æ‚Å‚ ‚éB
+
+JIS X 0208‚ÌŠg’£‹KŠi‚Å‚ ‚éJIS X 0213‚Å‚ÍA2000”N§’è‚Ì‰”Å‚Å•‘®‘1‚Æ‚µ‚Ä
+Shift_JISX0213‚ª’è‚ß‚ç‚ê‚½B2004”N‰ü³Žž‚Ì10•¶Žš’Ç‰Á‚É”º‚Á‚ÄAShift_JIS-2004
+‚Æ–¼Ì‚ª•ÏX‚³‚ê‚½B
+
+IANA‚àuShift_JISv‚Æ‚¢‚¤–¼‘O‚Å“o˜^‚µ‚Ä‚¢‚éB
+
+—˜“_‚ÆŒ‡“_
+
+—˜“_
+‘SŠp•¶Žš‚ÆAJIS X 0201‚Å’è‹`‚µ‚½‚¢‚í‚ä‚é”¼ŠpƒJƒi•¶Žš‚ð“¯ˆê‚ÌƒR[ƒh‘ÌŒn‚Å•\Œ»
+‚Å‚«‚éB 
+“ú–{ŒêŠÂ‹«‚É‚¨‚¢‚Ä‚ÍAMS-DOS‚Å“ú–{Œê—p•¶ŽšƒR[ƒh‚Æ‚µ‚ÄÌ—p‚³‚ê‚ÄˆÈ—ˆAƒpƒ\ƒRƒ“
+‚É‚¨‚¢‚Äˆ³“|“I‚È•‹y“x‚ª‚ ‚èA‚»‚Ì‘¼‚Ì•¶Žš•„†‰»•ûŽ®‚É”ä‚×‚Äƒf[ƒ^ŒðŠ·‰Â”\«
+‚ª‚‚¢ (‚½‚¾‚µA•¶ŽšW‡‚É‚Â‚¢‚Ä‚ÍŽÀ‘•ƒxƒ“ƒ_‚ªJIS X 0208‚Å‹K’è‚³‚ê‚Ä‚¢‚È‚¢
+‹@ŽíˆË‘¶‚ÌŠg’£‚ðŽ{‚µ‚Ä‚¢‚é‚±‚Æ‚ª‘½‚­A‚±‚¤‚¢‚Á‚½Šg’£•”•ª‚ÉŠÖ‚µ‚Ä‚Íƒf[ƒ^ŒðŠ·
+‰Â”\«‚ª’á‚¢)B
+
+Œ‡“_
+”¼ŠpƒJƒi‚Ì‚½‚ß‚Ì—Ìˆæ‚ðŠm•Û‚µ‚½ŠÖŒWãAƒR[ƒhƒV[ƒNƒGƒ“ƒX‚ª‹æ“_”Ô†‚Ìu‹æv‚Ì
+‹æØ‚è‚Å‚Í‚È‚¢‰ÓŠ‚Å•ª’f‚µ‚Ä‚¢‚éB‚±‚Ì‚½‚ßAƒR[ƒh”Ô†‚ð‰‰ŽZ‚Å‹‚ß‚éÛ‚Í”ÏŽG
+‚Èˆ—‚ª•K—v‚Å‚ ‚éB
+2ƒoƒCƒg–Ú‚É80(16)–¢–ž(ASCII‚ÌƒR[ƒh—Ìˆæ)‚ªŒ»‚ê‚éB‚±‚Ì‚½‚ßA•¶Žš‚Ì‹æØ‚è‚Ì”»’è
+‚ÉŽèŠÔ‚ª‚©‚©‚éBƒtƒ@ƒCƒ‹A“d•¶‚Ìæ“ª‚©‚ç•¶ŽšƒR[ƒh”»’è‚·‚éê‡‚Í‚æ‚¢‚ªAŒã‚ë
+‚©‚ç•¶ŽšƒR[ƒh‚Ì”»’è‚ð‚µ‚æ‚¤‚ÆŽv‚¤‚ÆAÅˆ«‚Ìê‡Aæ“ª‚Ü‚Å‚½‚Ç‚ç‚È‚¢‚Æ‚¢‚¯‚È
+‚¢‚±‚Æ‚ª‚ ‚é‚½‚ßAƒvƒƒOƒ‰ƒ€‚Ìì‚è•û‚ÉH•v‚ª•K—v‚É‚È‚éB 
+ƒVƒ“ƒOƒ‹ƒoƒCƒg•¶ŽšƒR[ƒh‚âAƒ}ƒ‹ƒ`ƒoƒCƒg‚ÌEUC-JPAUTF-8‚È‚Ç‚æ‚èAƒvƒƒOƒ‰ƒ~ƒ“
+ƒOã‚Ìˆµ‚¢‚ª“ï‚µ‚¢B¨ŽŸ€
+JIS•â•Š¿Žš‚ª•\Œ»‚Å‚«‚È‚¢B•â•Š¿Žš‚Ì•¶Žš”‚ÍShift_JIS‚ÌƒR[ƒh–¢“o˜^•”•ª‚ÉŽû
+‚Ü‚ç‚È‚¢B
+
+2ƒoƒCƒg–Ú‚ª5C“™‚É¬‚è‚¤‚é‚±‚Æ‚É‚æ‚é–â‘è
+
+Shift_JIS‚Å‚ÍAuƒ\vu‰\v‚È‚Çˆê•”‚ÌŽš‚Ì2ƒoƒCƒg–Ú‚ÉA5C(16)iShift_JIS‚Å‚Í
+‹L†AASCII‚È‚Ç‚Å‚ÍƒoƒbƒNƒXƒ‰ƒbƒVƒ…j‚ðŽg—p‚µ‚Ä‚¢‚éB‘½‚­‚ÌƒvƒƒOƒ‰ƒ~ƒ“ƒO
+Œ¾Œê (CAPerlABourne Shell‚È‚Ç‘½”) ‚Å‚ÍA‚±‚Ì5C(16)‚ðƒGƒXƒP[ƒv•¶Žš‚Æ‚µ‚Ä
+‚¢‚éB‚µ‚½‚ª‚Á‚ÄAƒ\[ƒXƒR[ƒh‚â•¶Žšƒf[ƒ^‚Ìˆ—‚É‚¨‚¢‚ÄShift_JIS‚ð‘z’è‚µ‚Ä
+‚¢‚È‚¢ƒvƒƒOƒ‰ƒ~ƒ“ƒOŠÂ‹«‚Å‚Í–â‘è‚ª‹N‚±‚éB‚±‚Ì–â‘è‚ÍA“¯‚¶‚æ‚¤‚É2ƒoƒCƒg–Ú‚Ì
+”ÍˆÍ‚É5C(16)‚ðŠÜ‚ÞBig5‚âA‚Ü‚ê‚Å‚Í‚ ‚é‚ªGBK‚È‚Ç‚Ì•¶ŽšƒR[ƒh‚Å‚à”­¶‚µ‚¤‚éB
+
+‚Ü‚½A5C(16)ˆÈŠO‚É‚Â‚¢‚Ä‚à—ÞŽ—‚Ì–â‘è‚ª”­¶‚·‚é‚±‚Æ‚ª‚ ‚éB‚½‚Æ‚¦‚ÎAUnix‚â
+MS-DOS‚È‚Ç‚ÌƒVƒFƒ‹ã‚Å7C(16) (Shift_JIS‚âASCII‚Å‚Íƒo[ƒeƒBƒJƒ‹ƒo[) ‚ðŠÜ‚Þ
+•¶Žši|Aƒ|A„|A‰|AŠ|A‹|AŒ|Accj‚ðƒtƒ@ƒCƒ‹–¼‚ÉŽg—p‚µ‚æ‚¤‚Æ‚·‚é‚ÆA
+ƒpƒCƒv‹L†‚Æ”FŽ¯‚³‚êA³í‚Éƒtƒ@ƒCƒ‹‚ªì¬‚³‚ê‚È‚©‚Á‚½‚èA“Ç‚Ýž‚Ý‚ª•s—Ç‚É
+‚È‚Á‚½‚è‚·‚é‚±‚Æ‚ª‚ ‚éB
+
+Œ»Ý‚Å‚àAƒVƒ“ƒOƒ‹ƒoƒCƒg•¶ŽšƒR[ƒh‘Î‰ž‚Ìƒ\ƒtƒgƒEƒFƒA‚ðShift_JISŠÂ‹«‚ÅŽg—p‚·‚é
+‚ÆA‰üs‚È‚Ç‚Ì“®ì‚âƒtƒ@ƒCƒ‹–¼‚Ìˆ—‚È‚Ç‚É‚µ‚Î‚µ‚Î‚±‚Ì–â‘è‚ª‚Â‚«‚Ü‚Æ‚¤B‚±‚Ì
+•s‹ï‡‚ðµ‚­A2ƒoƒCƒg–Ú‚É5C(16)‚ðŽ‚Â•¶Žš‚Ì‚±‚Æ‚ðA‚¾‚ß•¶Žš‚ÆŒÄ‚ÑA‚±‚Ì’†‚É‚Í
+uƒ\vu\vu”\vu•\v‚È‚Çˆê”Ê‚ÉŽg—p•p“x‚Ì‚‚¢•¶Žš‚à‚ ‚é[1]B
+
+‚±‚Ì–â‘è‚ð‰ñ”ð‚·‚é“`““I‚È•û–@‚Æ‚µ‚ÄAƒ\[ƒXƒR[ƒh‘S‘Ì‚ðEUCƒR[ƒh‚âUTF-8‚È‚Ç
+‚É•ÏŠ·‚µ‚Ä‚©‚çƒRƒ“ƒpƒCƒ‹‚µ‚½‚èŽÀs‚µ‚½‚è‚·‚é•û–@‚ª‚ ‚éB‚ ‚é‚¢‚Íuƒ\\v‚Ì
+‚æ‚¤‚É2ƒoƒCƒg–Ú‚Ì’¼‘O‚ÉƒGƒXƒP[ƒv•¶Žš‚Ì5C(16)‚ð‹Lq‚µA‚¾‚ß•¶Žš‚ð•¶Žš‚Æ‚µ‚Ä
+³‚µ‚­”FŽ¯‚³‚¹‚é‚È‚Ç‚Ì•û–@‚à‚ ‚é(Perl ‚ÌSjisƒ\ƒtƒgƒEƒFƒA‚È‚Ç)BÅ‹ß‚Å‚ÍA‘½‚­
+‚ÌƒvƒƒOƒ‰ƒ~ƒ“ƒOŒ¾Œê‚ªShift_JIS‚É‘Î‰ž‚·‚é‚æ‚¤‚É‚È‚Á‚½‚½‚ßAShift_JIS‚ðŠÜ‚Þ
+ƒ\[ƒXƒR[ƒh‚âƒf[ƒ^‚ðˆµ‚Á‚Ä‚à‚±‚Ì–â‘è‚Í‹N‚«‚È‚­‚È‚Á‚½‚ªA‹Œ—ˆ‚Ìƒ\ƒtƒgƒEƒFƒA
+Ž‘ŽY‚ð—˜—p‚·‚éã‚Å‚ÍˆË‘RA–â‘è‚ª‚Â‚«‚Ü‚Æ‚¤B
+
+  •\ 2ƒoƒCƒg–Ú‚É5C(16)‚ðŽ‚Â•¶Žšˆê—— •¶Žš •„†(16i) “Ç‚ÝEˆÓ–¡ 
+
+  \   815C ƒ_ƒbƒVƒ…
+  ƒ\   835C •Ð‰¼–¼‚Ìu‚»v
+  „\   845C ƒLƒŠƒ‹•¶Žš‚ÌƒEƒB
+  ‡\/? 875C WindowsŠÂ‹«‚Å‚Íƒ[ƒ}”Žš‚Ì9
+            MacŠÂ‹«‚Å‚ÍGBiƒMƒKƒoƒCƒgj
+  ‰\   895C ‚¤‚í‚³B
+  Š\   8A5C ŠC—¢
+  ‹\   8B5C ‚ ‚´‚Þ‚­B¼‹\
+  Œ\   8C5C ‚¯‚¢Bl–¼B
+  \   8D5C ‚©‚Ü‚¦‚éB\‘¢
+  Ž\   8E5C ƒJƒCƒRB—{Ž\
+  \   8F5C Š¿”Žš‚Ì10B
+  \   905C ‚à‚¤‚·A‚µ‚ñB\¿
+  ‘\   915C ‚»A‚ÐBu‘]v‚Ìˆóü•W€Žš‘ÌB‘\‘·
+  ’\   925C ‚½‚ñB’\y
+  “\   935C ‚Í‚éB“\•t
+  ”\   945C ‚Ì‚¤B”\—Í
+  •\   955C ‚ ‚ç‚í‚·A‚Ð‚å‚¤B•\Œ»
+  –\   965C ‚ ‚Î‚ê‚éA‚Ú‚¤B–\—Í
+  —\   975C ‚ ‚ç‚©‚¶‚ßA‚æB—\”õ
+  ˜\   985C ‚ë‚­B•î˜\
+  ™\   995C ‚ÆA‚¤‚³‚¬Bu“ev‚ÌˆÙ‘ÌŽš
+  š\   9A5C ‚©‚­Bš\ŒŒ
+  ›\   9B5C ‚±‚¤B›\˜aiu˜a‚Ì”ñ‘Š·‚¦j
+  œ\   9C5C ‚âB–í¶‚Ìu–ív‚Ì‹ŒŽš‘Ì
+  \   9D5C ‚¾B\•ß
+  ž\   9E5C “È‚Ì•Ê‘Ì
+  Ÿ\   9F5C ‚·‚·‚éA‚»‚¤A‚µ‚å‚¤B
+  à\   E05C ‚³‚ç‚¤A‚µ‚ã‚ñB
+  á\   E15C ‚Ó‚²A‚Ù‚ñB
+  â\   E25C ‚Æ‚éA‚Ö‚¢B
+  ã\   E35C ‚ ‚âA‚³‚¢B
+  ä\   E45C ‚Å‚ñA‚µ‚èBä\•”
+  å\   E55C ‚ ‚¢B˜a‹Cå\X
+  æ\   E65C G‚Ì‹ŒŽš‘Ì
+  ç\   E75C ‘Ì‚ÌŒÃŽš
+  è\   E85C ‚Â‚ÎB“‚Ìè\i’ÕjB
+  é\   E95C ‚Ü‚ñBé\“ª
+  ê\   EA5C ƒoƒ“B’¹‚Ì–¼B
+  ð€   ED5C ‚µ‚ã‚ñB
+  öÁ   EE5C ‚¬‚å‚­B
+  íµ   FA5C ‚í‚½A‚±‚¤B
+  ì‰   FB5C ‚¬‚ñB
+
+ƒR[ƒh‹óŠÔ‚É‚¨‚¯‚é•¶Žš”§ŒÀ
+Shift_JIS‚Ì2ƒoƒCƒgƒR[ƒh‚Ì‹óŠÔ‚ÍA‘æ1ƒoƒCƒg‚ª81(16)-9F(16)‚È‚ç‚Ñ‚ÉE0(16)-FC(16)A
+‘æ2ƒoƒCƒg‚ª40(16)-7E(16)‚È‚ç‚Ñ‚É80(16)-FC(16)‚Å‚ ‚éB‚µ‚½‚ª‚Á‚ÄA60~188=11280
+•¶ŽšA‚³‚ç‚É1ƒoƒCƒgƒR[ƒh‚ª158•¶Žš iƒXƒy[ƒX‚ðŠÜ‚ÝADEL‚Í”‚¦‚¸j‚Å‚ ‚é‚½‚ßA
+Œv11438•¶Žš‚Æ‚È‚éB
+
+‚È‚¨AShift_JIS-2004‚Å‚ÍA2ƒoƒCƒg•¶Žš‚ª11233•¶ŽšA1ƒoƒCƒg•¶Žš‚ª158•¶Žš‚Ì‚½‚ßA
+‡Œv11391•¶Žš‚ðŽg—p‚µ‚Ä‚¢‚éB
+
+Shift_JIS‚É‚¨‚¯‚éuƒVƒtƒgv‚Æ‚Í
+ISO-2022-JP‚ÍŽwŽ¦ƒV[ƒPƒ“ƒX‚ÅŠ¿Žš‚ÆƒAƒ‹ƒtƒ@ƒxƒbƒg‚ðØ‚è‘Ö‚¦‚é•„†‰»•ûŽ®‚Å‚ ‚éB
+‚Ü‚½AEUC-JP‚Í•â•Š¿Žš‚Æ”¼ŠpƒJƒ^ƒJƒi‚ðƒVƒ“ƒOƒ‹ƒVƒtƒg‚ÅˆêŽž“I‚ÉØ‚è‘Ö‚¦‚ÄŽg‚¤
+•„†‰»•ûŽ®‚Å‚ ‚éB‚±‚ê‚ç‚Ì•„†‰»•ûŽ®‚Å‚ÍAŠe•¶ŽšW‡‚Ì–Ê‚ðƒVƒtƒgƒR[ƒh‚É‚æ‚Á‚Ä
+Ø‚è‘Ö‚¦iƒVƒtƒg‚µj‚Ä‚¢‚éB
+
+‚µ‚©‚µ‚È‚ª‚çAShift_JIS‚ÌwƒVƒtƒgx‚Æ‚Í‚±‚ÌˆÓ–¡‚Å‚ÌƒVƒtƒg‚Å‚Í‚È‚¢B‚Ü‚½Aƒrƒbƒg
+ƒVƒtƒg‚ÌwƒVƒtƒgx‚Å‚à‚È‚¢B‚±‚ÌwƒVƒtƒgx‚Æ‚ÍA256~256‚Ì•½–Ê‚Ì’†‚Å•¶Žš‚ð
+•¡ŽG‚É"‚¸‚ç‚·"‚Æ‚¢‚¤ˆÓ–¡‚ÌwƒVƒtƒgx‚Å‚ ‚éB
+
+Shift_JIS‚Æ‹æ“_”Ô†
+Shift_JIS‚ª•„†‰»‚Ì‘ÎÛ‚É‚·‚é•¶ŽšƒZƒbƒg‚ÍAJIS X 0208‚Å‚ ‚éB‚±‚Ì•„†‰»•¶Žš
+W‡‚É‚ÍA‹æ“_”Ô†‚Æ‚¢‚¤ŠT”O‚ª‘¶Ý‚·‚éB‚±‚ê‚ÍA94~94‚Ì•¶Žš•\‚Ìs‚Æ—ñ‚Ì”Ô†
+‚Ì‘g‚Å‚ ‚éB
+
+Shift_JIS‚Å‚ÍA8140(16)-FCFC(16)‚Æ‚¢‚¤‚æ‚¤‚ÉAJIS X 0208‚Æ‚Í‚Ü‚Á‚½‚­ˆá‚Á‚½
+ƒR[ƒh‘ÌŒn‚Å‚ ‚é‚ªAJIS X 0208‚ðŒvŽZ‚É‚æ‚è•ÏŒ`‚µ‚½‚à‚Ì‚Å‚ ‚é‚½‚ßA‹æ“_”Ô†‚ð
+—p‚¢‚Ä•¶Žš‚ÌƒR[ƒhƒ|ƒCƒ“ƒg‚ðŽw‚µŽ¦‚·‚±‚Æ‚ª‘½‚¢B“à—e‚É‚Â‚¢‚Ä‚ÍAJIS X 0208‚Ì
+1`94‹æ‚Æ“¯‚¶‚Å‚ ‚éB‚½‚¾‚µA‹@ŽíˆË‘¶•¶Žš‚Å‚ÍAƒVƒtƒgJIS‚Ì•„†‹óŠÔ‚©‚ç‹t¬‚µA
+94‹æ‚Ì‰º•û‚É‚ ‚½‚©‚à120‹æ‚Ü‚Å‚ªŠg’£‚µ‚Ä‚¢‚é‚©‚Ì‚æ‚¤‚Éˆµ‚¤‚±‚Æ‚ª‚ ‚éB95‹æˆÈã
+‚ÍAISO/IEC 2022‚É‘¥‚Á‚½JIS X 0208‚Ì\‘¢‚Å‚Í‘¶Ý‚µ“¾‚È‚¢‚Ì‚ÅA–{—ˆ‚Í‚¨‚©‚µ‚¢B
+ƒxƒ“ƒ_“ÆŽ©‚Ì”ñŒöŽ®‚ÈŠT”O‚Å‚ ‚éB‚È‚¨AJIS X 0213‚Ì‹KŠi‚Ìˆê•”‚Å‚ ‚é
+Shift_JISX0213•„†‰»•\Œ»‚É‚¨‚¢‚Ä‚ÍA‘æ1ƒoƒCƒgF0(16)ˆÈ~‚ð2–Ê‚Ì•¶Žš‚ÉŠ„‚è“–‚Ä
+‚Ä‚¨‚èA•S‰½‹æ‚Æ‚¢‚¤‚æ‚¤‚È‘¶Ý‚µ‚È‚¢‹æ”Ô†‚Í“oê‚µ‚È‚¢B
+
+ux-sjisv‚ÆuMS_Kanjiv
+ux-sjisv‚ÆuMS_Kanjiv‚Í‚Æ‚à‚ÉAHTMLƒhƒLƒ…ƒƒ“ƒg‚Ìucharsetv‚ÌŽw’è‚É
+uShift_JISv‚Ì•Ê–¼‚Æ‚µ‚ÄŽg‚¤‚±‚Æ‚ªo—ˆ‚éB
+
+ux-sjisv‚ÍIANA‚ÉuShift_JISv‚Æ‚¢‚¤–¼‘O‚ð“o˜^‚·‚é‘O‚ÉANetscape Navigator 2.0
+‚É‚¨‚¢‚ÄŽg‚Á‚Ä‚¢‚½ƒGƒ“ƒR[ƒfƒBƒ“ƒO‚ÌŽw’èŽq–¼‚Å‚ ‚éBˆê•”‚ÌHTML¶¬ƒ\ƒtƒg‚ªŽ©“®
+‚Å‚±‚ÌŽw’èŽq‚ð‘g‚Ýž‚ñ‚ÅŽg‚Á‚Ä‚¢‚éB‚»‚Ì‚½‚ß”FŽ¯‰Â”\‚Èƒuƒ‰ƒEƒU‚ª‚ ‚é‚ªA
+uShift_JISv‚É‘‚«Š·‚¦‚é‚±‚Æ‚ð„§‚µ‚Ä‚¢‚éB
+
+‹r’
+—¤–ì—DŽ÷•Ò (2006-12-23XV (2001-07-13ì¬)). "‚¾‚ß•¶Žš" ’ÊM—pŒê‚ÌŠî‘b’mŽ¯E
+’ÊM‹Zp•¶Žš—pŒê•Ò (CTCHRY). ’ÊM—pŒê‚ÌŠî‘b’mŽ¯ •ÒŽ[ˆÏˆõ‰ï. 2007”N11ŒŽ5“ú‰{——.
+
+=head1 ‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚Å‚Ì "ShiftJIS"
+
+‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚Å‚¢‚¤ "ShiftJIS" ‚Íã‹L‚ÌuƒR[ƒh‹óŠÔ‚É‚¨‚¯‚é•¶Žš”§ŒÀv‚Ì
+11438•¶Žš‚·‚×‚Ä‚ðˆµ‚¦‚é‚±‚Æ‚ð–ÚŽw‚µ‚Ä‚¢‚Ü‚·B‚»‚Ì‚½‚ß‚ÉƒAƒ‹ƒSƒŠƒYƒ€‚Í2‚ÂŽg‚í
+‚ê‚Ä‚¢‚Ü‚·B
+
+=over 2
+
+=item * ƒAƒ‹ƒSƒŠƒYƒ€ 1
+
+ƒIƒNƒeƒbƒg‚Ì•À‚Ñ‚©‚ç•¶Žš‚ðŽæ‚èo‚·‚Æ‚«A1ƒIƒNƒeƒbƒgƒR[ƒh‚Æ2ƒIƒNƒeƒbƒgƒR[ƒh‚Ì
+‹æ•Ê‚Í‘æ1ƒIƒNƒeƒbƒgƒR[ƒh‚Ì‚Ý‚Ås‚í‚ê‚Ü‚·B‘æ2ƒIƒNƒeƒbƒg‚Íl—¶‚³‚ê‚Ü‚¹‚ñB
+
+    1ƒIƒNƒeƒbƒgƒR[ƒh:
+      0x00-0x80, 0xA0-0xDF, 0xFD-0xFF
+
+    2ƒIƒNƒeƒbƒgƒR[ƒh:
+      ‘æ1ƒIƒNƒeƒbƒg  0x81-0x9F, 0xE0-0xEF, 0xF0-0xFC
+      ‘æ2ƒIƒNƒeƒbƒg  0x00-0xFF (All octet)
+
+    •s³‚È1ƒIƒNƒeƒbƒgƒR[ƒh:
+      0x81-0x9F, 0xE0-0xFC
+      * •¶Žš—ñ‚ÌÅIƒIƒNƒeƒbƒg‚ª2ƒIƒNƒeƒbƒgƒR[ƒh‚Ì‘æ1ƒIƒNƒeƒbƒg‚Æ“¯‚¶ê‡
+
+ ‚±‚Ì "ShiftJIS" ‚Í Informix Ascii 'INFORMIX V6 ALS' ‚Ì3ƒIƒNƒeƒbƒgƒR[ƒh‚ð
+œ‚¯‚ÎA‚Ç‚ÌƒVƒtƒgJISƒx[ƒX‚Ì•¶ŽšƒR[ƒh‚Å‚àˆµ‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚·B
+(Informix Ascii ƒ†[ƒU‚Ì•ûA\‚µ–ó‚È‚¢B)
+
+ˆÈ‰º‚ÉƒR[ƒh•\‚ðŒfÚ‚µ‚Ü‚·B
+
+        1ƒIƒNƒeƒbƒgƒR[ƒh•\
+
+   0 1 2 3 4 5 6 7 8 9 A B C D E F 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x00-0x80
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 1|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 2|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 3|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 8|*| | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 9| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xA0-0xDF
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ E| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ F| | | | | | | | | | | | | |*|*|*| 0xFD-0xFF
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                                 2ƒIƒNƒeƒbƒgƒR[ƒh•\
+            ‘æ1ƒIƒNƒeƒbƒg                                    ‘æ2ƒIƒNƒeƒbƒg
+
+
+   0 1 2 3 4 5 6 7 8 9 A B C D E F                 0 1 2 3 4 5 6 7 8 9 A B C D E F 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0| | | | | | | | | | | | | | | | |              0|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x00-0xFF
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 1| | | | | | | | | | | | | | | | |              1|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 2| | | | | | | | | | | | | | | | |              2|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 3| | | | | | | | | | | | | | | | |              3|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 4| | | | | | | | | | | | | | | | |              4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 5| | | | | | | | | | | | | | | | |              5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 6| | | | | | | | | | | | | | | | |              6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 7| | | | | | | | | | | | | | | | |              7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 8| |*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x81-0x9F    8|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|              9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ A| | | | | | | | | | | | | | | | |              A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ B| | | | | | | | | | | | | | | | |              B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ C| | | | | | | | | | | | | | | | |              C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ D| | | | | | | | | | | | | | | | |              D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xE0-0xFC    E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ F|*|*|*|*|*|*|*|*|*|*|*|*|*| | | |              F|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+    *•s³‚È* 1ƒIƒNƒeƒbƒgƒR[ƒh
+
+•¶Žš—ñ‚ÌÅIƒIƒNƒeƒbƒg‚ª2ƒIƒNƒeƒbƒgƒR[ƒh‚Ì‘æ1ƒIƒNƒeƒbƒg‚Æ“¯‚¶ê‡
+
+•s³‚Å‚ ‚Á‚Ä‚à–³Ž‹‚³‚ê‚½‚èAŽ©“®“I‚Éíœ‚³‚ê‚é‚±‚Æ‚Í‚ ‚è‚Ü‚¹‚ñB
+—á‚¦‚ÎAEsjis::chop ‚Í‚±‚ÌƒIƒNƒeƒbƒg‚ð•Ô‚µ‚Ü‚·B
+
+   0 1 2 3 4 5 6 7 8 9 A B C D E F 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 1| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 2| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 3| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 4| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 5| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 6| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 7| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 8| |M|M|M|M|M|M|M|M|M|M|M|M|M|M|M| 0x81-0x9F
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 9|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ A| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ B| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ C| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ D| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ E|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ F|M|M|M|M|M|M|M|M|M|M|M|M|M| | | |  0xE0-0xFC
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+ƒxƒ“ƒ_•Ê SJIS ƒR[ƒhˆê——
+L<http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html>
+
+ DEC PC                         0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ DEC WS                         0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Fujitsu TrueType font (PC)     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Fujitsu FontCity font (PC)     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Hitachi PC                     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Hitachi WS                     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ IBM                            0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ NEC Windows (PC)               0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ NEC DOS (PC)                   0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ SONY NEWS-OS                   0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Sun Wabi                       0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Unisys PC                      0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ HP Japan Japanese HP-15        0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ AT&T Japan                     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Mitsubishi Electric FONTRUNNER 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Concurrent Japan               0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Informix ASCII INFORMIX V6 ALS 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC), (0xFD)(0xA1-0xFE)(0xA1-0xFE)
+ Oracle Oracle7 (Release 7.1.3) 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x00-0xFF)
+ Sybase SQL Server, Open Server 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+
+=item * ƒAƒ‹ƒSƒŠƒYƒ€ 2
+
+ƒAƒ‹ƒSƒŠƒYƒ€ 1 ‚É‚àŠÖ‚í‚ç‚¸Atr/// ‚É‚æ‚è•¶Žš‚Ì”ÍˆÍ‚ðŽw’è‚³‚ê‚½ê‡‚ÍˆÈ‰º‚Ì•¶Žš
+‚Ì‚Ý‚ª—LŒø‚Æ‚È‚è‚Ü‚·B
+
+    1ƒIƒNƒeƒbƒgƒR[ƒh:
+      0x00-0x80, 0xA0-0xDF, 0xFD-0xFF
+
+    2ƒIƒNƒeƒbƒgƒR[ƒh:
+      ‘æ1ƒIƒNƒeƒbƒg  0x81-0x9F, 0xE0-0xEF, 0xF0-0xFC
+      ‘æ2ƒIƒNƒeƒbƒg  0x40-0x7E, 0x80-0xFC
+
+—á‚¦‚ÎA[\x81\x00-\x82\xFF] ‚Æ‘‚©‚ê‚½ê‡‚Í [\x81\x82][\x40-\x7E\x80-\xFC] ‚ð
+ˆÓ–¡‚µ‚Ü‚·B
+
+ˆÈ‰º‚ÉƒR[ƒh•\‚ðŒfÚ‚µ‚Ü‚·B
+
+        1ƒIƒNƒeƒbƒgƒR[ƒh•\
+
+   0 1 2 3 4 5 6 7 8 9 A B C D E F 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x00-0x80
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 1|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 2|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 3|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 8|*| | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 9| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xA0-0xDF
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ E| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ F| | | | | | | | | | | | | |*|*|*| 0xFD-0xFF
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+                                 2ƒIƒNƒeƒbƒgƒR[ƒh•\
+            ‘æ1ƒIƒNƒeƒbƒg                                    ‘æ2ƒIƒNƒeƒbƒg
+
+   0 1 2 3 4 5 6 7 8 9 A B C D E F                 0 1 2 3 4 5 6 7 8 9 A B C D E F 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0| | | | | | | | | | | | | | | | |              0| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 1| | | | | | | | | | | | | | | | |              1| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 2| | | | | | | | | | | | | | | | |              2| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 3| | | | | | | | | | | | | | | | |              3| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 4| | | | | | | | | | | | | | | | |              4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x40-0x7E
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 5| | | | | | | | | | | | | | | | |              5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 6| | | | | | | | | | | | | | | | |              6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 7| | | | | | | | | | | | | | | | |              7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 8| |*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x81-0x9F    8|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x80-0xFC
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|              9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ A| | | | | | | | | | | | | | | | |              A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ B| | | | | | | | | | | | | | | | |              B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ C| | | | | | | | | | | | | | | | |              C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ D| | | | | | | | | | | | | | | | |              D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xE0-0xFC    E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ F|*|*|*|*|*|*|*|*|*|*|*|*|*| | | |              F|*|*|*|*|*|*|*|*|*|*|*|*|*| | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+=back
+
+=head1 ƒS[ƒ‹
+
+ƒvƒƒOƒ‰ƒ~ƒ“ƒO Perl ‘æ3”Å VOLUME 1 (ISBN 4-87311-096-3)
+15Í Unicode ŽQÆ
+
+—‘z“I‚É‚ÍAˆÈ‰º‚Ì5‚Â‚ÌƒS[ƒ‹‚ðŽÀŒ»‚µ‚æ‚¤‚Æl‚¦‚Ä‚¢‚Ü‚·B
+
+=over 2
+
+=item ƒS[ƒ‹1
+
+Šù‘¶‚ÌƒoƒCƒgŽwŒü‚ÌƒXƒNƒŠƒvƒg‚ÍAˆÈ‘Oˆµ‚Á‚Ä‚¢‚½Šù‘¶‚ÌƒoƒCƒgŽwŒü‚Ìƒf[ƒ^‚É‘Î‚µ
+‚ÄAˆÈ‘O‚Æ“¯—l‚É“®ì‚·‚×‚«‚Å‚ ‚éB
+
+‚±‚ê‚Í ShiftJIS ‚ªƒoƒCƒgŽwŒü‚Å‚ ‚é ASCII ‚¨‚æ‚Ñ JIS X 0201 ‚Æ‘g‡‚í‚¹‚Ä—˜—p
+‚Å‚«‚é‚æ‚¤ÝŒv‚³‚ê‚½‚±‚Æ‚É‚æ‚Á‚ÄA‚·‚Å‚É’B¬‚³‚ê‚Ä‚¢‚Ü‚·B
+
+=item ƒS[ƒ‹2
+
+Šù‘¶‚ÌƒoƒCƒgŽwŒü‚ÌƒXƒNƒŠƒvƒg‚ÍA‰½‚àŽè‚ð‰Á‚¦‚¸‚ÉA(‚»‚¤‚·‚é‚±‚Æ‚ª“KØ‚Å‚ ‚ê‚Î)
+V‚µ‚¢•¶ŽšŽwŒü‚Ìƒf[ƒ^‚É‘Î‚µ‚Ä‚à“®ì‚·‚é‚æ‚¤‚É‚È‚é‚×‚«‚Å‚ ‚éB
+
+‘gž‚ÝŠÖ” length, substr, index, rindex, pos ‚È‚Ç‚Ì•¶Žš—ñ‚Ì’·‚³‚âˆÊ’u‚ðˆµ‚¤
+‚à‚Ì‚Í¡‚Ü‚Å‚Ç‚¨‚è‚É1ƒIƒNƒeƒbƒg‚ð 1 ‚Æ”‚¦‚Ü‚·B‚±‚Ì•”•ª‚É‚Â‚¢‚Ä‰½‚àŽè‚Í‰Á
+‚í‚è‚Ü‚¹‚ñB2ƒIƒNƒeƒbƒgƒR[ƒh1•¶Žš‚Ì length ‚Í 2 ‚É‚È‚è‚Ü‚·B
+
+ˆê•ûAƒXƒNƒŠƒvƒg’†‚Ì³‹K•\Œ»‚Í‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚É‚æ‚Á‚Äƒ}ƒ‹ƒ`ƒoƒCƒg•¶Žš‚Ì‚½‚ß‚Ì
+ƒAƒ“ƒJƒŠƒ“ƒOˆ—‚ª‘‚«‰Á‚í‚è‚Ü‚·B‚Â‚Ü‚èŽè‚ð‰Á‚¦‚é•K—v‚ª‚ ‚é‚Ì‚Å‚·‚ªA‚»‚ê‚ð
+‚ ‚È‚½‚Ì‘ã‚í‚è‚É‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚ªs‚¢‚Ü‚·B
+
+ƒS[ƒ‹1‚ÆƒS[ƒ‹2‚Ì“à—e‚ð}Ž¦‚µ‚Ü‚·B
+
+                                   GOAL#1  GOAL#2
+                            (a)     (b)     (c)     (d)     (e)
+         „¡„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„¦„Ÿ„Ÿ„Ÿ„¦„Ÿ„Ÿ„Ÿ„¦„Ÿ„Ÿ„Ÿ„¦„Ÿ„Ÿ„Ÿ„¦„Ÿ„Ÿ„Ÿ„¢
+         „  ƒf[ƒ^       „  Old  „  Old  „  New  „  Old  „  New  „ 
+         „¥„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„©„Ÿ„Ÿ„Ÿ„©„Ÿ„Ÿ„Ÿ„¨„Ÿ„Ÿ„Ÿ„©„Ÿ„Ÿ„Ÿ„¨„Ÿ„Ÿ„Ÿ„§
+         „  ƒXƒNƒŠƒvƒg   „  Old  „      Old      „      New      „ 
+         „¥„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„©„Ÿ„Ÿ„Ÿ„©„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„¨„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„§
+         „  ƒCƒ“ƒ^ƒvƒŠƒ^ „  Old  „              New              „ 
+         „¤„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„¨„Ÿ„Ÿ„Ÿ„¨„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„£
+          Old --- Šù‘¶‚ÌƒoƒCƒgŽwŒü
+          New --- V‚µ‚¢•¶ŽšŽwŒü
+
+ƒf[ƒ^AƒXƒNƒŠƒvƒgAƒCƒ“ƒ^ƒvƒŠƒ^‚ÌVE‹Œ‚ÉŠÖ‚µ‚ÄAã‚Ì (a) ‚©‚ç (e) ‚Ü‚Å‚Ì
+‘g‡‚¹‚ª‚ ‚è‚Ü‚·B‚±‚Ì•¶‘‚ª‘‚©‚ê‚½“–Žž‚É‘¶Ý‚µ‚È‚©‚Á‚½ Encode ƒ‚ƒWƒ…[ƒ‹‚Æ
+‚±‚Ìƒ\ƒtƒgƒEƒFƒAA‚¨‚æ‚Ñ‘¶Ý‚µ‚Ä‚¢‚½ JPerl ‚ð‘‚«‘«‚µ‚Ä‚Ý‚Ü‚µ‚å‚¤B
+
+                            (a)     (b)     (c)     (d)     (e)
+                                           JPerl          Encode,Sjis
+         „¡„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„¦„Ÿ„Ÿ„Ÿ„¦„Ÿ„Ÿ„Ÿ„¦„Ÿ„Ÿ„Ÿ„¦„Ÿ„Ÿ„Ÿ„¦„Ÿ„Ÿ„Ÿ„¢
+         „  ƒf[ƒ^       „  Old  „  Old  „  New  „  Old  „  New  „ 
+         „¥„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„©„Ÿ„Ÿ„Ÿ„©„Ÿ„Ÿ„Ÿ„¨„Ÿ„Ÿ„Ÿ„©„Ÿ„Ÿ„Ÿ„¨„Ÿ„Ÿ„Ÿ„§
+         „  ƒXƒNƒŠƒvƒg   „  Old  „      Old      „      New      „ 
+         „¥„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„©„Ÿ„Ÿ„Ÿ„©„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„¨„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„§
+         „  ƒCƒ“ƒ^ƒvƒŠƒ^ „  Old  „              New              „ 
+         „¤„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„¨„Ÿ„Ÿ„Ÿ„¨„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„£
+          Old --- Šù‘¶‚ÌƒoƒCƒgŽwŒü
+          New --- V‚µ‚¢•¶ŽšŽwŒü
+
+JPerl ‚ª‚Æ‚Ä‚à—D‚ê‚Ä‚¢‚é——R‚Í (c) ‚ÌˆÊ’u‚É‚ ‚é‚©‚ç‚Å‚·B‚·‚È‚í‚¿“ú–{Œêˆ—
+‚ðs‚¤‚½‚ß‚ÉƒXƒNƒŠƒvƒg‚É“Á•Ê‚È‹Lq‚ðs‚¤•K—v‚ª‚ ‚è‚Ü‚¹‚ñB
+
+‘ÎÆ“I‚È‚Ì‚Í Encode ƒ‚ƒWƒ…[ƒ‹‚â‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚É‚Ä "use Sjis;" ‚ð‹Lq‚·‚é
+ê‡‚Å‚·B‚±‚Ìê‡‚ÍV‚½‚ÈƒXƒNƒŠƒvƒg‚Ì‘‚«•û‚ð‚·‚é•K—v‚ª‚ ‚è‚Ü‚·B
+
+=item ƒS[ƒ‹3
+
+ƒvƒƒOƒ‰ƒ€‚ÍAV‚µ‚¢•¶ŽšŽwŒüƒ‚[ƒh‚Å‚àAˆÈ‘O‚ÌƒoƒCƒgŽwŒüƒ‚[ƒh‚Æ“¯‚¶ƒXƒs[
+ƒh‚Å“®ì‚·‚×‚«‚Å‚ ‚éB
+
+‚»‚ê‚Í–³—B‚¾‚Á‚ÄAˆÈ‰º‚ÌŽžŠÔ‚ª•K—v‚¾‚à‚ÌB
+
+(1) ƒ†[ƒU‚Ì‘‚¢‚½ƒXƒNƒŠƒvƒg‚ðƒGƒXƒP[ƒv‚µ‚ÄAƒoƒCƒgŽwŒü Perl Œü‚¯‚ÌƒXƒNƒŠ
+ƒvƒg‚É‘‚«Š·‚¦‚éŽžŠÔB‚½‚¾‚µAƒGƒXƒP[ƒv‚³‚ê‚½ƒXƒNƒŠƒvƒg‚Í•Û‘¶‚Å‚«‚é‚½‚ßA
+ŽŸ‰ñ‚©‚ç‚Í‚±‚ÌŽžŠÔ‚Í‚¢‚è‚Ü‚¹‚ñB
+
+(2) ƒGƒXƒP[ƒv‚³‚ê‚½ƒXƒNƒŠƒvƒg‚ªƒ}ƒ‹ƒ`ƒoƒCƒgƒAƒ“ƒJƒŠƒ“ƒOˆ—‚ðs‚¢‚È‚ª‚çA
+³‹K•\Œ»‚ðŽÀs‚·‚éŽžŠÔB
+
+‚·‚Å‚É‘¶Ý‚·‚é ASCII ƒf[ƒ^‚Í1•¶Žš‚ª1ƒIƒNƒeƒbƒg‚ÉƒpƒbƒN‚³‚ê‚Ä‚¢‚Ü‚·B‚»‚Ì
+ƒf[ƒ^‚ÆŒÝŠ·«‚ð•Û‚¿‚È‚ª‚ç•¶ŽšŽí‚ð‘‚â‚»‚¤‚Æ‚·‚é‚ÆAISO-2022 ‚Ì‚æ‚¤‚ÉƒGƒXƒP[
+ƒvƒV[ƒPƒ“ƒX‚ª•K—v‚Å‚ ‚Á‚½‚èAShiftJIS ‚â UTF-8 ‚Ì‚æ‚¤‚É "ƒGƒXƒP[ƒvƒrƒbƒg"
+‚ª•K—v‚É‚È‚Á‚½‚è‚µ‚Ü‚·B‚±‚ê‚ç‚ÌƒGƒXƒP[ƒvˆ—‚ª‰Á‚í‚é‚½‚ßAˆÈ‘O‚Æ“¯‚¶ƒXƒs[
+ƒh‚Å“®ì‚·‚×‚«‚Å‚ ‚é‚Æ‚¢‚¤‚Ì‚Í–³—‚È–Ú•W‚¾‚ÆŽv‚¢‚Ü‚·B
+
+=item ƒS[ƒ‹4
+
+Perl ‚ÍAƒoƒCƒgŽwŒü‚Ì Perl ‚Æ•¶ŽšŽwŒü‚Ì Perl ‚ÉŽ}•ª‚©‚ê‚¹‚¸‚ÉA1‚Â‚ÌŒ¾Œê‚Å
+‚ ‚è‘±‚¯‚é‚×‚«‚Å‚ ‚éB
+
+ƒoƒCƒgŽwŒü‚Ì Perl ‚Í‚·‚Å‚ÉƒoƒCƒiƒŠƒf[ƒ^‚ðˆµ‚¤‚±‚Æ‚ª‚Å‚«‚é‚½‚ßA•¶ŽšŽwŒü‚Ì
+Perl ‚ð•Ê—§‚Ä‚Åì¬‚·‚é•K—v‚Í‚ ‚è‚Ü‚¹‚ñB‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚Í’P‚É Perl ‚ÌƒAƒvƒŠ
+ƒP[ƒVƒ‡ƒ“ƒvƒƒOƒ‰ƒ€‚Å‚ ‚èAƒtƒBƒ‹ƒ^ƒvƒƒOƒ‰ƒ€‚Æ‚µ‚Äì¬‚³‚ê‚Ä‚¢‚Ü‚·BŠî–{“I
+‚É‚Í perl ‚ªŽÀs‚Å‚«‚éŠÂ‹«‚Å“®ì‚·‚é‚Å‚µ‚å‚¤B
+
+=item ƒS[ƒ‹5
+
+JPerl ƒ†[ƒU‚ª Perl ‚Å JPerl ‚ð•ÛŽç‚Å‚«‚é‚æ‚¤‚É‚È‚éB
+
+JPerl ‚Ìƒj[ƒY‚ª‚ ‚é‚Ì‚Å‚ ‚ê‚ÎA‚·‚È‚í‚¿ Perl ƒvƒƒOƒ‰ƒ}‚ª‘¶Ý‚·‚é‚Æ‚¢‚¤‚±‚Æ
+‚ðˆÓ–¡‚µ‚Ä‚¢‚é‚í‚¯‚ÅA¡‚Ü‚Å‚æ‚èˆÀS‚Å‚«‚é‚Æ‚¢‚¢‚ñ‚¾‚¯‚Ç‚È‚ŸB
+
+=back
+
+=head1 ŽQl•¶Œ£
+
+ C<ƒvƒƒOƒ‰ƒ~ƒ“ƒOPerl ‘æ3”Å VOLUME 1>
+ By Larry Wall, Tom Christiansen, Jon Orwant, ‹ß“¡ ‰Ãá –ó
+ 2002”N09ŒŽ ”­s
+ 756ƒy[ƒW
+ ISBN 4-87311-096-3
+ L<http://www.oreilly.co.jp/books/4873110963/>
+
+ C<ƒvƒƒOƒ‰ƒ~ƒ“ƒOPerl ‘æ3”Å VOLUME 2>
+ By Larry Wall, Tom Christiansen, Jon Orwant, ‹ß“¡ ‰Ãá –ó
+ 2002”N09ŒŽ ”­s
+ 680ƒy[ƒW
+ ISBN 4-87311-097-1
+ L<http://www.oreilly.co.jp/books/4873110971/>
+
+ C<PerlƒNƒbƒNƒuƒbƒN ‘æ2”Å VOLUME 1>
+ By Tom Christiansen, Nathan Torkington, Shibuya Perl Mongers ŠÄ–ó, Š”Ž®‰ïŽÐƒhƒLƒ…ƒƒ“ƒgƒVƒXƒeƒ€ –ó
+ 2004”N09ŒŽ ”­s
+ 752ƒy[ƒW
+ ISBN 4-87311-202-8
+ L<http://www.oreilly.co.jp/books/4873112028/>
+
+ C<PerlƒNƒbƒNƒuƒbƒN ‘æ2”Å VOLUME 2>
+ By Tom Christiansen, Nathan Torkington, Shibuya Perl Mongers ŠÄ–ó, Š”Ž®‰ïŽÐƒhƒLƒ…ƒƒ“ƒgƒVƒXƒeƒ€ –ó
+ 2004”N09ŒŽ ”­s
+ 464ƒy[ƒW
+ ISBN 4-87311-203-6
+ L<http://www.oreilly.co.jp/books/4873112036/>
+
+ C<Perl ƒNƒCƒbƒNƒŠƒtƒ@ƒŒƒ“ƒX>
+ By Stephen Spainhour, Ellen Siever, Nathan Patwardhan, ‹ß“¡ ‰Ãá, ‘äê Œ\ˆê ŠÄ–ó
+ 2000”N03ŒŽ ”­s
+ 784ƒy[ƒW
+ ISBN 4-900900-72-9
+ L<http://www.oreilly.co.jp/books/4900900729/>
+
+ C<CJKV“ú’†ŠØ‰zî•ñˆ—>
+ Chinese, Japanese, Korean & Vietnamese Computing
+ By Ken Lunde, ¬¼ Í, ‹tˆä ŽŒÈ –ó
+ 2002”N12ŒŽ ”­s
+ 1172ƒy[ƒW
+ ISBN 4-87311-108-0
+ L<http://www.oreilly.co.jp/books/4873111080/>
+
+ C<Úà ³‹K•\Œ» ‘æ2”Å>
+ By Jeffrey E. F. Friedl, “c˜a Ÿ –ó
+ 2003”N05ŒŽ ”­s
+ 464ƒy[ƒW
+ ISBN 4-87311-130-7
+ L<http://www.oreilly.co.jp/books/4873111307/>
+
+ C<Úà ³‹K•\Œ» ‘æ3”Å>
+ By Jeffrey E. F. Friedl, Š”Ž®‰ïŽÐƒƒ“ƒOƒe[ƒ‹^’·”ö ‚O –ó
+ 2008”N04ŒŽ ”­s
+ 528ƒy[ƒW
+ ISBN 978-4-87311-359-3
+ L<http://www.oreilly.co.jp/books/9784873113593/>
+
+ C<PerlƒvƒƒOƒ‰ƒ~ƒ“ƒO>
+ Larry Wall, Randal L.Schwartz, ‹ß“¡ ‰Ãá –ó
+ 1993”N2ŒŽ”­s
+ ISBN 4-89052-384-7
+ L<http://www.context.co.jp/~cond/books/old-books.html>
+
+ C<JISŠ¿ŽšŽš“T>
+ ŽÅ–ìkŽi •Ò’˜
+ 1456 •Å
+ ISBN 4-542-20129-5
+ L<http://www.webstore.jsa.or.jp/lib/lib.asp?fn=/manual/mnl01_12.htm>
+
+=head1 ŽÓŽ«
+
+‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚ÍAˆÈ‰º‚Ì•ûX‚Ì‚¨‚©‚°‚É‚æ‚èì¬‚³‚ê‚Ü‚µ‚½B“Á‚É‚±‚Ì POD ‚Í
+Encode ƒ‚ƒWƒ…[ƒ‹‚ðŽQl‚É‚µ‚Ä‘‚©‚ê‚Ä‚¢‚Ü‚·B‘S‚Ä‚Ì•û‚ÉŠ´ŽÓ‚¢‚½‚µ‚Ü‚·B
+
+ ŽR‰º —Ç‘ ‚³‚ñ, ƒVƒtƒgJIS‚ÌƒfƒUƒCƒ“‚Ì˜b
+ http://furukawablog.spaces.live.com/Blog/cns!1pmWgsL289nm7Shn7cS0jHzA!2225.entry
+
+ Larry Wall, Perl
+ L<http://www.perl.org/>
+
+ ‰Ì‘ã ˜a³‚³‚ñ, jcode.pl
+ L<http://www.srekcah.org/jcode/>
+
+ Jeffrey E. F. Friedl, Mastering Regular Expressions
+ L<http://www.oreilly.com/catalog/regex/index.html>
+
+ ’åœA ’ms‚³‚ñ, Shift-JISƒeƒLƒXƒg‚ð³‚µ‚­ˆµ‚¤
+ L<http://homepage1.nifty.com/nomenclator/perl/shiftjis.htm>
+
+ “¡‰ª ˜a•v‚³‚ñ, jperlƒ†[ƒU[‚Ì‚½‚ß‚É
+ L<http://homepage1.nifty.com/kazuf/jperl.html>
+
+ ˜aò G–¾‚³‚ñ, Windows‚ÅPerl 5.8/5.10‚ðŽg‚¤ƒ‚ƒ“‚¶‚á‚È‚¢
+ L<http://www.aritia.org/hizumi/perl/perlwin.html>
+
+ —é–Ø ‹I•v‚³‚ñ, Jperl
+ L<http://homepage2.nifty.com/kipp/perl/jperl/>
+
+ “n•Ó ”Ž•¶‚³‚ñ, Jperl
+ L<http://search.cpan.org/~watanabe/>
+
+ ¬Ž” ’e‚³‚ñ, Encode ƒ‚ƒWƒ…[ƒ‹
+ L<http://search.cpan.org/dist/Encode/>
+
+=cut
+

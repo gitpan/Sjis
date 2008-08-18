@@ -3,6 +3,17 @@ die "This file is not encoded in ShiftJIS.\n" if q{あ} ne "\x82\xa0";
 
 local $^W = 1;
 
+unless (@ARGV) {
+    die <<'END';
+実行方法:
+
+jperl55.bat grepdir.pl aaa dt
+jperl55.bat grepdir.pl 表  dt
+jperl.exe   grepdir.pl aaa dt
+jperl.exe   grepdir.pl 表  dt
+END
+}
+
 &grepdir(@ARGV);
 
 exit 0;

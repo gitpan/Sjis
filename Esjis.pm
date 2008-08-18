@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.23 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.24 $ =~ m/(\d+)/xmsg;
 
 use Carp qw(carp croak confess cluck verbose);
 use Symbol qw(qualify_to_ref);
@@ -134,7 +134,6 @@ sub Esjis::tr($$$;$) {
     @searchlist = _charlist_tr($searchlist =~ m{\G(
         \\     [0-7]{2,3}          |
         \\x    [0-9A-Fa-f]{2}      |
-        \\x \{ [0-9A-Fa-f]{1,4} \} |
         \\c    [\x40-\x5F]         |
         \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
             (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
@@ -142,7 +141,6 @@ sub Esjis::tr($$$;$) {
     @replacementlist = _charlist_tr($replacementlist =~ m{\G(
         \\     [0-7]{2,3}          |
         \\x    [0-9A-Fa-f]{2}      |
-        \\x \{ [0-9A-Fa-f]{1,4} \} |
         \\c    [\x40-\x5F]         |
         \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
             (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
@@ -361,7 +359,7 @@ sub Esjis::ignorecase(@) {
                     }
                     if ($char[$i] eq ']') {
                         my $right = $i;
-                        my @charlist = &charlist_qr(@char[$left+1..$right-1], 'i');
+                        my @charlist = _charlist_qr(@char[$left+1..$right-1], 'i');
 
                         # escape character
                         for my $char (@charlist) {
@@ -393,7 +391,7 @@ sub Esjis::ignorecase(@) {
                     }
                     if ($char[$i] eq ']') {
                         my $right = $i;
-                        my @charlist = &charlist_not_qr(@char[$left+1..$right-1], 'i');
+                        my @charlist = _charlist_not_qr(@char[$left+1..$right-1], 'i');
 
                         # escape character
                         for my $char (@charlist) {
@@ -578,9 +576,6 @@ sub _charlist_tr {
         elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
             $char[$i] = CORE::chr(hex $1);
         }
-        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,4}) \} \z/oxms) {
-            $char[$i] = Esjis::chr(hex $1);
-        }
         elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
             $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
         }
@@ -669,6 +664,470 @@ sub _charlist_tr {
     }
 
     return @char;
+}
+
+#
+# ShiftJIS open character list for qr
+#
+sub _charlist_qr {
+    my $modifier = pop @_;
+    my @char = @_;
+
+    # unescape character
+    for (my $i=0; $i <= $#char; $i++) {
+
+        # escape - to ...
+        if ($char[$i] eq '-') {
+            if ((0 < $i) and ($i < $#char)) {
+                $char[$i] = '...';
+            }
+        }
+        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
+            $char[$i] = CORE::chr oct $1;
+        }
+        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
+            $char[$i] = CORE::chr hex $1;
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/oxms) {
+            $char[$i] = pack 'H2', $1;
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{3,4}) \} \z/oxms) {
+            $char[$i] = pack 'H4', $1;
+        }
+        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
+            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
+        }
+        elsif ($char[$i] =~ m/\A (\\ [0nrtfbaedDhHsSvVwW]) \z/oxms) {
+            $char[$i] = {
+                '\0' => "\0",
+                '\n' => "\n",
+                '\r' => "\r",
+                '\t' => "\t",
+                '\f' => "\f",
+                '\b' => "\x08", # \b means backspace in character class
+                '\a' => "\a",
+                '\e' => "\e",
+                '\d' => '\d',
+                '\h' => '\h',
+                '\s' => '\s',
+                '\v' => '\v',
+                '\w' => '\w',
+                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
+                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
+                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
+                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
+                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+            }->{$1};
+        }
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) \z/oxms) {
+            $char[$i] = $1;
+        }
+    }
+
+    # open character list
+    my @singleoctet = ();
+    my @charlist    = ();
+    if ((scalar(@char) == 1) or ((scalar(@char) >= 2) and ($char[1] ne '...'))) {
+        if ($char[0] =~ m/\A [\x00-\xFF] \z/oxms) {
+            push @singleoctet, $char[0];
+        }
+        else {
+            push @charlist, $char[0];
+        }
+    }
+    for (my $i=1; $i <= $#char-1; ) {
+
+        # escaped -
+        if ($char[$i] eq '...') {
+
+            # range of single octet code
+            if (
+                ($char[$i-1] =~ m/\A [\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x00-\xFF] \z/oxms)
+            ) {
+                my $begin = unpack 'C', $char[$i-1];
+                my $end   = unpack 'C', $char[$i+1];
+                if ($begin > $end) {
+                    confess "$0: invalid [] range \"\\x" . unpack('H*',$char[$i-1]) . '-\\x' . unpack('H*',$char[$i+1]) . '" in regexp';
+                }
+                else {
+                    if ($modifier =~ m/i/oxms) {
+                        my %range = ();
+                        for my $c ($begin .. $end) {
+                            $range{CORE::ord CORE::uc CORE::chr $c} = 1;
+                            $range{CORE::ord CORE::lc CORE::chr $c} = 1;
+                        }
+
+                        my @lt = grep {$_ < $begin} sort {$a <=> $b} keys %range;
+                        if (scalar(@lt) == 1) {
+                            push @singleoctet, sprintf(q{\\x%02X},         $lt[0]);
+                        }
+                        elsif (scalar(@lt) >= 2) {
+                            push @singleoctet, sprintf(q{\\x%02X-\\x%02X}, $lt[0], $lt[-1]);
+                        }
+
+                        push @singleoctet, sprintf(q{\\x%02X-\\x%02X},     $begin, $end);
+
+                        my @gt = grep {$_ > $end  } sort {$a <=> $b} keys %range;
+                        if (scalar(@gt) == 1) {
+                            push @singleoctet, sprintf(q{\\x%02X},         $gt[0]);
+                        }
+                        elsif (scalar(@gt) >= 2) {
+                            push @singleoctet, sprintf(q{\\x%02X-\\x%02X}, $gt[0], $gt[-1]);
+                        }
+                    }
+                    else {
+                        push @singleoctet, sprintf(q{\\x%02X-\\x%02X},     $begin, $end);
+                    }
+                }
+            }
+
+            # range of double octet code
+            elsif (
+                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms)
+            ) {
+                my($begin1,$begin2) = unpack 'CC', $char[$i-1];
+                my($end1,  $end2)   = unpack 'CC', $char[$i+1];
+                my $begin = $begin1 * 0x100 + $begin2;
+                my $end   = $end1   * 0x100 + $end2;
+                if ($begin > $end) {
+                    confess "$0: invalid [] range \"\\x" . unpack('H*',$char[$i-1]) . '-\\x' . unpack('H*',$char[$i+1]) . '" in regexp';
+                }
+                elsif ($begin1 == $end1) {
+                    push @charlist, sprintf(q{\\x%02X[\\x%02X-\\x%02X]}, $begin1, $begin2, $end2);
+                }
+                elsif (($begin1 + 1) == $end1) {
+                    push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},   $begin1, $begin2);
+                    push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},   $end1,   $end2);
+                }
+                else {
+                    my @middle = ();
+                    for my $c ($begin1+1 .. $end1-1) {
+                        if ((0x81 <= $c and $c <= 0x9F) or (0xE0 <= $c and $c <= 0xFC)) {
+                            push @middle, $c;
+                        }
+                    }
+                    if (scalar(@middle) == 0) {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
+                    }
+                    elsif (scalar(@middle) == 1) {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\xFF]},           $middle[0]);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
+                    }
+                    else {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{[\\x%02X-\\x%02X][\\x00-\\xFF]}, $middle[0], $middle[-1]);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
+                    }
+                }
+            }
+
+            # range error
+            else {
+                confess "$0: invalid [] range \"\\x" . unpack('H*',$char[$i-1]) . '-\\x' . unpack('H*',$char[$i+1]) . '" in regexp';
+            }
+
+            $i += 2;
+        }
+
+        # /i modifier
+        elsif (($char[$i] =~ m/\A ([A-Za-z]) \z/oxms) and (($i+1 > $#char) or ($char[$i+1] ne '...'))) {
+            my $c = $1;
+            if ($modifier =~ m/i/oxms) {
+                push @singleoctet, CORE::uc $c, CORE::lc $c;
+            }
+            else {
+                push @singleoctet, $c;
+            }
+            $i += 1;
+        }
+
+        # single character
+        elsif ($char[$i] =~ m/\A (?: [\x00-\xFF] | \\d | \\h | \\s | \\v | \\w )  \z/oxms) {
+            push @singleoctet, $char[$i];
+            $i += 1;
+        }
+        else {
+            push @charlist, $char[$i];
+            $i += 1;
+        }
+    }
+    if ((scalar(@char) >= 2) and ($char[-2] ne '...')) {
+        if ($char[-1] =~ m/\A [\x00-\xFF] \z/oxms) {
+            push @singleoctet, $char[-1];
+        }
+        else {
+            push @charlist, $char[-1];
+        }
+    }
+
+    # quote metachar
+    for (@singleoctet) {
+        if (m/\A \n \z/oxms) {
+            $_ = '\n';
+        }
+        elsif (m/\A \r \z/oxms) {
+            $_ = '\r';
+        }
+        elsif (m/\A ([\x00-\x21\x7F-\xA0\xE0-\xFF]) \z/oxms) {
+            $_ = sprintf(q{\\x%02X}, CORE::ord $1);
+        }
+        elsif (m/\A ([\x00-\xFF]) \z/oxms) {
+            $_ = quotemeta $1;
+        }
+    }
+    for (@charlist) {
+        if (m/\A ([\x81-\x9F\xE0-\xFC]) ([\x00-\xFF]) \z/oxms) {
+            $_ = $1 . quotemeta $2;
+        }
+    }
+
+    # return character list
+    if (scalar(@singleoctet) == 0) {
+    }
+    elsif ((scalar(@singleoctet) == 1) and ($singleoctet[0] !~ m/\A .-. \z/oxms)) {
+        push @charlist, $singleoctet[0];
+    }
+    else {
+        push @charlist, '[' . join('',@singleoctet) . ']';
+    }
+    if (scalar(@charlist) >= 2) {
+        return '(?:' . join('|', @charlist) . ')';
+    }
+    else {
+        return @charlist;
+    }
+}
+
+#
+# ShiftJIS open character list for not qr
+#
+sub _charlist_not_qr {
+    my $modifier = pop @_;
+    my @char = @_;
+
+    # unescape character
+    for (my $i=0; $i <= $#char; $i++) {
+
+        # escape - to ...
+        if ($char[$i] eq '-') {
+            if ((0 < $i) and ($i < $#char)) {
+                $char[$i] = '...';
+            }
+        }
+        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
+            $char[$i] = CORE::chr oct $1;
+        }
+        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
+            $char[$i] = CORE::chr hex $1;
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/oxms) {
+            $char[$i] = pack 'H2', $1;
+        }
+        elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{3,4}) \} \z/oxms) {
+            $char[$i] = pack 'H4', $1;
+        }
+        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
+            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
+        }
+        elsif ($char[$i] =~ m/\A (\\ [0nrtfbaedDhHsSvVwW]) \z/oxms) {
+            $char[$i] = {
+                '\0' => "\0",
+                '\n' => "\n",
+                '\r' => "\r",
+                '\t' => "\t",
+                '\f' => "\f",
+                '\b' => "\x08", # \b means backspace in character class
+                '\a' => "\a",
+                '\e' => "\e",
+                '\d' => '\d',
+                '\h' => '\h',
+                '\s' => '\s',
+                '\v' => '\v',
+                '\w' => '\w',
+                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
+                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
+                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
+                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
+                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+            }->{$1};
+        }
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) \z/oxms) {
+            $char[$i] = $1;
+        }
+    }
+
+    # open character list
+    my @singleoctet = ();
+    my @charlist    = ();
+    if ((scalar(@char) == 1) or ((scalar(@char) >= 2) and ($char[1] ne '...'))) {
+        if ($char[0] =~ m/\A [\x00-\xFF] \z/oxms) {
+            push @singleoctet, $char[0];
+        }
+        else {
+            push @charlist, $char[0];
+        }
+    }
+    for (my $i=1; $i <= $#char-1; ) {
+
+        # escaped -
+        if ($char[$i] eq '...') {
+
+            # range of single octet code
+            if (
+                ($char[$i-1] =~ m/\A [\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x00-\xFF] \z/oxms)
+            ) {
+                my $begin = unpack 'C', $char[$i-1];
+                my $end   = unpack 'C', $char[$i+1];
+                if ($begin > $end) {
+                    confess "$0: invalid [] range \"\\x" . unpack('H*',$char[$i-1]) . '-\\x' . unpack('H*',$char[$i+1]) . '" in regexp';
+                }
+                else {
+                    if ($modifier =~ m/i/oxms) {
+                        my %range = ();
+                        for my $c ($begin .. $end) {
+                            $range{CORE::ord CORE::uc CORE::chr $c} = 1;
+                            $range{CORE::ord CORE::lc CORE::chr $c} = 1;
+                        }
+
+                        my @lt = grep {$_ < $begin} sort {$a <=> $b} keys %range;
+                        if (scalar(@lt) == 1) {
+                            push @singleoctet, sprintf(q{\\x%02X},         $lt[0]);
+                        }
+                        elsif (scalar(@lt) >= 2) {
+                            push @singleoctet, sprintf(q{\\x%02X-\\x%02X}, $lt[0], $lt[-1]);
+                        }
+
+                        push @singleoctet, sprintf(q{\\x%02X-\\x%02X},     $begin, $end);
+
+                        my @gt = grep {$_ > $end  } sort {$a <=> $b} keys %range;
+                        if (scalar(@gt) == 1) {
+                            push @singleoctet, sprintf(q{\\x%02X},         $gt[0]);
+                        }
+                        elsif (scalar(@gt) >= 2) {
+                            push @singleoctet, sprintf(q{\\x%02X-\\x%02X}, $gt[0], $gt[-1]);
+                        }
+                    }
+                    else {
+                        push @singleoctet, sprintf(q{[\\x%02X-\\x%02X]},   $begin, $end);
+                    }
+                }
+            }
+
+            # range of double octet code
+            elsif (
+                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms)
+            ) {
+                my($begin1,$begin2) = unpack 'CC', $char[$i-1];
+                my($end1,  $end2)   = unpack 'CC', $char[$i+1];
+                my $begin = $begin1 * 0x100 + $begin2;
+                my $end   = $end1   * 0x100 + $end2;
+                if ($begin > $end) {
+                    confess "$0: invalid [] range \"\\x" . unpack('H*',$char[$i-1]) . '-\\x' . unpack('H*',$char[$i+1]) . '" in regexp';
+                }
+                elsif ($begin1 == $end1) {
+                    push @charlist, sprintf(q{\\x%02X[\\x%02X-\\x%02X]}, $begin1, $begin2, $end2);
+                }
+                elsif (($begin1 + 1) == $end1) {
+                    push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},   $begin1, $begin2);
+                    push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},   $end1,   $end2);
+                }
+                else {
+                    my @middle = ();
+                    for my $c ($begin1+1 .. $end1-1) {
+                        if ((0x81 <= $c and $c <= 0x9F) or (0xE0 <= $c and $c <= 0xFC)) {
+                            push @middle, $c;
+                        }
+                    }
+                    if (scalar(@middle) == 0) {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
+                    }
+                    elsif (scalar(@middle) == 1) {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\xFF]},           $middle[0]);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
+                    }
+                    else {
+                        push @charlist, sprintf(q{\\x%02X[\\x%02X-\\xFF]},         $begin1,    $begin2);
+                        push @charlist, sprintf(q{[\\x%02X-\\x%02X][\\x00-\\xFF]}, $middle[0], $middle[-1]);
+                        push @charlist, sprintf(q{\\x%02X[\\x00-\\x%02X]},         $end1,      $end2);
+                    }
+                }
+            }
+
+            # range error
+            else {
+                confess "$0: invalid [] range \"\\x" . unpack('H*',$char[$i-1]) . '-\\x' . unpack('H*',$char[$i+1]) . '" in regexp';
+            }
+
+            $i += 2;
+        }
+
+        # /i modifier
+        elsif (($char[$i] =~ m/\A ([A-Za-z]) \z/oxms) and (($i+1 > $#char) or ($char[$i+1] ne '...'))) {
+            my $c = $1;
+            if ($modifier =~ m/i/oxms) {
+                push @singleoctet, CORE::uc $c, CORE::lc $c;
+            }
+            else {
+                push @singleoctet, $c;
+            }
+            $i += 1;
+        }
+
+        # single character
+        elsif ($char[$i] =~ m/\A (?: [\x00-\xFF] | \\d | \\h | \\s | \\v | \\w )  \z/oxms) {
+            push @singleoctet, $char[$i];
+            $i += 1;
+        }
+        else {
+            push @charlist, $char[$i];
+            $i += 1;
+        }
+    }
+    if ((scalar(@char) >= 2) and ($char[-2] ne '...')) {
+        if ($char[-1] =~ m/\A [\x00-\xFF] \z/oxms) {
+            push @singleoctet, $char[-1];
+        }
+        else {
+            push @charlist, $char[-1];
+        }
+    }
+
+    # quote metachar
+    for (@singleoctet) {
+        if (m/\A \n \z/oxms) {
+            $_ = '\n';
+        }
+        elsif (m/\A \r \z/oxms) {
+            $_ = '\r';
+        }
+        elsif (m/\A ([\x00-\x21\x7F-\xA0\xE0-\xFF]) \z/oxms) {
+            $_ = sprintf(q{\\x%02X}, CORE::ord $1);
+        }
+        elsif (m/\A ([\x00-\xFF]) \z/oxms) {
+            $_ = quotemeta $_;
+        }
+    }
+    for (@charlist) {
+        if (m/\A ([\x81-\x9F\xE0-\xFC]) ([\x00-\xFF]) \z/oxms) {
+            $_ = $1 . quotemeta $2;
+        }
+    }
+
+    # return character list
+    if (scalar(@charlist) >= 1) {
+        return '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC'. join('', @singleoctet) . '])';
+    }
+    else {
+        return                                 '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC'. join('', @singleoctet) . '])';
+    }
 }
 
 # pop warning
