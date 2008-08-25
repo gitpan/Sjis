@@ -43,6 +43,9 @@ To install this software, type the following:
    make.bat install              --- install to current using Perl
    perl58.bat make.bat instal    --- install to Perl5.8
    perl510.bat make.bat install  --- install to Perl5.10
+   perl make-ebig5plus.pl        --- make ebig5plus.pl, Ebig5plus.pm and Big5Plus.pm
+   perl make-egbk.pl             --- make egbk.pl, Egbk.pm and GBK.pm
+   perl make-euhc.pl             --- make euhc.pl, Euhc.pm and UHC.pm
 
 MAKE OTHER
 

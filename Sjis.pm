@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.24 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.25 $ =~ m/(\d+)/xmsg;
 
 sub import() {}
 sub unimport() {}
@@ -38,13 +38,6 @@ else {
             ($mtime < (stat(abspath('Sjis.pm'))) [9])
         ) {
 
-#           # check before filter if jperl exists
-#           if (system(qq{jperl -v > NUL}) == 0) {
-#               if ((my $rc = system(qq{jperl -c $script})) != 0) {
-#                   exit $rc;
-#               }
-#           }
-
             # escape script
             if (system(qq{$^X -S esjis.pl $script > $script.e}) != 0) {
                 die "Sjis: Can't escape $script\n";
@@ -54,13 +47,6 @@ else {
 
     # not exists script.e
     else {
-
-#       # check before filter if jperl exists
-#       if (system(qq{jperl -v > NUL}) == 0) {
-#           if ((my $rc = system(qq{jperl -c $script})) != 0) {
-#               exit $rc;
-#           }
-#       }
 
         # escape script
         if (system(qq{$^X -S esjis.pl $script > $script.e}) != 0) {

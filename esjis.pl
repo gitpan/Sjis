@@ -10,7 +10,7 @@ use strict;
 use 5.00503;
 
 use vars qw($VERSION);
-$VERSION = sprintf '%d.%02d', q$Revision: 0.24 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.25 $ =~ m/(\d+)/oxmsg;
 
 use constant DEBUG => 1;
 local $SIG{__WARN__} = sub { die "$0: ", @_ } if DEBUG;
@@ -25,9 +25,9 @@ BEGIN {
 }
 
 # regexp of character
-my $qq_char   = qr/\\c[\x40-\x5F]|[^\\\x81-\x9F\xE0-\xFC]|[\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|\\[\x81-\x9F\xE0-\xFC][\x00-\xFF]/oxms;
-my  $q_char   = qr/[^\x81-\x9F\xE0-\xFC]|[\x81-\x9F\xE0-\xFC][\x00-\xFF]/oxms;
-my $your_char = q{[^\x81-\x9F\xE0-\xFC]|[\x81-\x9F\xE0-\xFC][\x00-\xFF]};
+my $qq_char   = qr/\\c[\x40-\x5F]|\\[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]/oxms;
+my  $q_char   = qr/[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]/oxms;
+my $your_char = q {[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]};
 
 # P.1023 Appendix W.9 Multibyte Anchoring
 # of ISBN 1-56592-224-7 CJKV Information Processing
@@ -42,28 +42,28 @@ use vars qw($nest);
 # of ISBN 0-596-00289-0 Mastering Regular Expressions, Second edition
 
 my $qq_paren   = qr{(?{local $nest=0}) (?>(?:
-                    \\c[\x40-\x5F] |
-                    [^\\\x81-\x9F\xE0-\xFC()]  | [\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] |
-                                          \(   (?{$nest++}) |
-                                          \)   (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                    \\c[\x40-\x5F] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x81-\x9F\xE0-\xFC\\][\x00-\xFF] |
+                    [^()] |
+                             \(  (?{$nest++}) |
+                             \)  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 my $qq_brace   = qr{(?{local $nest=0}) (?>(?:
-                    \\c[\x40-\x5F] |
-                    [^\\\x81-\x9F\xE0-\xFC{}]  | [\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] |
-                                          \{   (?{$nest++}) |
-                                          \}   (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                    \\c[\x40-\x5F] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x81-\x9F\xE0-\xFC\\][\x00-\xFF] |
+                    [^{}] |
+                             \{  (?{$nest++}) |
+                             \}  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 my $qq_bracket = qr{(?{local $nest=0}) (?>(?:
-                    \\c[\x40-\x5F] |
-                    [^\\\x81-\x9F\xE0-\xFC[\]] | [\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] |
-                                          \[   (?{$nest++}) |
-                                          \]   (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                    \\c[\x40-\x5F] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x81-\x9F\xE0-\xFC\\][\x00-\xFF] |
+                    [^[\]] |
+                             \[  (?{$nest++}) |
+                             \]  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 my $qq_angle   = qr{(?{local $nest=0}) (?>(?:
-                    \\c[\x40-\x5F] |
-                    [^\\\x81-\x9F\xE0-\xFC<>]  | [\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] |
-                                          \<   (?{$nest++}) |
-                                          \>   (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                    \\c[\x40-\x5F] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x81-\x9F\xE0-\xFC\\][\x00-\xFF] |
+                    [^<>] |
+                             \<  (?{$nest++}) |
+                             \>  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 my $qq_scalar  = qr{(?: \{ (?:$qq_brace)*? \} |
                        (?: ::)? (?:
@@ -85,24 +85,28 @@ my $qq_variable = qr{(?: \{ (?:$qq_brace)*? \} |
 
 # regexp of nested parens in qXX
 my $q_paren    = qr{(?{local $nest=0}) (?>(?:
-                    [^\x81-\x9F\xE0-\xFC()]  | [\x81-\x9F\xE0-\xFC][\x00-\xFF] |
-                                        \(   (?{$nest++}) |
-                                        \)   (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                    [\x81-\x9F\xE0-\xFC][\x00-\xFF] |
+                    [^()] |
+                             \(  (?{$nest++}) |
+                             \)  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 my $q_brace    = qr{(?{local $nest=0}) (?>(?:
-                    [^\x81-\x9F\xE0-\xFC{}]  | [\x81-\x9F\xE0-\xFC][\x00-\xFF] |
-                                        \{   (?{$nest++}) |
-                                        \}   (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                    [\x81-\x9F\xE0-\xFC][\x00-\xFF] |
+                    [^{}] |
+                             \{  (?{$nest++}) |
+                             \}  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 my $q_bracket  = qr{(?{local $nest=0}) (?>(?:
-                    [^\x81-\x9F\xE0-\xFC[\]] | [\x81-\x9F\xE0-\xFC][\x00-\xFF] |
-                                        \[   (?{$nest++}) |
-                                        \]   (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                    [\x81-\x9F\xE0-\xFC][\x00-\xFF] |
+                    [^[\]] |
+                             \[  (?{$nest++}) |
+                             \]  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 my $q_angle    = qr{(?{local $nest=0}) (?>(?:
-                    [^\x81-\x9F\xE0-\xFC<>]  | [\x81-\x9F\xE0-\xFC][\x00-\xFF] |
-                                        \<   (?{$nest++}) |
-                                        \>   (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
+                    [\x81-\x9F\xE0-\xFC][\x00-\xFF] |
+                    [^<>] |
+                             \<  (?{$nest++}) |
+                             \>  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 
 my $tr_variable1 = '';    # variable of ($scalar = ...) =~ tr///
@@ -997,7 +1001,7 @@ sub e_string {
     # of ISBN 1-56592-224-7 CJKV Information Processing
     # (and so on)
 
-    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
+    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
 
     if (not (grep(m/\A \{ \z/xms, @char) and grep(m/\A \} \z/xms, @char))) {
         return $string;
@@ -1253,7 +1257,7 @@ sub e_q {
 
     $slash = 'div';
 
-    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
+    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape second octet of double octet
@@ -1284,7 +1288,7 @@ sub e_qq {
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
+    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape second octet of double octet
@@ -1363,7 +1367,7 @@ sub e_heredoc {
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G ([\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
+    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape character
@@ -1425,12 +1429,12 @@ sub e_m {
         \\  [0-7]{2,3}         |
         \\x [0-9A-Fa-f]{2}     |
         \\c [\x40-\x5F]        |
-        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) |
         [\$\@] $qq_variable |
         \[\:\^ [a-z]+ \:\]  |
         \[\:   [a-z]+ \:\]  |
         \[\^                |
-            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF] | [\x00-\xFF])
     )}oxmsg;
 
     # unescape character
@@ -1498,13 +1502,13 @@ sub e_m {
         # rewrite character class or escape character
         elsif (my $char = {
             '.'  => ($modifier =~ /s/) ?
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])' :
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\n])',
-            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])' :
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\n])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$char[$i]}
         ) {
             $char[$i] = $char;
@@ -1562,7 +1566,7 @@ sub e_m {
             ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
             ($char[$i-1] =~ m/\A 
                 (?:
-                        [\x81-\x9F\xE0\xFC] | 
+                        [\x81-\x9F\xE0-\xFC] | 
                     \\  (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) |
                     \\x (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c])
                 )
@@ -1603,7 +1607,7 @@ sub e_m_q {
         \[\:\^ [a-z]+ \:\] |
         \[\:   [a-z]+ \:\] |
         \[\^               |
-            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF] | [\x00-\xFF])
     )}oxmsg;
 
     # unescape character
@@ -1655,13 +1659,13 @@ sub e_m_q {
         # rewrite character class or escape character
         elsif (my $char = {
             '.'  => ($modifier =~ /s/) ?
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])' :
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\n])',
-            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])' :
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\n])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$char[$i]}
         ) {
             $char[$i] = $char;
@@ -1703,12 +1707,12 @@ sub backreference {
         \\  [0-7]{1,3}      |
         \\x [0-9A-Fa-f]{2}  |
         \\c [\x40-\x5F]     |
-        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) |
         [\$\@] $qq_variable |
         \[\:\^ [a-z]+ \:\]  |
         \[\:   [a-z]+ \:\]  |
         \[\^                |
-            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF] | [\x00-\xFF])
     )}oxmsg;
 
     return scalar(grep {$_ eq '('} @char);
@@ -1733,12 +1737,12 @@ sub e_s1 {
         \\  [0-7]{1,3}      |
         \\x [0-9A-Fa-f]{2}  |
         \\c [\x40-\x5F]     |
-        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) |
         [\$\@] $qq_variable |
         \[\:\^ [a-z]+ \:\]  |
         \[\:   [a-z]+ \:\]  |
         \[\^                |
-            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF] | [\x00-\xFF])
     )}oxmsg;
 
     # unescape character
@@ -1828,13 +1832,13 @@ sub e_s1 {
         # rewrite character class or escape character
         elsif (my $char = {
             '.'  => ($modifier =~ /s/) ?
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])' :
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\n])',
-            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])' :
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\n])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$char[$i]}
         ) {
             $char[$i] = $char;
@@ -1892,7 +1896,7 @@ sub e_s1 {
             ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
             ($char[$i-1] =~ m/\A 
                 (?:
-                        [\x81-\x9F\xE0\xFC] | 
+                        [\x81-\x9F\xE0-\xFC] | 
                     \\  (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) |
                     \\x (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c])
                 )
@@ -1936,7 +1940,7 @@ sub e_s1_q {
         \[\:\^ [a-z]+ \:\] |
         \[\:   [a-z]+ \:\] |
         \[\^               |
-            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF] | [\x00-\xFF])
     )}oxmsg;
 
     # unescape character
@@ -1999,13 +2003,13 @@ sub e_s1_q {
         # rewrite character class or escape character
         elsif (my $char = {
             '.'  => ($modifier =~ /s/) ?
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])' :
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\n])',
-            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])' :
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\n])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$char[$i]}
         ) {
             $char[$i] = $char;
@@ -2045,7 +2049,7 @@ sub e_s2 {
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G (\$\d+|\\\d+|[\\\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
+    my @char = $string =~ m/ \G (\$\d+|\\\d+|[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape second octet of double octet
@@ -2139,7 +2143,7 @@ sub e_s2_q {
 
     $slash = 'div';
 
-    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC]) /oxmsg;
+    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape second octet of double octet
@@ -2168,12 +2172,12 @@ sub e_qr {
         \\  [0-7]{2,3}         |
         \\x [0-9A-Fa-f]{2}     |
         \\c [\x40-\x5F]        |
-        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) |
         [\$\@] $qq_variable |
         \[\:\^ [a-z]+ \:\]  |
         \[\:   [a-z]+ \:\]  |
         \[\^                |
-            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF] | [\x00-\xFF])
     )}oxmsg;
 
     # unescape character
@@ -2241,13 +2245,13 @@ sub e_qr {
         # rewrite character class or escape character
         elsif (my $char = {
             '.'  => ($modifier =~ /s/) ?
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])' :
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\n])',
-            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])' :
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\n])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$char[$i]}
         ) {
             $char[$i] = $char;
@@ -2305,7 +2309,7 @@ sub e_qr {
             ($char[$i] =~ m/\A [\?\+\*\{] \z/oxms) and
             ($char[$i-1] =~ m/\A 
                 (?:
-                        [\x81-\x9F\xE0\xFC] | 
+                        [\x81-\x9F\xE0-\xFC] | 
                     \\  (?:20[1-7]|2[123][0-7]|3[4-6][0-7]|37[0-4]) |
                     \\x (?:8[1-9A-Fa-f]|9[0-9A-Fa-f]|[Ee][0-9A-Fa-f]|[Ff][0-9A-Ca-c])
                 )
@@ -2346,7 +2350,7 @@ sub e_qr_q {
         \[\:\^ [a-z]+ \:\] |
         \[\:   [a-z]+ \:\] |
         \[\^               |
-            (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF] | [\x00-\xFF])
     )}oxmsg;
 
     # unescape character
@@ -2398,13 +2402,13 @@ sub e_qr_q {
         # rewrite character class or escape character
         elsif (my $char = {
             '.'  => ($modifier =~ /s/) ?
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])' :
-                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\n])',
-            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])' :
+                    '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\n])',
+            '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+            '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+            '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+            '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+            '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$char[$i]}
         ) {
             $char[$i] = $char;
@@ -2472,14 +2476,14 @@ sub charlist_qr {
                 '\s' => '\s',
                 '\v' => '\v',
                 '\w' => '\w',
-                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$1};
         }
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) \z/oxms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) \z/oxms) {
             $char[$i] = $1;
         }
     }
@@ -2564,7 +2568,8 @@ sub charlist_qr {
                 else {
                     my @middle = ();
                     for my $c ($begin1+1 .. $end1-1) {
-                        if ((0x81 <= $c and $c <= 0x9F) or (0xE0 <= $c and $c <= 0xFC)) {
+                        my $char = CORE::chr($c);
+                        if ($char =~ /\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
                             push @middle, $c;
                         }
                     }
@@ -2632,7 +2637,7 @@ sub charlist_qr {
         elsif (m/\A \r \z/oxms) {
             $_ = '\r';
         }
-        elsif (m/\A ([\x00-\x21\x7F-\xA0\xE0-\xFF]) \z/oxms) {
+        elsif (m/\A ([\x00-\x1F\x7F-\xFF]) \z/oxms) {
             $_ = sprintf(q{\\x%02X}, CORE::ord $1);
         }
         elsif (m/\A ([\x00-\xFF]) \z/oxms) {
@@ -2702,14 +2707,14 @@ sub charlist_not_qr {
                 '\s' => '\s',
                 '\v' => '\v',
                 '\w' => '\w',
-                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$1};
         }
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) \z/oxms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) \z/oxms) {
             $char[$i] = $1;
         }
     }
@@ -2794,7 +2799,8 @@ sub charlist_not_qr {
                 else {
                     my @middle = ();
                     for my $c ($begin1+1 .. $end1-1) {
-                        if ((0x81 <= $c and $c <= 0x9F) or (0xE0 <= $c and $c <= 0xFC)) {
+                        my $char = CORE::chr($c);
+                        if ($char =~ /\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
                             push @middle, $c;
                         }
                     }
@@ -2862,7 +2868,7 @@ sub charlist_not_qr {
         elsif (m/\A \r \z/oxms) {
             $_ = '\r';
         }
-        elsif (m/\A ([\x00-\x21\x7F-\xA0\xE0-\xFF]) \z/oxms) {
+        elsif (m/\A ([\x00-\x1F\x7F-\xFF]) \z/oxms) {
             $_ = sprintf(q{\\x%02X}, CORE::ord $1);
         }
         elsif (m/\A ([\x00-\xFF]) \z/oxms) {
@@ -2877,10 +2883,20 @@ sub charlist_not_qr {
 
     # return character list
     if (scalar(@charlist) >= 1) {
-        return '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC'. join('', @singleoctet) . '])';
+        if (scalar(@singleoctet) >= 1) {
+            return '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^'. join('', @singleoctet) . '])';
+        }
+        else {
+            return '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF])';
+        }
     }
     else {
-        return                                 '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC'. join('', @singleoctet) . '])';
+        if (scalar(@singleoctet) >= 1) {
+            return                                 '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^'. join('', @singleoctet) . '])';
+        }
+        else {
+            return                                 '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF])';
+        }
     }
 }
 
@@ -3233,329 +3249,6 @@ This software is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-=head1 ShiftJIS IN WIKIPEDIA
-
-Shift JIS (2008.02.15 15:02:00 JST). In Wikipedia: The Free Encyclopedia.
-Retrieved from
-L<http://en.wikipedia.org/wiki/Shift_JIS>
-
-Shift JIS (also SJIS, MIME name Shift_JIS) is a character encoding
-for the Japanese language originally developed by a Japanese company
-called ASCII Corporation in conjunction with Microsoft and standardized
-as JIS X 0208 Appendix 1. It is based on character sets defined within
-JIS standards JIS X 0201:1997 (for the single-byte characters) and
-JIS X 0208:1997 (for the double byte characters). The lead bytes for
-the double byte characters are "shifted" around the 64 halfwidth katakana
-characters in the single-byte range 0xA1 to 0xDF. The single-byte
-characters 0x00 to 0x7F match the ASCII encoding, except for a yen sign
-at 0x5C and an overline at 0x7E in place of the ASCII character set's
-backslash and tilde respectively. On the web, 0x5C is still used as the
-Perl Script escape character. The single-byte characters from 0xA1 to 0xDF
-map to the half-width katakana characters found in JIS X 0201. 
-
-Shift JIS requires an 8-bit medium for transmission. It is fully backwards
-compatible with the legacy JIS X 0201 single-byte encoding, meaning it
-supports half-width katakana and that any valid JIS X 0201 string is also
-a valid Shift JIS string. However Shift JIS only guarantees that the first
-byte will be in the upper ASCII range; the value of the second byte can be
-either high or low. This makes reliable Shift JIS detection difficult.
-On the other hand, the competing 8-bit format EUC-JP, which does not
-support single-byte halfwidth katakana, allows for a much cleaner and
-direct conversion to and from JIS X 0208 codepoints, as all upper-ASCII
-bytes are part of a double-byte character and all lower-ASCII bytes are
-part of a single-byte character.
-
-Many different versions of Shift JIS exist. There are two areas for
-expansion: Firstly, JIS X 0208 does not fill the whole 94x94 space encoded
-for it in Shift JIS, therefore there is room for more characters here ?
-these are really extensions to JIS X 0208 rather than to Shift JIS itself.
-The most popular extension here is to the Windows-31J (otherwise known as
-Code page 932) encoding popularized by Microsoft, although Microsoft
-itself does not recognize the Windows-31J name and instead calls that
-variation "shift_jis". Secondly, Shift JIS has more encoding space than is
-needed for JIS X 0201 and JIS X 0208, and this space can and is used for
-yet more characters. The space with lead bytes 0xF5 to 0xF9 is used by
-Japanese mobile phone operators for pictographs for use in E-mail, for
-example (KDDI goes further and defines hundreds more in the space with
-lead bytes 0xF3 and 0xF4).
-
-Beyond even this there have been numerous minor variations made on Shift
-JIS, with individual characters here and there altered. Most of these
-extensions and variants have no IANA registration, so there is much scope
-for confusion if the extensions are used. Microsoft Code Page 932 is
-registered separately from Shift JIS.
-IBM CCSID 943 has the same extensions as Code Page 932.
-As with most code pages and encodings it is recommended that Unicode be
-used instead.
-
-=head1 "ShiftJIS" IN THIS SOFTWARE
-
- The "ShiftJIS" in this software means widely codeset than general
-ShiftJIS. This software use two algorithms to handle ShiftJIS.
-
-=over 2
-
-=item * ALGORITHM #1
-
- When the character is taken out of the octet string, it is necessary to
-distinguish a single octet character and the double octet character.
-The distinction is done only by first octet.
-
-    Single octet code is:
-      0x00-0x80, 0xA0-0xDF and 0xFD-0xFF
-
-    Double octet code is:
-      First octet   0x81-0x9F, 0xE0-0xEF and 0xF0-0xFC
-      Second octet  0x00-0xFF (All octet)
-
-    MALFORMED single octet code is:
-      0x81-0x9F and 0xE0-0xFC
-      * Final octet of string like first octet of double octet code
-
- So this "ShiftJIS" can handle any code of ShiftJIS based code without
-Informix Ascii 'INFORMIX V6 ALS' is triple octet code.
-(I'm sorry, Informix Ascii users.)
-
-See also code table:
-
-         Single octet code
-
-   0 1 2 3 4 5 6 7 8 9 A B C D E F 
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 0|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x00-0x80
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 1|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 2|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 3|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 8|*| | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 9| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xA0-0xDF
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- E| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- F| | | | | | | | | | | | | |*|*|*| 0xFD-0xFF
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-                                 Double octet code
-            First octet                                     Second octet
-
-   0 1 2 3 4 5 6 7 8 9 A B C D E F                 0 1 2 3 4 5 6 7 8 9 A B C D E F 
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 0| | | | | | | | | | | | | | | | |              0|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x00-0xFF
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 1| | | | | | | | | | | | | | | | |              1|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 2| | | | | | | | | | | | | | | | |              2|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 3| | | | | | | | | | | | | | | | |              3|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 4| | | | | | | | | | | | | | | | |              4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 5| | | | | | | | | | | | | | | | |              5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 6| | | | | | | | | | | | | | | | |              6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 7| | | | | | | | | | | | | | | | |              7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 8| |*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x81-0x9F    8|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|              9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- A| | | | | | | | | | | | | | | | |              A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- B| | | | | | | | | | | | | | | | |              B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- C| | | | | | | | | | | | | | | | |              C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- D| | | | | | | | | | | | | | | | |              D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xE0-0xFC    E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- F|*|*|*|*|*|*|*|*|*|*|*|*|*| | | |              F|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-    *MALFORMED* Single octet code
-
-Final octet of string like first octet of double octet code
-
-Even if malformed, it is not ignored and not deleted automatically.
-For example, Esjis::chop function returns this octet.
-
-   0 1 2 3 4 5 6 7 8 9 A B C D E F 
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 0| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 1| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 2| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 3| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 4| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 5| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 6| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 7| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 8| |M|M|M|M|M|M|M|M|M|M|M|M|M|M|M| 0x81-0x9F
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 9|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- A| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- B| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- C| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- D| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- E|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- F|M|M|M|M|M|M|M|M|M|M|M|M|M| | | |  0xE0-0xFC
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-The ShiftJIS list via vendors:
-L<http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html>
-
- DEC PC                         0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- DEC WS                         0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- Fujitsu TrueType font (PC)     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- Fujitsu FontCity font (PC)     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- Hitachi PC                     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- Hitachi WS                     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- IBM                            0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- NEC Windows (PC)               0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- NEC DOS (PC)                   0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- SONY NEWS-OS                   0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- Sun Wabi                       0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- Unisys PC                      0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- HP Japan Japanese HP-15        0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- AT&T Japan                     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- Mitsubishi Electric FONTRUNNER 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- Concurrent Japan               0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
- Informix ASCII INFORMIX V6 ALS 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC), (0xFD)(0xA1-0xFE)(0xA1-0xFE)
- Oracle Oracle7 (Release 7.1.3) 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x00-0xFF)
- Sybase SQL Server, Open Server 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
-
-=item * ALGORITHM #2
-
-Against algorithm.1, when the range of the character by tr/// is specified, only the
-following character codes are effective.
-
-    Single octet code is:
-      0x00-0x80, 0xA0-0xDF and 0xFD-0xFF
-
-    Double octet code is:
-      First octet   0x81-0x9F, 0xE0-0xEF and 0xF0-0xFC
-      Second octet  0x40-0x7E and 0x80-0xFC
-
-For instance, [\x81\x00-\x82\xFF] in script means [\x81\x82][\x40-\x7E\x80-\xFC].
-
-See also code table:
-
-         Single octet code
-
-   0 1 2 3 4 5 6 7 8 9 A B C D E F 
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 0|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x00-0x80
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 1|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 2|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 3|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 8|*| | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 9| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xA0-0xDF
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- E| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- F| | | | | | | | | | | | | |*|*|*| 0xFD-0xFF
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-                                 Double octet code
-            First octet                                     Second octet
-
-   0 1 2 3 4 5 6 7 8 9 A B C D E F                 0 1 2 3 4 5 6 7 8 9 A B C D E F 
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 0| | | | | | | | | | | | | | | | |              0| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 1| | | | | | | | | | | | | | | | |              1| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 2| | | | | | | | | | | | | | | | |              2| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 3| | | | | | | | | | | | | | | | |              3| | | | | | | | | | | | | | | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 4| | | | | | | | | | | | | | | | |              4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x40-0x7E
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 5| | | | | | | | | | | | | | | | |              5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 6| | | | | | | | | | | | | | | | |              6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 7| | | | | | | | | | | | | | | | |              7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 8| |*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x81-0x9F    8|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x80-0xFC
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- 9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|              9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- A| | | | | | | | | | | | | | | | |              A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- B| | | | | | | | | | | | | | | | |              B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- C| | | | | | | | | | | | | | | | |              C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- D| | | | | | | | | | | | | | | | |              D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xE0-0xFC    E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- F|*|*|*|*|*|*|*|*|*|*|*|*|*| | | |              F|*|*|*|*|*|*|*|*|*|*|*|*|*| | | |
-  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-=back
-
 =head1 MY GOAL
 
 See chapter 15: Unicode
@@ -3570,24 +3263,88 @@ Ideally, I'd like to achieve these five Goals:
 Old byte-oriented programs should not spontaneously break on the old
 byte-oriented data they used to work on.
 
+It has already been achieved by ShiftJIS designed for combining with
+old byte-oriented ASCII.
+
 =item Goal #2:
 
 Old byte-oriented programs should magically start working on the new
 character-oriented data when appropriate.
+
+Still now, 1 octet is counted with 1 by embedded functions length,
+substr, index, rindex and pos that handle length and position of string.
+In this part, there is no change. The length of 1 character of 2 octet
+code is 2.
+
+On the other hand, the regular expression in the script is added the
+multibyte anchoring processing with this software. This software does
+the rewriting instead of you.
+
+figure of Goal #1 and Goal #2.
+
+                               GOAL#1  GOAL#2
+                        (a)     (b)     (c)     (d)     (e)
+      +--------------+-------+-------+-------+-------+-------+
+      | data         |  Old  |  Old  |  New  |  Old  |  New  |
+      +--------------+-------+-------+-------+-------+-------+
+      | script       |  Old  |      Old      |      New      |
+      +--------------+-------+---------------+---------------+
+      | interpreter  |  Old  |              New              |
+      +--------------+-------+-------------------------------+
+      Old --- Old byte-oriented
+      New --- New character-oriented
+
+There is a combination from (a) to (e) in data, script and interpreter
+of old and new. Let's add the Encode module and this software did not
+exist at time of be written this document and JPerl did exist.
+
+                        (a)     (b)     (c)     (d)     (e)
+                                      JPerl           Encode,Sjis
+      +--------------+-------+-------+-------+-------+-------+
+      | data         |  Old  |  Old  |  New  |  Old  |  New  |
+      +--------------+-------+-------+-------+-------+-------+
+      | script       |  Old  |      Old      |      New      |
+      +--------------+-------+---------------+---------------+
+      | interpreter  |  Old  |              New              |
+      +--------------+-------+-------------------------------+
+      Old --- Old byte-oriented
+      New --- New character-oriented
+
+The reason why JPerl is very excellent is that it is at the position of
+(c). That is, it is not necessary to do a special description to the
+script to process Japanese.
+
+Contrasting is Encode module and describing "use Sjis;" on this software,
+in this case, a new description is necessary.
 
 =item Goal #3:
 
 Programs should run just as fast in the new character-oriented mode
 as in the old byte-oriented mode.
 
+It is impossible. Because the following time is necessary.
+
+(1) Time of escape script for old byte-oriented perl.
+
+(2) Time of processing regular expression by escaped script while
+    multibyte anchoring.
+
 =item Goal #4:
 
 Perl should remain one language, rather than forking into a
 byte-oriented Perl and a character-oriented Perl.
 
+A character-oriented Perl is not necessary to make it specially,
+because a byte-oriented Perl can already treat the binary data.
+This software is only an application program of Perl, a filter program.
+If perl can be executed, this software will be able to be executed.
+
 =item Goal #5:
 
 JPerl users will be able to maintain JPerl by Perl.
+
+It means the Perl programmer exists if there are needs of JPerl, I hope
+I get peaceful sleep at night.
 
 =back
 

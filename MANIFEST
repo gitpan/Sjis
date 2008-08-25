@@ -62,4 +62,8 @@ example/dt/alphabet/alpha.txt
 example/dt/alphabet/sjis.txt
 example/dt/“ú–{Œê/alpha.txt
 example/dt/“ú–{Œê/sjis.txt
-esjis-JA.pod
+esjis-JA.txt
+make-esjis.pl
+make-ebig5plus.pl
+make-egbk.pl
+make-euhc.pl

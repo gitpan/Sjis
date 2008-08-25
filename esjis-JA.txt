@@ -1,21 +1,17 @@
-# This file is encoded in ShiftJIS.
-1;
-__END__
+This file is encoded in ShiftJIS.
 
-=pod
+ソフトウェア名称
 
-=head1 NAME
+esjis-JA.txt - Source code filter to escape ShiftJIS (Japanese document)
 
-esjis.pl - ShiftJIS ソースコードフィルタ
-
-=head1 SYNOPSIS
+概要
 
   C:\>perl esjis.pl ShiftJIS_script.pl > Escaped_script.pl.e
 
   ShiftJIS_script.pl  --- ShiftJIS で書かれたスクリプト
   Escaped_script.pl.e --- エスケープされたスクリプト
 
-=head1 要約
+要約
 
 これまでの歴史からはじめましょう。ShiftJIS のサポートは jperl 4.019+1.3 から始
 まりました。これによって chop() や正規表現を複雑な CJK 文字に対しても適用できる
@@ -35,7 +31,7 @@ ShiftJIS はもともと過去の規格との互換性を考慮して開発されました。一般的にオペ
 
 あなたもエンコードの問題からエスケープしませんか？
 
-=head1 JPerl の未来
+JPerl の未来
 
 JPerl はとても優れたソフトウェアです。
 しかしながら最終バージョンは 5.005_4 で、今はメンテナンスされていません。
@@ -48,7 +44,7 @@ JPerl はとても優れたソフトウェアです。
 というメッセージを残し、Perl から離れていってしまいました。
 
 スライド15 "jperl の今後"
-L<ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt>
+ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
 私はどうしても欲しかったのでこのソフトウェアを作りました。
 
@@ -58,23 +54,19 @@ L<ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt>
 
 このソフトウェアによって
 
-=over 2
+  * ShiftJIS そのままの値を扱う
 
-=item * ShiftJIS そのままの値を扱う
+  * ShiftJIS 文字列の長さを扱う
 
-=item * ShiftJIS 文字列の長さを扱う
+  * UTF8 フラグを扱わないですむ
 
-=item * UTF8 フラグを扱わないですむ
-
-=item * C プログラミングを行わないですむ
-
-=back
+  * C プログラミングを行わないですむ
 
 ことができます。
 
 さあ、JPerl の未来を作りましょう。
 
-=head1 SOFTWARE COMPOSITION
+ソフトウェアの一覧
 
     jperl55.bat  --- perl5.5 と esjis.pl による jperl
     jperl58.bat  --- perl5.8 と esjis.pl による jperl
@@ -86,13 +78,11 @@ L<ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt>
     Esjis.pm     --- esjis.pl のランタイムルーチン
     Sjis.pm      --- ShiftJIS ソースコードフィルタモジュール
 
-=head1 SOFTWARE COMBINATION
+ソフトウェアの組合せについて
 
 このソフトウェアは以下の組合せで使うことができます。
 
-=over 2
-
-=item * 組合せ 1
+  * 組合せ 1
 
     esjis.pl + Esjis.pm
 
@@ -100,7 +90,7 @@ L<ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt>
     す。エスケープされたスクリプトはランタイムルーチンとして "use Esjis;" とい
     う記述を含みます。
 
-=item * 組合せ 2
+  * 組合せ 2
 
     jperl55.bat + esjis.pl + Esjis.pm
 
@@ -108,7 +98,7 @@ L<ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt>
     プトを perl5.5 によって実行します。
     この組合せは主に Jperl.exe との互換性を検証する目的で使われます。
 
-=item * 組合せ 3
+  * 組合せ 3
 
     Sjis.pm + esjis.pl + Esjis.pm
 
@@ -118,7 +108,7 @@ L<ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt>
     つまり "use Sjis;" とさえ記述すれば、コマンド実行時に perl と jperl を使い
     分ける必要がないため便利です。
 
-=item * 組合せ 4
+  * 組合せ 4
 
     jperl58.bat + perl58.bat + esjis.pl + Esjis.pm
 
@@ -129,14 +119,14 @@ L<ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt>
     起動できます。perl5.8 の実行ファイルは任意のドライブの \Perl58\bin に存在
     する必要があります。
 
-=item * 組合せ 5
+  * 組合せ 5
 
     perl58.bat + Sjis.pm + esjis.pl + Esjis.pm
 
     組合せ 3 の perl5.8 版です。perl58.bat で起動するスクリプトには "use Sjis;"
     の記述が必要です。
 
-=item * 組合せ 6
+  * 組合せ 6
 
     jperl510.bat + perl510.bat + esjis.pl + Esjis.pm
 
@@ -144,116 +134,100 @@ L<ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt>
     "use Sjis;" の記述は不要です。perl5.10 の実行ファイルは任意のドライブの
     \Perl510\bin に存在する必要があります。
 
-=item * 組合せ 7
+  * 組合せ 7
 
     perl510.bat + Sjis.pm + esjis.pl + Esjis.pm
 
     組合せ 3 の perl5.10 版です。perl510.bat で起動するスクリプトには
     "use Sjis;" の記述が必要です。
 
-=item * 組合せ 8
+  * 組合せ 8
 
     pl2ebat.bat + esjis.pl + Esjis.pm
 
     ShiftJIS で書かれたスクリプト用の "pl2bat.bat" です。
 
-=back
-
-=head1 JPerl 互換の機能
+JPerl 互換の機能
 
 以下の関数は JPerl と同様に機能します。
 このソフトウェアによって書き換わる関数があります。
 
-=over 2
+  * シングルクォート中の2オクテットコード文字列の扱い
 
-=item * シングルクォート中の2オクテットコード文字列の扱い
+  * ダブルクォート中の2オクテットコード文字列の扱い
 
-=item * ダブルクォート中の2オクテットコード文字列の扱い
+  * シングルクォート中の2オクテットコード正規表現の扱い
 
-=item * シングルクォート中の2オクテットコード正規表現の扱い
+  * ダブルクォート中の2オクテットコード正規表現の扱い
 
-=item * ダブルクォート中の2オクテットコード正規表現の扱い
+  * chop は Esjis::chop に書き換わります
 
-=item * chop は Esjis::chop に書き換わります
+  * split は Esjis::split に書き換わります
 
-=item * split は Esjis::split に書き換わります
+  * substr はそのままです
 
-=item * substr はそのままです
+  * index は Esjis::index に書き換わります
 
-=item * index は Esjis::index に書き換わります
+  * rindex は Esjis::rindex に書き換わります
 
-=item * rindex は Esjis::rindex に書き換わります
+  * lc は Esjis::lc に書き換わります
 
-=item * lc は Esjis::lc に書き換わります
+  * uc は Esjis::uc に書き換わります
 
-=item * uc は Esjis::uc に書き換わります
+  * tr/// または y///
 
-=item * tr/// または y///
+    /b と /B 修飾子が利用できます。
 
-/b と /B 修飾子が利用できます。
-
-=back
-
-=head1 JPerl 上位互換の機能
+JPerl 上位互換の機能
 
 以下の関数の機能は JPerl よりも拡張されています。
 
-=over 2
+  * chr は Esjis::chr に書き換わります
 
-=item * chr は Esjis::chr に書き換わります
+    2オクテットコードを扱うことができます。
 
-2オクテットコードを扱うことができます。
+  * ord は Esjis::ord に書き換わります
 
-=item * ord は Esjis::ord に書き換わります
+    2オクテットコードを扱うことができます。
 
-2オクテットコードを扱うことができます。
+  * reverse は Esjis::reverse に書き換わります
 
-=item * reverse は Esjis::reverse に書き換わります
+    スカラコンテキストでは2オクテットコードを扱うことができます。
+    つまり2オクテットコードでも文字ごとに反対に並べます。
 
-スカラコンテキストでは2オクテットコードを扱うことができます。
-つまり2オクテットコードでも文字ごとに反対に並べます。
-
-=back
-
-=head1 JPerl と互換性のない機能
+JPerl と互換性のない機能
 
 以下の機能は JPerl と互換性がありません。オリジナル Perl と同じ機能になります。
 
-=over 2
+  * format
 
-=item * format
+    オリジナルの Perl と機能が同じです(ShiftJIS に対応していません)。
 
-オリジナルの Perl と機能が同じです(ShiftJIS に対応していません)。
+  * -B
 
-=item * -B
+    オリジナルの Perl と機能が同じです。
 
-オリジナルの Perl と機能が同じです。
+  * -T
 
-=item * -T
+    オリジナルの Perl と機能が同じです。
 
-オリジナルの Perl と機能が同じです。
-
-=back
-
-=head1 バグと制限事項
+バグと制限事項
 
 バグ報告、パッチを歓迎します。
 
-=over 2
+  * 制限事項 1
 
-=item * 制限事項 1
+    ファイルテスト演算子 -T および -B の機能はオリジナルの Perl と同じです。
 
-ファイルテスト演算子 -T および -B の機能はオリジナルの Perl と同じです。
+  * 制限事項 2
 
-=item * 制限事項 2
+    format 関数は2オクテットコードに対応していません。
 
-format 関数は2オクテットコードに対応していません。
+  * 制限事項 3
 
-=item * 制限事項 3
-
-スクリプトの1行にヒアドキュメントのデリミタを2つ以上指定した場合、それらのうち
-1つでもダブルクォートライクなもの(<<"END", <<END, <<`END`)があれば残りのデリミ
-タについても、すべてダブルクォート扱いになります。
+    スクリプトの1行にヒアドキュメントのデリミタを2つ以上指定した場合、それらのうち
+    1つでもダブルクォートライクなもの(<<"END", <<END, <<`END`)があれば残りのデリミ
+    タについても、すべてダブルクォート扱いになります。
 
     例1
         print <<'END';
@@ -352,34 +326,32 @@ format 関数は2オクテットコードに対応していません。
         ============================================================
         END3
 
-=back
-
-=head1 履歴
+履歴
 
 この esjis.pl は 'jcode.pl' のソースコードを基にして、'Jperl.exe' と同等の
 機能を目指して ActivePerl Build 522 Built under MSWin32 Compiled at Nov 2
 1999 09:52:28 で利用可能なように作られました。
 
-=head1 作者
+作者
 
-このプロジェクトは 稲葉 準 E<lt>ina@cpan.orgE<gt> によって始まりました。
+このプロジェクトは 稲葉 準 ina@cpan.org によって始まりました。
 このファイルを分かち合いましょう。
 
-=head1 著作権
+著作権
 
 このソフトウェアはフリーソフトウェアです。あなたは Perl と同じライセンス
-の元で再配布及び変更を行うことが出来ます。詳しくは L<perlartistic> を
-参照してください。
+の元で再配布及び変更を行うことが出来ます。詳しくは perlartistic を参照して
+ください。
 
 このソフトウェアは有用であることを願って頒布されますが、*全くの無保証* 
 です。商業可能性の保証や特定の目的への適合性は、言外に示されたものも含
 め全く存在しません。
 
-=head1 ウィキペディアによる「Shift_JIS」の定義
+ウィキペディアによる「Shift_JIS」の定義
 
 Shift_JIS (2008.08.12 23:24:00 JST). In Wikipedia: The Free Encyclopedia.
 Retrieved from
-L<http://ja.wikipedia.org/wiki/Shift_JIS>
+http://ja.wikipedia.org/wiki/Shift_JIS
 
 出典: フリー百科事典『ウィキペディア（Wikipedia）』
 
@@ -590,25 +562,23 @@ Shift_JISX0213符号化表現においては、第1バイトF0(16)以降を2面の文字に割り当て
 陸野優樹編 (2006-12-23更新 (2001-07-13作成)). "だめ文字" 通信用語の基礎知識・
 通信技術文字用語編 (CTCHRY). 通信用語の基礎知識 編纂委員会. 2007年11月5日閲覧.
 
-=head1 このソフトウェアでの "ShiftJIS"
+このソフトウェアでの "ShiftJIS"
 
 このソフトウェアでいう "ShiftJIS" は上記の「コード空間における文字数制限」の
 11438文字すべてを扱えることを目指しています。そのためにアルゴリズムは2つ使わ
 れています。
 
-=over 2
+  * アルゴリズム 1
 
-=item * アルゴリズム 1
-
-オクテットの並びから文字を取り出すとき、1オクテットコードと2オクテットコードの
-区別は第1オクテットコードのみで行われます。第2オクテットは考慮されません。
+    オクテットの並びから文字を取り出すとき、1オクテットコードと2オクテットコードの
+    区別は第1オクテットコードのみで行われます。第2オクテットは考慮されません。
 
     1オクテットコード:
       0x00-0x80, 0xA0-0xDF, 0xFD-0xFF
 
     2オクテットコード:
       第1オクテット  0x81-0x9F, 0xE0-0xEF, 0xF0-0xFC
-      第2オクテット  0x00-0xFF (All octet)
+      第2オクテット  0x00-0xFF (すべて)
 
     不正な1オクテットコード:
       0x81-0x9F, 0xE0-0xFC
@@ -741,7 +711,7 @@ Shift_JISX0213符号化表現においては、第1バイトF0(16)以降を2面の文字に割り当て
 
 
 ベンダ別 SJIS コード一覧
-L<http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html>
+http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html
 
  DEC PC                         0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
  DEC WS                         0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
@@ -763,10 +733,10 @@ L<http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html>
  Oracle Oracle7 (Release 7.1.3) 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x00-0xFF)
  Sybase SQL Server, Open Server 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
 
-=item * アルゴリズム 2
+  * アルゴリズム 2
 
-アルゴリズム 1 にも関わらず、tr/// により文字の範囲を指定された場合は以下の文字
-のみが有効となります。
+    アルゴリズム 1 にも関わらず、tr/// により文字の範囲を指定された場合は以下の文字
+    のみが有効となります。
 
     1オクテットコード:
       0x00-0x80, 0xA0-0xDF, 0xFD-0xFF
@@ -857,39 +827,35 @@ L<http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html>
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-=back
-
-=head1 ゴール
+ゴール
 
 プログラミング Perl 第3版 VOLUME 1 (ISBN 4-87311-096-3)
 15章 Unicode 参照
 
 理想的には、以下の5つのゴールを実現しようと考えています。
 
-=over 2
+  * ゴール1
 
-=item ゴール1
+    既存のバイト指向のスクリプトは、以前扱っていた既存のバイト指向のデータに対し
+    て、以前と同様に動作すべきである。
 
-既存のバイト指向のスクリプトは、以前扱っていた既存のバイト指向のデータに対し
-て、以前と同様に動作すべきである。
+    これは ShiftJIS がバイト指向である ASCII および JIS X 0201 と組合わせて利用
+    できるよう設計されたことによって、すでに達成されています。
 
-これは ShiftJIS がバイト指向である ASCII および JIS X 0201 と組合わせて利用
-できるよう設計されたことによって、すでに達成されています。
+  * ゴール2
 
-=item ゴール2
+    既存のバイト指向のスクリプトは、何も手を加えずに、(そうすることが適切であれば)
+    新しい文字指向のデータに対しても動作するようになるべきである。
 
-既存のバイト指向のスクリプトは、何も手を加えずに、(そうすることが適切であれば)
-新しい文字指向のデータに対しても動作するようになるべきである。
+    組込み関数 length, substr, index, rindex, pos などの文字列の長さや位置を扱う
+    ものは今までどおりに1オクテットを 1 と数えます。この部分について何も手は加
+    わりません。2オクテットコード1文字の length は 2 になります。
 
-組込み関数 length, substr, index, rindex, pos などの文字列の長さや位置を扱う
-ものは今までどおりに1オクテットを 1 と数えます。この部分について何も手は加
-わりません。2オクテットコード1文字の length は 2 になります。
+    一方、スクリプト中の正規表現はこのソフトウェアによってマルチバイト文字のための
+    アンカーリング処理が書き加わります。つまり手を加える必要があるのですが、それを
+    あなたの代わりにこのソフトウェアが行います。
 
-一方、スクリプト中の正規表現はこのソフトウェアによってマルチバイト文字のための
-アンカリング処理が書き加わります。つまり手を加える必要があるのですが、それを
-あなたの代わりにこのソフトウェアが行います。
-
-ゴール1とゴール2の内容を図示します。
+    ゴール1とゴール2の内容を図示します。
 
                                    GOAL#1  GOAL#2
                             (a)     (b)     (c)     (d)     (e)
@@ -903,9 +869,9 @@ L<http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html>
           Old --- 既存のバイト指向
           New --- 新しい文字指向
 
-データ、スクリプト、インタプリタの新・旧に関して、上の (a) から (e) までの
-組合せがあります。この文書が書かれた当時に存在しなかった Encode モジュールと
-このソフトウェア、および存在していた JPerl を書き足してみましょう。
+    データ、スクリプト、インタプリタの新・旧に関して、上の (a) から (e) までの
+    組合せがあります。この文書が書かれた当時に存在しなかった Encode モジュールと
+    このソフトウェア、および存在していた JPerl を書き足してみましょう。
 
                             (a)     (b)     (c)     (d)     (e)
                                            JPerl          Encode,Sjis
@@ -919,123 +885,121 @@ L<http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html>
           Old --- 既存のバイト指向
           New --- 新しい文字指向
 
-JPerl がとても優れている理由は (c) の位置にあるからです。すなわち日本語処理
-を行うためにスクリプトに特別な記述を行う必要がありません。
+    JPerl がとても優れている理由は (c) の位置にあるからです。すなわち日本語処理
+    を行うためにスクリプトに特別な記述を行う必要がありません。
 
-対照的なのは Encode モジュールやこのソフトウェアにて "use Sjis;" を記述する
-場合です。この場合は新たなスクリプトの書き方をする必要があります。
+    対照的なのは Encode モジュールやこのソフトウェアにて "use Sjis;" を記述する
+    場合です。この場合は新たなスクリプトの書き方をする必要があります。
 
-=item ゴール3
+  * ゴール3
 
-プログラムは、新しい文字指向モードでも、以前のバイト指向モードと同じスピー
-ドで動作すべきである。
+    スクリプトは、新しい文字指向モードでも、以前のバイト指向モードと同じスピー
+    ドで動作すべきである。
 
-それは無理。だって、以下の時間が必要だもの。
+    それは無理。だって、以下の時間が必要だもの。
 
-(1) ユーザの書いたスクリプトをエスケープして、バイト指向 Perl 向けのスクリ
-プトに書き換える時間。ただし、エスケープされたスクリプトは保存できるため、
-次回からはこの時間はいりません。
+    (1) スクリプトをエスケープして、バイト指向 Perl で扱えるように処理するための
+     時間。ただし、処理されたスクリプトは保存できるため、次回からはこの時間はいり
+     ません。
 
-(2) エスケープされたスクリプトがマルチバイトアンカリング処理を行いながら、
-正規表現を実行する時間。
+    (2) エスケープされたスクリプトがマルチバイトアンカーリング処理を行いながら、
+     正規表現を実行する時間。
 
-すでに存在する ASCII データは1文字が1オクテットにパックされています。その
-データと互換性を保ちながら文字種を増やそうとすると、ISO-2022 のようにエスケー
-プシーケンスが必要であったり、ShiftJIS や UTF-8 のように "エスケープビット"
-が必要になったりします。これらのエスケープ処理が加わるため、以前と同じスピー
-ドで動作すべきであるというのは無理な目標だと思います。
+    すでに存在する ASCII データは1文字が1オクテットにパックされています。その
+    データと互換性を保ちながら文字種を増やそうとすると、ISO-2022 のようにエスケー
+    プシーケンスが必要であったり、ShiftJIS や UTF-8 のように "エスケープビット"
+    が必要になったりします。これらのエスケープ処理が加わるため、以前と同じスピー
+    ドで動作すべきであるというのは無理な目標だと思います。
 
-=item ゴール4
+  * ゴール4
 
-Perl は、バイト指向の Perl と文字指向の Perl に枝分かれせずに、1つの言語で
-あり続けるべきである。
+    Perl は、バイト指向の Perl と文字指向の Perl に枝分かれせずに、1つの言語で
+    あり続けるべきである。
 
-バイト指向の Perl はすでにバイナリデータを扱うことができるため、文字指向の
-Perl を別立てで作成する必要はありません。このソフトウェアは単に Perl のアプリ
-ケーションプログラムであり、フィルタプログラムとして作成されています。基本的
-には perl が実行できる環境で動作するでしょう。
+    バイト指向の Perl はすでにバイナリデータを扱うことができるため、文字指向の
+    Perl を別立てで作成する必要はありません。このソフトウェアは単に Perl のアプリ
+    ケーションプログラムであり、フィルタプログラムとして作成されています。基本的
+    には perl が実行できる環境で動作するでしょう。
 
-=item ゴール5
+  * ゴール5
 
-JPerl ユーザが Perl で JPerl を保守できるようになる。
+    JPerl ユーザが Perl で JPerl を保守できるようになる。
 
-JPerl のニーズがあるのであれば、すなわち Perl プログラマが存在するということ
-を意味しているわけで、今までより安心できるといいんだけどなぁ。
+    JPerl のニーズがあるのであれば、すなわち Perl プログラマが存在するということ
+    を意味しているわけで、今までより安心できるといいんだけどなぁ。
 
-=back
+参考文献
 
-=head1 参考文献
-
- C<プログラミングPerl 第3版 VOLUME 1>
+ プログラミングPerl 第3版 VOLUME 1
  By Larry Wall, Tom Christiansen, Jon Orwant, 近藤 嘉雪 訳
  2002年09月 発行
  756ページ
  ISBN 4-87311-096-3
- L<http://www.oreilly.co.jp/books/4873110963/>
+ http://www.oreilly.co.jp/books/4873110963/
 
- C<プログラミングPerl 第3版 VOLUME 2>
+ プログラミングPerl 第3版 VOLUME 2
  By Larry Wall, Tom Christiansen, Jon Orwant, 近藤 嘉雪 訳
  2002年09月 発行
  680ページ
  ISBN 4-87311-097-1
- L<http://www.oreilly.co.jp/books/4873110971/>
+ http://www.oreilly.co.jp/books/4873110971/
 
- C<Perlクックブック 第2版 VOLUME 1>
+ Perlクックブック 第2版 VOLUME 1
  By Tom Christiansen, Nathan Torkington, Shibuya Perl Mongers 監訳, 株式会社ドキュメントシステム 訳
  2004年09月 発行
  752ページ
  ISBN 4-87311-202-8
- L<http://www.oreilly.co.jp/books/4873112028/>
+ http://www.oreilly.co.jp/books/4873112028/
 
- C<Perlクックブック 第2版 VOLUME 2>
+ Perlクックブック 第2版 VOLUME 2
  By Tom Christiansen, Nathan Torkington, Shibuya Perl Mongers 監訳, 株式会社ドキュメントシステム 訳
  2004年09月 発行
  464ページ
  ISBN 4-87311-203-6
- L<http://www.oreilly.co.jp/books/4873112036/>
+ http://www.oreilly.co.jp/books/4873112036/
 
- C<Perl クイックリファレンス>
+ Perl クイックリファレンス
  By Stephen Spainhour, Ellen Siever, Nathan Patwardhan, 近藤 嘉雪, 台場 圭一 監訳
  2000年03月 発行
  784ページ
  ISBN 4-900900-72-9
- L<http://www.oreilly.co.jp/books/4900900729/>
+ http://www.oreilly.co.jp/books/4900900729/
 
- C<CJKV日中韓越情報処理>
+ CJKV日中韓越情報処理
  Chinese, Japanese, Korean & Vietnamese Computing
  By Ken Lunde, 小松 章, 逆井 克己 訳
  2002年12月 発行
  1172ページ
  ISBN 4-87311-108-0
- L<http://www.oreilly.co.jp/books/4873111080/>
+ http://www.oreilly.co.jp/books/4873111080/
 
- C<詳説 正規表現 第2版>
+ 詳説 正規表現 第2版
  By Jeffrey E. F. Friedl, 田和 勝 訳
  2003年05月 発行
  464ページ
  ISBN 4-87311-130-7
- L<http://www.oreilly.co.jp/books/4873111307/>
+ http://www.oreilly.co.jp/books/4873111307/
 
- C<詳説 正規表現 第3版>
+ 詳説 正規表現 第3版
  By Jeffrey E. F. Friedl, 株式会社ロングテール／長尾 高弘 訳
  2008年04月 発行
  528ページ
  ISBN 978-4-87311-359-3
- L<http://www.oreilly.co.jp/books/9784873113593/>
+ http://www.oreilly.co.jp/books/9784873113593/
 
- C<Perlプログラミング>
+ Perlプログラミング
  Larry Wall, Randal L.Schwartz, 近藤 嘉雪 訳
  1993年2月発行
  ISBN 4-89052-384-7
- L<http://www.context.co.jp/~cond/books/old-books.html>
+ http://www.context.co.jp/~cond/books/old-books.html
 
- C<JIS漢字字典>
+ JIS漢字字典
  芝野耕司 編著
  1456 頁
  ISBN 4-542-20129-5
- L<http://www.webstore.jsa.or.jp/lib/lib.asp?fn=/manual/mnl01_12.htm>
+ http://www.webstore.jsa.or.jp/lib/lib.asp?fn=/manual/mnl01_12.htm
 
-=head1 謝辞
+謝辞
 
 このソフトウェアは、以下の方々のおかげにより作成されました。特にこの POD は
 Encode モジュールを参考にして書かれています。全ての方に感謝いたします。
@@ -1044,31 +1008,29 @@ Encode モジュールを参考にして書かれています。全ての方に感謝いたします。
  http://furukawablog.spaces.live.com/Blog/cns!1pmWgsL289nm7Shn7cS0jHzA!2225.entry
 
  Larry Wall, Perl
- L<http://www.perl.org/>
+ http://www.perl.org/
 
  歌代 和正さん, jcode.pl
- L<http://www.srekcah.org/jcode/>
+ http://www.srekcah.org/jcode/
 
  Jeffrey E. F. Friedl, Mastering Regular Expressions
- L<http://www.oreilly.com/catalog/regex/index.html>
+ http://www.oreilly.com/catalog/regex/index.html
 
  貞廣 知行さん, Shift-JISテキストを正しく扱う
- L<http://homepage1.nifty.com/nomenclator/perl/shiftjis.htm>
+ http://homepage1.nifty.com/nomenclator/perl/shiftjis.htm
 
  藤岡 和夫さん, jperlユーザーのために
- L<http://homepage1.nifty.com/kazuf/jperl.html>
+ http://homepage1.nifty.com/kazuf/jperl.html
 
  和泉 宏明さん, WindowsでPerl 5.8/5.10を使うモンじゃない
- L<http://www.aritia.org/hizumi/perl/perlwin.html>
+ http://www.aritia.org/hizumi/perl/perlwin.html
 
  鈴木 紀夫さん, Jperl
- L<http://homepage2.nifty.com/kipp/perl/jperl/>
+ http://homepage2.nifty.com/kipp/perl/jperl/
 
  渡辺 博文さん, Jperl
- L<http://search.cpan.org/~watanabe/>
+ http://search.cpan.org/~watanabe/
 
  小飼 弾さん, Encode モジュール
- L<http://search.cpan.org/dist/Encode/>
-
-=cut
+ http://search.cpan.org/dist/Encode/
 

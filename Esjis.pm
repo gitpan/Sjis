@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.24 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.25 $ =~ m/(\d+)/xmsg;
 
 use Carp qw(carp croak confess cluck verbose);
 use Symbol qw(qualify_to_ref);
@@ -130,20 +130,20 @@ sub Esjis::tr($$$;$) {
     my @searchlist      = ();
     my @replacementlist = ();
 
-    @char = $_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg;
+    @char = $_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
     @searchlist = _charlist_tr($searchlist =~ m{\G(
         \\     [0-7]{2,3}          |
         \\x    [0-9A-Fa-f]{2}      |
         \\c    [\x40-\x5F]         |
-        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
-            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) |
+            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])
     )}oxmsg);
     @replacementlist = _charlist_tr($replacementlist =~ m{\G(
         \\     [0-7]{2,3}          |
         \\x    [0-9A-Fa-f]{2}      |
         \\c    [\x40-\x5F]         |
-        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) |
-            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])
+        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) |
+            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])
     )}oxmsg);
 
     my %tr = ();
@@ -212,13 +212,13 @@ sub Esjis::chop(;@) {
 
     my $chop;
     if (@_ == 0) {
-        my @char = m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])/oxmsg;
+        my @char = m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
         $chop = pop @char;
         $_ = join '', @char;
     }
     else {
         for my $string (@_) {
-            my @char = $string =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg;
+            my @char = $string =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
             $chop = pop @char;
             $string = join '', @char;
         }
@@ -286,11 +286,11 @@ sub Esjis::lc(;@) {
 
     if (@_ == 0) {
         local $^W = 0;
-        return join '', map {$lc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])/oxmsg;
+        return join '', map {$lc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
     }
     elsif (@_ == 1) {
         local $^W = 0;
-        return join '', map {$lc{$_}||$_} ($_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])/oxmsg);
+        return join '', map {$lc{$_}||$_} ($_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg);
     }
     else {
         local $^W = 0;
@@ -298,7 +298,7 @@ sub Esjis::lc(;@) {
         # P.95 Named Unary and File Test Operators
         # of ISBN 0-596-00027-8 Programming Perl Third Edition.
 
-        return join('', map {$lc{$_}||$_} ($_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])/oxmsg)), @_[1..$#_];
+        return join('', map {$lc{$_}||$_} ($_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg)), @_[1..$#_];
     }
 }
 
@@ -313,11 +313,11 @@ sub Esjis::uc(;@) {
 
     if (@_ == 0) {
         local $^W = 0;
-        return join '', map {$uc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg;
+        return join '', map {$uc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
     }
     elsif (@_ == 1) {
         local $^W = 0;
-        return join '', map {$uc{$_}||$_} ($_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg);
+        return join '', map {$uc{$_}||$_} ($_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg);
     }
     else {
         local $^W = 0;
@@ -325,7 +325,7 @@ sub Esjis::uc(;@) {
         # P.95 Named Unary and File Test Operators
         # of ISBN 0-596-00027-8 Programming Perl Third Edition.
 
-        return join('', map {$uc{$_}||$_} ($_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg)), @_[1..$#_];
+        return join('', map {$uc{$_}||$_} ($_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg)), @_[1..$#_];
     }
 }
 
@@ -343,7 +343,7 @@ sub Esjis::ignorecase(@) {
         # split regexp
         my @char = $string =~ m{\G(
             \[\^ |
-                (?:[\\\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\\\x81-\x9F\xE0-\xFC])
+                (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF] | [\x00-\xFF])
         )}oxmsg;
 
         # unescape character
@@ -406,7 +406,7 @@ sub Esjis::ignorecase(@) {
                         }
 
                         # [^...]
-                        splice @char, $left, $right-$left+1, '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])';
+                        splice @char, $left, $right-$left+1, '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])';
 
                         $i = $left;
                         last;
@@ -416,11 +416,11 @@ sub Esjis::ignorecase(@) {
 
             # rewrite character class or escape character
             elsif (my $char = {
-                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
                 }->{$char[$i]}
             ) {
                 $char[$i] = $char;
@@ -549,7 +549,7 @@ sub Esjis::reverse(@) {
         return CORE::reverse @_;
     }
     else {
-        return join '', CORE::reverse(join('',@_) =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) /oxmsg);
+        return join '', CORE::reverse(join('',@_) =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg);
     }
 }
 
@@ -591,7 +591,7 @@ sub _charlist_tr {
                 '\e' => "\e",
             }->{$1};
         }
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) \z/oxms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) \z/oxms) {
             $char[$i] = $1;
         }
     }
@@ -712,14 +712,14 @@ sub _charlist_qr {
                 '\s' => '\s',
                 '\v' => '\v',
                 '\w' => '\w',
-                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$1};
         }
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) \z/oxms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) \z/oxms) {
             $char[$i] = $1;
         }
     }
@@ -948,14 +948,14 @@ sub _charlist_not_qr {
                 '\s' => '\s',
                 '\v' => '\v',
                 '\w' => '\w',
-                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\d])',
-                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\h])',
-                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\s])',
-                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\v])',
-                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC\w])',
+                '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
+                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
+                '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
+                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
+                '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$1};
         }
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC]) \z/oxms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) \z/oxms) {
             $char[$i] = $1;
         }
     }
@@ -1123,10 +1123,20 @@ sub _charlist_not_qr {
 
     # return character list
     if (scalar(@charlist) >= 1) {
-        return '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC'. join('', @singleoctet) . '])';
+        if (scalar(@singleoctet) >= 1) {
+            return '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^'. join('', @singleoctet) . '])';
+        }
+        else {
+            return '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF])';
+        }
     }
     else {
-        return                                 '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC'. join('', @singleoctet) . '])';
+        if (scalar(@singleoctet) >= 1) {
+            return                                 '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^'. join('', @singleoctet) . '])';
+        }
+        else {
+            return                                 '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF])';
+        }
     }
 }
 

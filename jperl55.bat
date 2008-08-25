@@ -15,7 +15,7 @@ goto endofperl
 $VERSION = "1.0.0"; undef @rem;
 ######################################################################
 #
-# jperl55 -  execute ShiftJIS perlscript on the perl5.5
+# jperl55 - execute ShiftJIS perlscript on the perl5.5
 #
 # Copyright (c) 2008 INABA Hitoshi <ina@cpan.org>
 #
@@ -40,16 +40,25 @@ for (@ARGV) {
 }
 
 # compile script
+$filter = 'esjis.pl';
 for (@ARGV) {
+    if (s/^--([sbgu])$//) {
+        $filter = {
+            's' => 'esjis.pl',
+            'b' => 'ebig5plus.pl',
+            'g' => 'egbk.pl',
+            'u' => 'euhc.pl',
+        }->{$1};
+    }
     next if /^-/; # skip command line option
 
     if (not -e $_) {
-        die "jperl55: script $_ is not exists.";
+        die "$0: script $_ is not exists.";
     }
     else {
 
         # if new *.e file exists
-        if ((-e "$_.e") and ((stat("$_.e"))[9] > (stat($_))[9]) and ((stat("$_.e"))[9] > (stat(&abspath('esjis.pl')))[9])) {
+        if ((-e "$_.e") and ((stat("$_.e"))[9] > (stat($_))[9]) and ((stat("$_.e"))[9] > (stat(&abspath($filter)))[9])) {
             $_ = "$_.e";
             last;
         }
@@ -60,12 +69,12 @@ for (@ARGV) {
         } while (-e $tmpnam);
 
         # escape ShiftJIS of script
-        if (system(qq{$^X -S esjis.pl $_ > $tmpnam}) == 0) {
+        if (system(qq{$^X -S $filter $_ > $tmpnam}) == 0) {
             rename($tmpnam,"$_.e") or unlink $tmpnam;
         }
         else {
             unlink $tmpnam;
-            die "jperl55: Can't execute script: $_";
+            die "$0: Can't execute script: $_";
         }
     }
 
@@ -79,7 +88,7 @@ if ($] =~ /^5\.005/) {
     exit system($^X, @ARGV);
 }
 else {
-    die "jperl55: nothing perl5.5.\n";
+    die "$0: nothing perl5.5.\n";
 }
 
 # find absolute path
@@ -110,11 +119,15 @@ jperl55 - execute ShiftJIS perlscript on the perl5.5
 
 =head1 SYNOPSIS
 
-B<jperl55> [perlscript.pl]
+B<jperl55>    [perlscript.pl]   --- for ShiftJIS script
+B<jperl55 -s> [perlscript.pl]   --- for ShiftJIS script
+B<jperl55 -b> [perlscript.pl]   --- for Big5Plus script
+B<jperl55 -g> [perlscript.pl]   --- for GBK script
+B<jperl55 -h> [perlscript.pl]   --- for UHC script
 
 =head1 DESCRIPTION
 
-This utility converts a ShiftJIS perl script into a escaped script that
+This utility converts a CJK perl script into a escaped script that
 can be executed by original perl5.5 on DOS-like operating systems.
 
 If the up-to-date escaped file already exists, it is not made again.
@@ -150,7 +163,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 =head1 SEE ALSO
 
-perl, esjis.pl
+perl, esjis.pl, ebig5plus.pl, egbk.pl, euhc.pl
 
 =cut
 

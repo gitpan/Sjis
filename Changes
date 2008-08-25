@@ -99,3 +99,7 @@ Revision history for Perl extension Sjis.
 	- support \1,\2,\3 syntax of s/// and s'''.
 	- add Japanese document.
 	; created by INABA Hitoshi
+
+0.25  2008/08/25 00:00:00
+	- add Big5Plus, GBK and UHC support.
+	; created by INABA Hitoshi
