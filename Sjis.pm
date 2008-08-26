@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.25 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.26 $ =~ m/(\d+)/xmsg;
 
 sub import() {}
 sub unimport() {}

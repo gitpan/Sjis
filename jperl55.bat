@@ -119,11 +119,15 @@ jperl55 - execute ShiftJIS perlscript on the perl5.5
 
 =head1 SYNOPSIS
 
-B<jperl55>    [perlscript.pl]   --- for ShiftJIS script
-B<jperl55 -s> [perlscript.pl]   --- for ShiftJIS script
-B<jperl55 -b> [perlscript.pl]   --- for Big5Plus script
-B<jperl55 -g> [perlscript.pl]   --- for GBK script
-B<jperl55 -h> [perlscript.pl]   --- for UHC script
+    B<jperl55>     [perlscript.pl]   --- for ShiftJIS script
+
+    B<jperl55 --s> [perlscript.pl]   --- for ShiftJIS script
+
+    B<jperl55 --b> [perlscript.pl]   --- for Big5Plus script
+
+    B<jperl55 --g> [perlscript.pl]   --- for GBK script
+
+    B<jperl55 --h> [perlscript.pl]   --- for UHC script
 
 =head1 DESCRIPTION
 

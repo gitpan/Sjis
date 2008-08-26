@@ -77,6 +77,9 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
     esjis.pl     --- ShiftJIS ソースコードフィルタ
     Esjis.pm     --- esjis.pl のランタイムルーチン
     Sjis.pm      --- ShiftJIS ソースコードフィルタモジュール
+    make-ebig5plus.pl --- ebig5plus.pl, Ebig5plus.pm, Big5Plus.pm を作るスクリプト
+    make-egbk.pl      --- egbk.pl, Egbk.pm, GBK.pm を作るスクリプト
+    make-euhc.pl      --- euhc.pl, Euhc.pm, UHC.pm を作るスクリプト
 
 ソフトウェアの組合せについて
 
@@ -197,7 +200,7 @@ JPerl 上位互換の機能
 
 JPerl と互換性のない機能
 
-以下の機能は JPerl と互換性がありません。オリジナル Perl と同じ機能になります。
+以下の機能は JPerl と互換性がありません。オリジナルの Perl と同じ機能になります。
 
   * format
 

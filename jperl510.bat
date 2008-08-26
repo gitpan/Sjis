@@ -122,11 +122,15 @@ jperl510 - execute ShiftJIS perlscript on the perl5.10
 
 =head1 SYNOPSIS
 
-B<jperl510>    [perlscript.pl]   --- for ShiftJIS script
-B<jperl510 -s> [perlscript.pl]   --- for ShiftJIS script
-B<jperl510 -b> [perlscript.pl]   --- for Big5Plus script
-B<jperl510 -g> [perlscript.pl]   --- for GBK script
-B<jperl510 -h> [perlscript.pl]   --- for UHC script
+    B<jperl510>     [perlscript.pl]   --- for ShiftJIS script
+
+    B<jperl510 --s> [perlscript.pl]   --- for ShiftJIS script
+
+    B<jperl510 --b> [perlscript.pl]   --- for Big5Plus script
+
+    B<jperl510 --g> [perlscript.pl]   --- for GBK script
+
+    B<jperl510 --h> [perlscript.pl]   --- for UHC script
 
 =head1 DESCRIPTION
 

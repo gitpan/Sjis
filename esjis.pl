@@ -10,7 +10,7 @@ use strict;
 use 5.00503;
 
 use vars qw($VERSION);
-$VERSION = sprintf '%d.%02d', q$Revision: 0.25 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.26 $ =~ m/(\d+)/oxmsg;
 
 use constant DEBUG => 1;
 local $SIG{__WARN__} = sub { die "$0: ", @_ } if DEBUG;
@@ -2987,6 +2987,9 @@ Let's make the future of JPerl.
     esjis.pl     --- source code filter to escape ShiftJIS
     Esjis.pm     --- run-time routines for esjis.pl
     Sjis.pm      --- Source code filter for ShiftJIS script
+    make-ebig5plus.pl --- make ebig5plus.pl, Ebig5plus.pm and Big5Plus.pm
+    make-egbk.pl      --- make egbk.pl, Egbk.pm and GBK.pm
+    make-euhc.pl      --- make euhc.pl, Euhc.pm and UHC.pm
 
 =head1 SOFTWARE COMBINATION
 

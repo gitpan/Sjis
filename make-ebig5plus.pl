@@ -20,7 +20,7 @@ for my $io (
 
     open(I,$i)    || die "Can't open file: $i\n";
     open(O,">$o") || die "Can't open file: $o\n";
-	binmode(O);
+    binmode(O);
 
     while (<I>) {
         s/\\x81-\\x9F\\xE0-\\xFC/\\x81-\\xFE/g;
