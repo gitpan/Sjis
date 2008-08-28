@@ -29,7 +29,15 @@ $0 ver.$VERSION
 
 usage:
 
-C:\\>$0 perlscript.pl ...
+C:\\>$0 perlscript.pl ...     --- for ShiftJIS script
+
+C:\\>$0 --s perlscript.pl ... --- for ShiftJIS script
+
+C:\\>$0 --b perlscript.pl ... --- for Big5Plus script
+
+C:\\>$0 --g perlscript.pl ... --- for GBK script
+
+C:\\>$0 --h perlscript.pl ... --- for UHC script
 
 END
 }

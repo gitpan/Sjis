@@ -107,3 +107,12 @@ Revision history for Perl extension Sjis.
 0.26  2008/08/27 00:00:00
 	- fix errata.
 	; created by INABA Hitoshi
+
+0.27  2008/08/28 00:00:00
+	- change tr output ex. (my $aaa = $bbb) =~ tr/XYZ/xyz/;
+	  old:
+	      (my $aaa = $bbb), Esjis::tr($bbb,'XYZ','xyz','');
+	  new:
+	      Esjis::tr((my $aaa = $bbb),'XYZ','xyz','');
+	; created by INABA Hitoshi
+

@@ -10,7 +10,7 @@ use strict;
 use 5.00503;
 
 use vars qw($VERSION);
-$VERSION = sprintf '%d.%02d', q$Revision: 0.26 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.27 $ =~ m/(\d+)/oxmsg;
 
 use constant DEBUG => 1;
 local $SIG{__WARN__} = sub { die "$0: ", @_ } if DEBUG;
@@ -109,9 +109,7 @@ my $q_angle    = qr{(?{local $nest=0}) (?>(?:
                              \>  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 
-my $tr_variable1 = '';    # variable of ($scalar = ...) =~ tr///
-my $tr_variable2 = '';    # variable of  $scalar        =~ tr///
-my $tr_variable  = '';    # variable of                    tr///
+my $tr_variable = '';     # variable of                    tr///
 use vars qw($slash);      # when 'm//', '/' means regexp match 'm//' and '?' means regexp match '??'
                           # when 'div', '/' means division operator and '?' means conditional operator (condition ? then : else)
 my %heredoc      = ();    # here document
@@ -202,26 +200,33 @@ sub escape {
     elsif (/\G (\s+|\#.*) /oxgc) { return $1; }
 
 # scalar variable ($scalar = ...) =~ tr///;
-    elsif (/\G ( \( \s* (?: local \s+ | my \s+ | our \s+ | state \s+ )? ( \$ $qq_scalar ) ) /oxgc) {
-        my $e_string  = e_string($1);
-        $tr_variable1 = e_string($2);
-        $slash = 'div';
-        return $e_string;
+    elsif (/\G ( \( \s* (?: local \s+ | my \s+ | our \s+ | state \s+ )? \$ $qq_scalar ) /oxgc) {
+        my $e_string = e_string($1);
+
+        if (/\G ( \s* = $qq_paren \) ) \s* =~ \s* (?= (?: tr|y) \b ) /oxgc) {
+            $tr_variable = $e_string . e_string($1);
+            $slash = 'm//';
+            return '';
+        }
+        else {
+            $slash = 'div';
+            return $e_string;
+        }
     }
 
 # scalar variable $scalar =~ tr///;
     elsif (/\G ( \$ $qq_scalar ) /oxgc) {
-        $tr_variable2 = e_string($1);
-        my $e_string  = e_string($1);
-        $slash = 'div';
-        return $e_string;
-    }
+        my $scalar = e_string($1);
 
-# =~ tr ...
-    elsif (/\G ( =~ \s* ) (?= (?: tr|y) \b ) /oxgc) {
-        $slash = 'm//';
-        $tr_variable = ($tr_variable1 || $tr_variable2);
-        return ', ';
+        if (/\G \s* =~ \s* (?= (?: tr|y) \b ) /oxgc) {
+            $tr_variable = $scalar;
+            $slash = 'm//';
+            return '';
+        }
+        else {
+            $slash = 'div';
+            return $scalar;
+        }
     }
 
     # end of statement
@@ -230,8 +235,6 @@ sub escape {
 
         # clear tr variable
         $tr_variable  = '';
-        $tr_variable1 = '';
-        $tr_variable2 = '';
 
         return $1;
     }
@@ -995,16 +998,17 @@ sub e_string {
 
     local $slash = 'm//';
 
-    # without { ... }
-
     # P.1024 Appendix W.10 Multibyte Processing
     # of ISBN 1-56592-224-7 CJKV Information Processing
     # (and so on)
 
     my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
 
+    # without { ... }
     if (not (grep(m/\A \{ \z/xms, @char) and grep(m/\A \} \z/xms, @char))) {
-        return $string;
+        if ($string !~ /<</oxms) {
+            return $string;
+        }
     }
 
 E_STRING_LOOP:
@@ -1122,6 +1126,102 @@ E_STRING_LOOP:
 
 # ``
         elsif ($string =~ /\G (\`) ((?:$qq_char)*?) (\`) /oxgc)                              { $e_string .= e_qq('',$1,$3,$2); }
+
+# << (bit shift)   --- not here document
+	    elsif ($string =~ /\G ( << \s* ) (?= [0-9\$\@\&] ) /oxgc) { $slash = 'm//'; $e_string .= $1;           }
+
+# <<'HEREDOC'
+	    elsif ($string =~ /\G ( << '([a-zA-Z_0-9]*)' ) /oxgc) {
+	        $slash = 'm//';
+	        my $here_quote = $1;
+	        my $delimiter  = $2;
+
+	        # get here document
+	        my $script = substr $_, pos $_;
+	        $script =~ s/.*?\n//oxm;
+	        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+	            $heredoc{$delimiter} = $1;
+	        }
+	        else {
+	            die "$0: Can't find string terminator $delimiter anywhere before EOF";
+	        }
+	        $e_string .= $here_quote;
+	    }
+
+# <<\HEREDOC
+	    elsif ($string =~ /\G ( << \\([a-zA-Z_0-9]+) ) /oxgc) {
+	        $slash = 'm//';
+	        my $here_quote = $1;
+	        my $delimiter  = $2;
+
+	        # get here document
+	        my $script = substr $_, pos $_;
+	        $script =~ s/.*?\n//oxm;
+	        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+	            $heredoc{$delimiter} = $1;
+	        }
+	        else {
+	            die "$0: Can't find string terminator $delimiter anywhere before EOF";
+	        }
+	        $e_string .= $here_quote;
+	    }
+
+# <<"HEREDOC"
+	    elsif ($string =~ /\G ( << "([a-zA-Z_0-9]*)" ) /oxgc) {
+	        $slash = 'm//';
+	        my $here_quote = $1;
+	        my $delimiter  = $2;
+	        $heredoc_qq++;
+
+	        # get here document
+	        my $script = substr $_, pos $_;
+	        $script =~ s/.*?\n//oxm;
+	        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+	            $heredoc{$delimiter} = $1;
+	        }
+	        else {
+	            die "$0: Can't find string terminator $delimiter anywhere before EOF";
+	        }
+	        $e_string .= $here_quote;
+	    }
+
+# <<HEREDOC
+	    elsif ($string =~ /\G ( << ([a-zA-Z_0-9]+) ) /oxgc) {
+	        $slash = 'm//';
+	        my $here_quote = $1;
+	        my $delimiter  = $2;
+	        $heredoc_qq++;
+
+	        # get here document
+	        my $script = substr $_, pos $_;
+	        $script =~ s/.*?\n//oxm;
+	        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+	            $heredoc{$delimiter} = $1;
+	        }
+	        else {
+	            die "$0: Can't find string terminator $delimiter anywhere before EOF";
+	        }
+	        $e_string .= $here_quote;
+	    }
+
+# <<`HEREDOC`
+	    elsif ($string =~ /\G ( << `([a-zA-Z_0-9]*)` ) /oxgc) {
+	        $slash = 'm//';
+	        my $here_quote = $1;
+	        my $delimiter  = $2;
+	        $heredoc_qq++;
+
+	        # get here document
+	        my $script = substr $_, pos $_;
+	        $script =~ s/.*?\n//oxm;
+	        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+	            $heredoc{$delimiter} = $1;
+	        }
+	        else {
+	            die "$0: Can't find string terminator $delimiter anywhere before EOF";
+	        }
+	        $e_string .= $here_quote;
+	    }
 
         # any operator before div
         elsif ($string =~ /\G (
@@ -1243,8 +1343,6 @@ sub e_tr {
 
     # clear tr variable
     $tr_variable  = '';
-    $tr_variable1 = '';
-    $tr_variable2 = '';
 
     return $e_tr;
 }
@@ -3257,6 +3355,12 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See chapter 15: Unicode
 of ISBN 0-596-00027-8 Programming Perl Third Edition.
 
+Before the introduction of utf8 support in perl, The eq operator
+just compared the strings represented by two scalars. Beginning
+with perl 5.8, eq compares two strings with simultaneous consideration
+of the utf8 flag. To explain why I made back it so, I will quote
+page 402 of Programming Perl, 3rd ed.
+
 Ideally, I'd like to achieve these five Goals:
 
 =over 2
@@ -3350,6 +3454,10 @@ It means the Perl programmer exists if there are needs of JPerl, I hope
 I get peaceful sleep at night.
 
 =back
+
+Back when Programming Perl, 3rd ed. was written, UTF-8 flag was not born
+and Perl was designed to make the easy jobs easy. This software provide
+programming environment like at that time.
 
 =head1 SEE ALSO
 
