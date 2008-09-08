@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.27 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.28 $ =~ m/(\d+)/xmsg;
 
 use Carp qw(carp croak confess cluck verbose);
 use Symbol qw(qualify_to_ref);
@@ -468,92 +468,6 @@ sub Esjis::ignorecase(@) {
 }
 
 #
-# ShiftJIS order to character (chr)
-#
-sub Esjis::chr(;@) {
-
-    if (@_ == 0) {
-        if ($_ > 0xFF) {
-            return pack('CC', int($_ / 0x100), $_ % 0x100);
-        }
-        else {
-            return CORE::chr($_);
-        }
-    }
-    elsif (@_ == 1) {
-        if ($_[0] > 0xFF) {
-            return pack('CC', int($_[0] / 0x100), $_[0] % 0x100);
-        }
-        else {
-            return CORE::chr($_[0]);
-        }
-    }
-    else {
-
-        # P.95 Named Unary and File Test Operators
-        # of ISBN 0-596-00027-8 Programming Perl Third Edition.
-
-        if ($_[0] > 0xFF) {
-            return pack('CC', int($_[0] / 0x100), $_[0] % 0x100), @_[1..$#_];
-        }
-        else {
-            return CORE::chr($_[0]), @_[1..$#_];
-        }
-    }
-}
-
-#
-# ShiftJIS character to order (ord)
-#
-sub Esjis::ord(;@) {
-
-    if (@_ == 0) {
-        if (m/\A [\x81-\x9F\xE0-\xFC] /oxms) {
-            my($ord1,$ord2) = unpack('CC', $_);
-            return $ord1 * 0x100 + $ord2;
-        }
-        else {
-            return CORE::ord($_);
-        }
-    }
-    elsif (@_ == 1) {
-        if ($_[0] =~ m/\A [\x81-\x9F\xE0-\xFC] /oxms) {
-            my($ord1,$ord2) = unpack('CC', $_[0]);
-            return $ord1 * 0x100 + $ord2;
-        }
-        else {
-            return CORE::ord($_[0]);
-        }
-    }
-    else {
-
-        # P.95 Named Unary and File Test Operators
-        # of ISBN 0-596-00027-8 Programming Perl Third Edition.
-
-        if ($_[0] =~ m/\A [\x81-\x9F\xE0-\xFC] /oxms) {
-            my($ord1,$ord2) = unpack('CC', $_[0]);
-            return $ord1 * 0x100 + $ord2, @_[1..$#_];
-        }
-        else {
-            return CORE::ord($_[0]), @_[1..$#_];
-        }
-    }
-}
-
-#
-# ShiftJIS reverse
-#
-sub Esjis::reverse(@) {
-
-    if (wantarray) {
-        return CORE::reverse @_;
-    }
-    else {
-        return join '', CORE::reverse(join('',@_) =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg);
-    }
-}
-
-#
 # ShiftJIS open character list for tr
 #
 sub _charlist_tr {
@@ -571,13 +485,13 @@ sub _charlist_tr {
             }
         }
         elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
-            $char[$i] = CORE::chr(oct $1);
+            $char[$i] = chr(oct $1);
         }
         elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
-            $char[$i] = CORE::chr(hex $1);
+            $char[$i] = chr(hex $1);
         }
         elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
-            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
+            $char[$i] = chr(ord($1) & 0x1F);
         }
         elsif ($char[$i] =~ m/\A (\\ [0nrtfbae]) \z/oxms) {
             $char[$i] = {
@@ -683,10 +597,10 @@ sub _charlist_qr {
             }
         }
         elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
-            $char[$i] = CORE::chr oct $1;
+            $char[$i] = chr oct $1;
         }
         elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
-            $char[$i] = CORE::chr hex $1;
+            $char[$i] = chr hex $1;
         }
         elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/oxms) {
             $char[$i] = pack 'H2', $1;
@@ -695,7 +609,7 @@ sub _charlist_qr {
             $char[$i] = pack 'H4', $1;
         }
         elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
-            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
+            $char[$i] = chr(ord($1) & 0x1F);
         }
         elsif ($char[$i] =~ m/\A (\\ [0nrtfbaedDhHsSvVwW]) \z/oxms) {
             $char[$i] = {
@@ -754,8 +668,8 @@ sub _charlist_qr {
                     if ($modifier =~ m/i/oxms) {
                         my %range = ();
                         for my $c ($begin .. $end) {
-                            $range{CORE::ord CORE::uc CORE::chr $c} = 1;
-                            $range{CORE::ord CORE::lc CORE::chr $c} = 1;
+                            $range{ord CORE::uc chr $c} = 1;
+                            $range{ord CORE::lc chr $c} = 1;
                         }
 
                         my @lt = grep {$_ < $begin} sort {$a <=> $b} keys %range;
@@ -873,7 +787,7 @@ sub _charlist_qr {
             $_ = '\r';
         }
         elsif (m/\A ([\x00-\x21\x7F-\xA0\xE0-\xFF]) \z/oxms) {
-            $_ = sprintf(q{\\x%02X}, CORE::ord $1);
+            $_ = sprintf(q{\\x%02X}, ord $1);
         }
         elsif (m/\A ([\x00-\xFF]) \z/oxms) {
             $_ = quotemeta $1;
@@ -919,10 +833,10 @@ sub _charlist_not_qr {
             }
         }
         elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
-            $char[$i] = CORE::chr oct $1;
+            $char[$i] = chr oct $1;
         }
         elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
-            $char[$i] = CORE::chr hex $1;
+            $char[$i] = chr hex $1;
         }
         elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/oxms) {
             $char[$i] = pack 'H2', $1;
@@ -931,7 +845,7 @@ sub _charlist_not_qr {
             $char[$i] = pack 'H4', $1;
         }
         elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
-            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
+            $char[$i] = chr(ord($1) & 0x1F);
         }
         elsif ($char[$i] =~ m/\A (\\ [0nrtfbaedDhHsSvVwW]) \z/oxms) {
             $char[$i] = {
@@ -990,8 +904,8 @@ sub _charlist_not_qr {
                     if ($modifier =~ m/i/oxms) {
                         my %range = ();
                         for my $c ($begin .. $end) {
-                            $range{CORE::ord CORE::uc CORE::chr $c} = 1;
-                            $range{CORE::ord CORE::lc CORE::chr $c} = 1;
+                            $range{ord CORE::uc chr $c} = 1;
+                            $range{ord CORE::lc chr $c} = 1;
                         }
 
                         my @lt = grep {$_ < $begin} sort {$a <=> $b} keys %range;
@@ -1109,7 +1023,7 @@ sub _charlist_not_qr {
             $_ = '\r';
         }
         elsif (m/\A ([\x00-\x21\x7F-\xA0\xE0-\xFF]) \z/oxms) {
-            $_ = sprintf(q{\\x%02X}, CORE::ord $1);
+            $_ = sprintf(q{\\x%02X}, ord $1);
         }
         elsif (m/\A ([\x00-\xFF]) \z/oxms) {
             $_ = quotemeta $_;
@@ -1165,9 +1079,6 @@ Esjis - Run-time routines for esjis.pl
     Esjis::lc(...);
     Esjis::uc(...);
     Esjis::ignorecase(...);
-    Esjis::chr(...);
-    Esjis::ord(...);
-    Esjis::reverse(...);
 
   # "no Esjis;" not supported
 
@@ -1253,23 +1164,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   @ignorecase = Esjis::ignorecase(@string);
 
   This function is internal use to m/ /i, s/ / /i and qr/ /i.
-
-=item Make character
-
-  $chr = Esjis::chr($code);
-  $chr = Esjis::chr();
-  $chr = Esjis::chr;
-
-=item Order of Character
-
-  $ord = Esjis::ord($string);
-  $ord = Esjis::ord();
-  $ord = Esjis::ord;
-
-=item Reverse list or string
-
-  @reverse = Esjis::reverse(@list);
-  $reverse = Esjis::reverse(@list);
 
 =back
 

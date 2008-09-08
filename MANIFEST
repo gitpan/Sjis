@@ -6,7 +6,6 @@ jperl58.bat
 jperl510.bat
 perl58.bat
 perl510.bat
-pl2ebat.bat
 Changes
 Makefile.PL
 MANIFEST
@@ -14,17 +13,14 @@ test.pl
 README
 META.yml
 t/smoke-chop.pl
-t/smoke-chr.pl
 t/smoke-index.pl
 t/smoke-lc.pl
 t/smoke-m.pl
-t/smoke-ord.pl
 t/smoke-q.pl
 t/smoke-qq.pl
 t/smoke-qr.pl
 t/smoke-qw.pl
 t/smoke-qx.pl
-t/smoke-reverse.pl
 t/smoke-rindex.pl
 t/smoke-s.pl
 t/smoke-split.pl
@@ -62,8 +58,9 @@ example/dt/alphabet/alpha.txt
 example/dt/alphabet/sjis.txt
 example/dt/“ú–{Œê/alpha.txt
 example/dt/“ú–{Œê/sjis.txt
-esjis-JA.txt
+pl2ebat.bat
 make-esjis.pl
 make-ebig5plus.pl
 make-egbk.pl
 make-euhc.pl
+esjis-JA.txt

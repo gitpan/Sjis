@@ -57,6 +57,7 @@ for (@ARGV) {
             'g' => 'egbk.pl',
             'u' => 'euhc.pl',
         }->{$1};
+        next;
     }
     next if /^-/; # skip command line option
 

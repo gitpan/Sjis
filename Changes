@@ -110,9 +110,17 @@ Revision history for Perl extension Sjis.
 
 0.27  2008/08/28 00:00:00
 	- change tr output ex. (my $aaa = $bbb) =~ tr/XYZ/xyz/;
-	  old:
+	  before:
 	      (my $aaa = $bbb), Esjis::tr($bbb,'XYZ','xyz','');
-	  new:
+	  after:
 	      Esjis::tr((my $aaa = $bbb),'XYZ','xyz','');
+	; created by INABA Hitoshi
+
+0.28  2008/09/05 00:00:00
+	- upgrade Makefile.PL
+	- fix backslashed hexadecimal character escapes.
+	- fix backslashed octal character escapes.
+	- cancel upper compatible function of chr, ord and reverse to backward compatibility.
+	- $1,$2,$3... of s/// in script means $2,$3,$4...
 	; created by INABA Hitoshi
 

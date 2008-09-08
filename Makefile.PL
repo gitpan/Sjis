@@ -74,17 +74,32 @@ for my $target (@ARGV) {
     elsif ($target eq 'dist') {
 
         # make work directory
-        open(SCRIPT,$file[0]) || die "Can't open file: $file[0]\n";
-        $_ = join('',<SCRIPT>);
-        close(SCRIPT);
-
-        use vars qw($VERSION);
-        my($version) = m/( \$VERSION \s* = \s* .+? ; )/xms;
-        eval $version; # get $VERSION
-
+        my($changes) = grep(/^Changes$/i,@file);
+        open(CHANGES,$changes) || die "Can't open file: $changes\n";
+        my $version;
+        while (<CHANGES>) {
+            if (/^(\d+\.\d+)/) {
+                $version = $1;
+            }
+        }
+        close(CHANGES);
         my $basename = basename($file[0], '.pm','.pl','.bat');
-        my $tardir = "$basename-$VERSION";
+        my $tardir = "$basename-$version";
         rmtree($tardir,0,0);
+
+        # rewrite META.yml file
+        if(my($metayml) = grep(/^META\.yml$/i,@file)) {
+            if (open(METAYML,$metayml)) {
+                $_ = join('',<METAYML>);
+                close(METAYML);
+                if (open(METAYML,">$metayml")) {
+                    s/^(version:\s*)\d+\.\d+/$1$version/m;
+                    binmode(METAYML);
+                    print METAYML $_;
+                    close(METAYML);
+                }
+            }
+        }
 
         # make *.tar file
         my $tar = Archive::Tar->new;
@@ -111,6 +126,10 @@ for my $target (@ARGV) {
         close(TAR);
         $gz->gzclose;
         unlink $tarfile;
+
+		# untar test
+		system("make.bat tar.bat");
+		system("tar.bat xzvf $tarfile.gz");
     }
     elsif ($target eq 'tar.bat') {
 
