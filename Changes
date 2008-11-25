@@ -124,3 +124,7 @@ Revision history for Perl extension Sjis.
 	- $1,$2,$3... of s/// in script means $2,$3,$4...
 	; created by INABA Hitoshi
 
+0.29  2008/11/20 00:00:00
+	- remove \G from $your_gap
+	; created by INABA Hitoshi
+

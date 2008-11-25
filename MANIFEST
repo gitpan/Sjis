@@ -58,6 +58,11 @@ example/dt/alphabet/alpha.txt
 example/dt/alphabet/sjis.txt
 example/dt/日本語/alpha.txt
 example/dt/日本語/sjis.txt
+kanji/hoge/テストソース.txt
+kanji/01kanji00.pl
+kanji/02kanji01.pl
+kanji/03kanji02x.pl
+kanji/04kanji02.pl
 pl2ebat.bat
 make-esjis.pl
 make-ebig5plus.pl
