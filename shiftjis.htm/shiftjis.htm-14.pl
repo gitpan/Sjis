@@ -1,13 +1,15 @@
 # This file is encoded in ShiftJIS.
 die "This file is not encoded in ShiftJIS.\n" if q{あ} ne "\x82\xa0";
 
+use Sjis;
+
 # Unrecognized character \x82
 # 「認識されない文字 \x82」
 print q{マッチ};
 
 __END__
 
-esjis.pl の処理結果が以下になることを期待している
+Sjis.pm の処理結果が以下になることを期待している
 
 print q{ソ}ッチ};
 

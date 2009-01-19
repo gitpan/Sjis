@@ -1,16 +1,16 @@
 # This file is encoded in ShiftJIS.
 die "This file is not encoded in ShiftJIS.\n" if q{あ} ne "\x82\xa0";
 
+use Sjis;
+
 local $^W = 1;
 
-unless (@ARGV) {
+if (@ARGV < 2) {
     die <<'END';
 実行方法:
 
-jperl55.bat grepdir.pl aaa dt
-jperl55.bat grepdir.pl 表  dt
-jperl.exe   grepdir.pl aaa dt
-jperl.exe   grepdir.pl 表  dt
+perl grepdir.pl aaa dt
+perl grepdir.pl 表  dt
 END
 }
 
@@ -70,7 +70,7 @@ http://www.aritia.org/hizumi/perl/perlwin.html
 
 例: 正規表現を指定して，指定したディレクトリ配下のファイルから取り出すコードを書いてる。
 
-コマンド形式: jperl grepdir.pl {パターン} {ディレクトリ}
+コマンド形式: perl grepdir.pl {パターン} {ディレクトリ}
 
 次のようなテスト環境を用意する。
 
@@ -86,9 +86,9 @@ C:\TEMP\TP\DT
        alpha.txt
        sjis.txt
 
-これを jperl55.bat にて実行させると，次のようになる。
+これを perl にて実行させると，次のようになる。
 
-C:\TEMP\TP\DT>jperl55.bat grepdir.pl aaa dt
+C:\TEMP\TP\DT>perl grepdir.pl aaa dt
 !!dt/alphabet!!
 !!dt/alphabet/alpha.txt!!
 dt/alphabet/alpha.txt:aaa
@@ -100,31 +100,7 @@ dt/日本語/alpha.txt:aaa
 !!dt/日本語/sjis.txt!!
 dt/日本語/sjis.txt:aaa
 
-C:\TEMP\TP\DT>jperl55.bat grepdir.pl 表 dt
-!!dt\alphabet!!
-!!dt\alphabet\alpha.txt!!
-!!dt\alphabet\sjis.txt!!
-dt\alphabet\sjis.txt:表
-!!dt\日本語!!
-!!dt\日本語\alpha.txt!!
-!!dt\日本語\sjis.txt!!
-dt\日本語\sjis.txt:表
-
-参考までに jperl.exe にて実行させると，次のようになる。
-
-C:\TEMP\TP\DT>jperl.exe grepdir.pl aaa dt
-!!dt\alphabet!!
-!!dt\alphabet\alpha.txt!!
-dt\alphabet\alpha.txt:aaa
-!!dt\alphabet\sjis.txt!!
-dt\alphabet\sjis.txt:aaa
-!!dt\日本語!!
-!!dt\日本語\alpha.txt!!
-dt\日本語\alpha.txt:aaa
-!!dt\日本語\sjis.txt!!
-dt\日本語\sjis.txt:aaa
-
-C:\TEMP\TP\DT>jperl.exe grepdir.pl 表 dt
+C:\TEMP\TP\DT>perl grepdir.pl 表 dt
 !!dt\alphabet!!
 !!dt\alphabet\alpha.txt!!
 !!dt\alphabet\sjis.txt!!

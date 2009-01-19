@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name: Sjis
-abstract: Source code filter for ShiftJIS script
-version: 0.29
+abstract: "Yet Another JPerl" Source code filter to escape ShiftJIS
+version: 0.30
 author:
   - INABA Hitoshi <ina@cpan.org>
 license: perl
@@ -20,7 +20,7 @@ requires:
   Test::Harness: 1.1602
   perl: 5.005_03
 recommends:
-  Win32::API: 0.01
+  Win32API::File: 0.07
 build_requires:
   Test: 1.122
 urls:

@@ -1,6 +1,6 @@
 NAME
 
-       Sjis - Source code filter for ShiftJIS script
+       Sjis - "Yet Another JPerl" Source code filter for ShiftJIS script
 
 SYNOPSIS
 
@@ -10,19 +10,13 @@ SYNOPSIS
 
     At command prompt:
 
-      without "use Sjis;" in your script
-        jperl55.bat   yourscript.pl  param1  param2 ...
-        jperl58.bat   yourscript.pl  param1  param2 ...
-        jperl510.bat  yourscript.pl  param1  param2 ...
-
-      with "use Sjis;" in your script
-        perl.exe     yourscript.pl  param1  param2 ...
-        perl58.bat   yourscript.pl  param1  param2 ...
-        perl510.bat  yourscript.pl  param1  param2 ...
+      perl.exe     yourscript.pl  param1  param2 ...
+      perl58.bat   yourscript.pl  param1  param2 ...
+      perl510.bat  yourscript.pl  param1  param2 ...
 
 DESCRIPTION
 
-      This software is "JPerl" written by Perl.
+      This software is "Yet Another JPerl" written by Perl.
       We can write the script in ShiftJIS again.
 
       This is software that does the bridge from JPerl to Perl of the
@@ -37,8 +31,6 @@ To install this software, type the following:
    perl Makefile.PL    --- Makefile.PL makes "make.bat" only, and ...
    make.bat
    make.bat test
-   perl t\smoke.pl
-   perl t\shiftjis.htm\shiftjis.htm.pl
 
    make.bat install              --- install to current using Perl
    perl58.bat make.bat instal    --- install to Perl5.8
@@ -54,15 +46,10 @@ MAKE OTHER
 
 PROGRAM COMPOSITION
 
-   Sjis.pm      --- source code filter for ShiftJIS script
-   esjis.pl     --- source code filter to escape ShiftJIS
-   Esjis.pm     --- run-time routines for esjis.pl
-   jperl55.bat  --- jperl emulator by perl5.5  with esjis.pl
-   jperl58.bat  --- jperl emulator by perl5.8  with esjis.pl
-   jperl510.bat --- jperl emulator by perl5.10 with esjis.pl
+   Sjis.pm      --- source code filter to escape ShiftJIS
+   Esjis.pm     --- run-time routines for Sjis.pm
    perl58.bat   --- find and run perl5.8  without %PATH% settings
    perl510.bat  --- find and run perl5.10 without %PATH% settings
-   pl2ebat      --- escape and wrap ShiftJIS perl code into a batch file
 
 DEPENDENCIES
 

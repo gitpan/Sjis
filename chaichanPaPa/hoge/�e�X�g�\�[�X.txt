@@ -1,0 +1,6 @@
+# This file is encoded in ShiftJIS.
+
+chaichanPaPa さんの燈明日記からの引用です。
+
+■[Perlノート] シフトJIS漢字のファイル名にマッチしてみる
+http://d.hatena.ne.jp/chaichanPaPa/20080802/1217660826
