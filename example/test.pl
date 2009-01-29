@@ -3,6 +3,58 @@ die "This file is not encoded in ShiftJIS.\n" if q{あ} ne "\x82\xa0";
 
 use Sjis;
 
+mkdir('dt',0777);
+mkdir('dt\\alphabet',0777);
+mkdir('dt\\日本語',0777);
+
+open(FILE,">dt\\alphabet\\alpha.txt") || die "Can't open file: dt\\alphabet\\alpha.txt\n";
+print FILE <<'END';
+aaa
+bbb
+ccc
+ddd
+eee
+END
+close(FILE);
+
+open(FILE,">dt\\日本語\\alpha.txt") || die "Can't open file: dt\\日本語\\alpha.txt\n";
+print FILE <<'END';
+aaa
+bbb
+ccc
+ddd
+eee
+END
+close(FILE);
+
+open(FILE,">dt\\alphabet\\sjis.txt") || die "Can't open file: dt\\alphabet\\sjis.txt\n";
+print FILE <<'END';
+aaa
+あああ
+bbb
+いいい
+ccc
+ううう
+ddd
+表
+eee
+END
+close(FILE);
+
+open(FILE,">dt\\日本語\\sjis.txt") || die "Can't open file: dt\\日本語\\sjis.txt\n";
+print FILE <<'END';
+aaa
+あああ
+bbb
+いいい
+ccc
+ううう
+ddd
+表
+eee
+END
+close(FILE);
+
 my $aaa = <<'END';
 !!dt\alphabet!!
 !!dt\alphabet\alpha.txt!!

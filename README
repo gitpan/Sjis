@@ -19,10 +19,7 @@ DESCRIPTION
       This software is "Yet Another JPerl" written by Perl.
       We can write the script in ShiftJIS again.
 
-      This is software that does the bridge from JPerl to Perl of the
-      latest version.
-
-      This software is still an alpha version for expressing a concept.
+      This software is a beta version for the public comment.
 
 INSTALLATION
 
@@ -35,9 +32,9 @@ To install this software, type the following:
    make.bat install              --- install to current using Perl
    perl58.bat make.bat instal    --- install to Perl5.8
    perl510.bat make.bat install  --- install to Perl5.10
-   perl make-ebig5plus.pl        --- make ebig5plus.pl, Ebig5plus.pm and Big5Plus.pm
-   perl make-egbk.pl             --- make egbk.pl, Egbk.pm and GBK.pm
-   perl make-euhc.pl             --- make euhc.pl, Euhc.pm and UHC.pm
+   perl make-big5plus.pl         --- make Ebig5plus.pm and Big5Plus.pm
+   perl make-gbk.pl              --- make Egbk.pm and GBK.pm
+   perl make-uhc.pl              --- make Euhc.pm and UHC.pm
 
 MAKE OTHER
 

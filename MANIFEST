@@ -13,7 +13,6 @@ make-big5plus.pl
 make-gbk.pl
 make-uhc.pl
 Sjis-JA.txt
-chaichanPaPa/hoge/テストソース.txt
 chaichanPaPa/01kanji00.pl
 chaichanPaPa/02kanji01.pl
 chaichanPaPa/03kanji02x.pl
@@ -21,12 +20,6 @@ chaichanPaPa/04kanji02.pl
 chaichanPaPa/test.pl
 example/grepdir.pl
 example/test.pl
-example/dt/alphabet
-example/dt/日本語
-example/dt/alphabet/alpha.txt
-example/dt/alphabet/sjis.txt
-example/dt/日本語/alpha.txt
-example/dt/日本語/sjis.txt
 filetest/filetest-01.pl
 filetest/filetest-02.pl
 filetest/filetest-03.pl

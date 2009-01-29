@@ -7,9 +7,6 @@ use strict;
 use Sjis;
 
 while (my $fileName = glob("./hoge/*")) {
-
-print STDERR "\$fileName=($fileName)\n";
-
     if ($fileName =~ /É\Å[ÉX/) {
         print "Match\n";
     }

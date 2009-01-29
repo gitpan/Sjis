@@ -5,18 +5,18 @@ use Sjis;
 
 $_ = 'F機能';
 if (@_ = stat($_)) {
-    print "ok - perl 03stat.pl (1/2)\n";
+    print "ok - 03stat.pl (1/2)\n";
 }
 else{
-    print "not ok - perl 03stat.pl (1/2)\n";
+    print "not ok - 03stat.pl (1/2)\n";
 }
 
 $_ = 'D機能';
 if (@_ = stat($_)) {
-    print "not ok - perl 03stat.pl (2/2)\n";
+    print "not ok - 03stat.pl (2/2)\n";
 }
 else{
-    print "ok - perl 03stat.pl (2/2)\n";
+    print "ok - 03stat.pl (2/2)\n";
 }
 
 __END__

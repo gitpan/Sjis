@@ -89,16 +89,16 @@ C:\TEMP\TP\DT
 これを perl にて実行させると，次のようになる。
 
 C:\TEMP\TP\DT>perl grepdir.pl aaa dt
-!!dt/alphabet!!
-!!dt/alphabet/alpha.txt!!
-dt/alphabet/alpha.txt:aaa
-!!dt/alphabet/sjis.txt!!
-dt/alphabet/sjis.txt:aaa
-!!dt/日本語!!
-!!dt/日本語/alpha.txt!!
-dt/日本語/alpha.txt:aaa
-!!dt/日本語/sjis.txt!!
-dt/日本語/sjis.txt:aaa
+!!dt\alphabet!!
+!!dt\alphabet\alpha.txt!!
+dt\alphabet\alpha.txt:aaa
+!!dt\alphabet\sjis.txt!!
+dt\alphabet\sjis.txt:aaa
+!!dt\日本語!!
+!!dt\日本語\alpha.txt!!
+dt\日本語\alpha.txt:aaa
+!!dt\日本語\sjis.txt!!
+dt\日本語\sjis.txt:aaa
 
 C:\TEMP\TP\DT>perl grepdir.pl 表 dt
 !!dt\alphabet!!

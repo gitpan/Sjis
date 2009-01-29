@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.30 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.31 $ =~ m/(\d+)/xmsg;
 
 use Carp qw(carp croak confess cluck verbose);
 use Fcntl;
@@ -117,85 +117,120 @@ sub Esjis::unlink(@);
 #
 sub Esjis::split(;$$$) {
 
-    if (@_ == 0) {
-        return CORE::split;
-    }
-    elsif (@_ == 1) {
-        if ($_[0] eq '') {
-            if (wantarray) {
-                return      m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
+    # P.794 split
+    # in Chapter 29: Functions
+    # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
+    my $pattern = $_[0];
+    my $string  = $_[1];
+    my $limit   = $_[2];
+
+    # if $string is omitted, the function splits the $_ string
+    $string = $_ if not defined $string;
+
+    my @split = ();
+
+    # if $limit is negative, it is treated as if an arbitrarily large $limit has been specified
+    if ((not defined $limit) or ($limit <= 0)) {
+
+        # if $pattern is also omitted or is the literal space, " ", the function splits
+        # on whitespace, /\s+/, after skipping any leading whitespace
+        # (and so on)
+
+        if ((not defined $pattern) or ($pattern eq ' ')) {
+            $string =~ s/ \A \s+ //oxms;
+
+            # the //m modifier is assumed when you split on the pattern /^/
+            # (and so on)
+
+            while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)\s+//m) {
+
+                # if the $pattern contains parentheses, then the substring matched by each pair of parentheses
+                # is included in the resulting list, interspersed with the fields that are ordinarily returned
+                # (and so on)
+
+                for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
+                    push @split, eval '$' . $digit;
+                }
             }
-            else {
-                cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
-                return @_ = m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
+        }
+
+        # a pattern capable of matching either the null string or something longer than the
+        # null string will split the value of $string into separate characters wherever it
+        # matches the null string between characters
+        # (and so on)
+
+        elsif ('' =~ m/ \A $pattern \z /xms) {
+            #                                                                               v--- Look
+            while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])+?)$pattern//m) {
+                for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
+                    push @split, eval '$' . $digit;
+                }
+            }
+        }
+
+        else {
+            #                                                                               v--- Look
+            while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)$pattern//m) {
+                for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
+                    push @split, eval '$' . $digit;
+                }
+            }
+        }
+    }
+
+    else {
+        if ((not defined $pattern) or ($pattern eq ' ')) {
+            $string =~ s/ \A \s+ //oxms;
+            while ((--$limit > 0) and (length($string) > 0)) {
+                if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)\s+//m) {
+                    for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
+                        push @split, eval '$' . $digit;
+                    }
+                }
+            }
+        }
+        elsif ('' =~ m/ \A $pattern \z /xms) {
+            while ((--$limit > 0) and (length($string) > 0)) {
+                #                                                                            v--- Look
+                if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])+?)$pattern//m) {
+                    for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
+                        push @split, eval '$' . $digit;
+                    }
+                }
             }
         }
         else {
-            return CORE::split $_[0];
+            while ((--$limit > 0) and (length($string) > 0)) {
+                #                                                                            v--- Look
+                if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)$pattern//m) {
+                    for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
+                        push @split, eval '$' . $digit;
+                    }
+                }
+            }
         }
     }
-    elsif (@_ == 2) {
-        if ($_[0] eq '') {
-            if (wantarray) {
-                return      $_[1] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
-            }
-            else {
-                cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
-                return @_ = $_[1] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
-            }
-        }
-        else {
-            return CORE::split $_[0], $_[1];
+
+    push @split, $string;
+
+    # if $limit is omitted or zero, trailing null fields are stripped from the result
+    if ((not defined $limit) or ($limit == 0)) {
+        while ($split[-1] eq '') {
+            pop @split;
         }
     }
-    elsif (@_ == 3) {
-        if ($_[0] eq '') {
-            if ($_[2] == 0) {
-                if (wantarray) {
-                    return      $_[1] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
-                }
-                else {
-                    cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
-                    return @_ = $_[1] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
-                }
-            }
-            elsif ($_[2] == 1) {
-                return $_[1];
-            }
-            else {
-                my @split = $_[1] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
-                if (scalar(@split) < $_[2]) {
-                    if (wantarray) {
-                        return      @split, '';
-                    }
-                    else {
-                        cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
-                        return @_ = @split, '';
-                    }
-                }
-                elsif (scalar(@split) == $_[2]) {
-                    if (wantarray) {
-                        return      @split;
-                    }
-                    else {
-                        cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
-                        return @_ = @split;
-                    }
-                }
-                else {
-                    if (wantarray) {
-                        return      @split[0..$_[2]-2], join '', @split[$_[2]-1..$#split];
-                    }
-                    else {
-                        cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
-                        return @_ = @split[0..$_[2]-2], join '', @split[$_[2]-1..$#split];
-                    }
-                }
-            }
-        }
-        else {
-            return CORE::split $_[0], $_[1], $_[2];
-        }
+
+    # resulting list value in list context
+    if (wantarray) {
+        return @split;
+    }
+
+    # count of substrings in scalar context
+    else {
+        cluck "$0: Use of implicit split to \@_ is deprecated" if $^W;
+        @_ = @split;
+        return scalar @_;
     }
 }
 
@@ -299,10 +334,10 @@ sub Esjis::chop(@) {
         $_ = join '', @char;
     }
     else {
-        for my $string (@_) {
-            my @char = $string =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
+        for (@_) {
+            my @char = m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
             $chop = pop @char;
-            $string = join '', @char;
+            $_ = join '', @char;
         }
     }
     return $chop;
@@ -362,13 +397,15 @@ sub Esjis::rindex($$;$) {
 #
 sub Esjis::lc($) {
 
+    local $_ = shift if @_;
+
     my %lc = ();
     @lc{qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z)} =
         qw(a b c d e f g h i j k l m n o p q r s t u v w x y z);
 
     local $^W = 0;
 
-    return join('', map {$lc{$_}||$_} $_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg);
+    return join('', map {$lc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg);
 }
 
 #
@@ -390,13 +427,15 @@ sub Esjis::lc_() {
 #
 sub Esjis::uc($) {
 
+    local $_ = shift if @_;
+
     my %uc = ();
     @uc{qw(a b c d e f g h i j k l m n o p q r s t u v w x y z)} =
         qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z);
 
     local $^W = 0;
 
-    return join('', map {$uc{$_}||$_} $_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg);
+    return join('', map {$uc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg);
 }
 
 #
@@ -574,7 +613,7 @@ sub Esjis::ignorecase(@) {
 #
 sub _charlist_tr {
 
-    my(@char) = @_;
+    my @char = @_;
 
     # unescape character
     for (my $i=0; $i <= $#char; $i++) {
@@ -686,6 +725,7 @@ sub _charlist_tr {
 # ShiftJIS open character list for qr
 #
 sub _charlist_qr {
+
     my $modifier = pop @_;
     my @char = @_;
 
@@ -925,6 +965,7 @@ sub _charlist_qr {
 # ShiftJIS open character list for not qr
 #
 sub _charlist_not_qr {
+
     my $modifier = pop @_;
     my @char = @_;
 
@@ -1163,11 +1204,14 @@ sub _charlist_not_qr {
 # ShiftJIS order to character (with parameter)
 #
 sub Esjis::chr($) {
-    if ($_[0] > 0xFF) {
-        return pack 'CC', int($_[0] / 0x100), $_[0] % 0x100;
+
+    local $_ = shift if @_;
+
+    if ($_ > 0xFF) {
+        return pack 'CC', int($_ / 0x100), $_ % 0x100;
     }
     else {
-        return CORE::chr $_[0];
+        return CORE::chr $_;
     }
 }
 
@@ -1175,6 +1219,7 @@ sub Esjis::chr($) {
 # ShiftJIS order to character (without parameter)
 #
 sub Esjis::chr_() {
+
     if ($_ > 0xFF) {
         return pack 'CC', int($_ / 0x100), $_ % 0x100;
     }
@@ -1187,12 +1232,15 @@ sub Esjis::chr_() {
 # ShiftJIS character to order (with parameter)
 #
 sub Esjis::ord($) {
-    if ($_[0] =~ m/\A [\x81-\x9F\xE0-\xFC] /oxms) {
-        my($ord1,$ord2) = unpack 'CC', $_[0];
+
+    local $_ = shift if @_;
+
+    if (m/\A [\x81-\x9F\xE0-\xFC] /oxms) {
+        my($ord1,$ord2) = unpack 'CC', $_;
         return $ord1 * 0x100 + $ord2;
     }
     else {
-        return CORE::ord $_[0];
+        return CORE::ord $_;
     }
 }
 
@@ -1200,6 +1248,7 @@ sub Esjis::ord($) {
 # ShiftJIS character to order (without parameter)
 #
 sub Esjis::ord_() {
+
     if (m/\A [\x81-\x9F\xE0-\xFC] /oxms) {
         my($ord1,$ord2) = unpack 'CC', $_;
         return $ord1 * 0x100 + $ord2;
@@ -1226,6 +1275,7 @@ sub Esjis::reverse(@) {
 # ShiftJIS file test -r expr
 #
 sub Esjis::r(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -r (Esjis::r)' if @_ and not wantarray;
 
@@ -1234,6 +1284,7 @@ sub Esjis::r(;*@) {
     }
 
     # P.908 Symbol
+    # in Chapter 32: Standard Modules
     # of ISBN 0-596-00027-8 Programming Perl Third Edition.
     # (and so on)
 
@@ -1263,6 +1314,7 @@ sub Esjis::r(;*@) {
 # ShiftJIS file test -w expr
 #
 sub Esjis::w(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -w (Esjis::w)' if @_ and not wantarray;
 
@@ -1295,6 +1347,7 @@ sub Esjis::w(;*@) {
 # ShiftJIS file test -x expr
 #
 sub Esjis::x(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -x (Esjis::x)' if @_ and not wantarray;
 
@@ -1329,6 +1382,7 @@ sub Esjis::x(;*@) {
 # ShiftJIS file test -o expr
 #
 sub Esjis::o(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -o (Esjis::o)' if @_ and not wantarray;
 
@@ -1361,6 +1415,7 @@ sub Esjis::o(;*@) {
 # ShiftJIS file test -R expr
 #
 sub Esjis::R(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -R (Esjis::R)' if @_ and not wantarray;
 
@@ -1393,6 +1448,7 @@ sub Esjis::R(;*@) {
 # ShiftJIS file test -W expr
 #
 sub Esjis::W(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -W (Esjis::W)' if @_ and not wantarray;
 
@@ -1425,6 +1481,7 @@ sub Esjis::W(;*@) {
 # ShiftJIS file test -X expr
 #
 sub Esjis::X(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -X (Esjis::X)' if @_ and not wantarray;
 
@@ -1459,6 +1516,7 @@ sub Esjis::X(;*@) {
 # ShiftJIS file test -O expr
 #
 sub Esjis::O(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -O (Esjis::O)' if @_ and not wantarray;
 
@@ -1491,6 +1549,7 @@ sub Esjis::O(;*@) {
 # ShiftJIS file test -e expr
 #
 sub Esjis::e(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -e (Esjis::e)' if @_ and not wantarray;
 
@@ -1531,6 +1590,7 @@ sub Esjis::e(;*@) {
 # ShiftJIS file test -z expr
 #
 sub Esjis::z(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -z (Esjis::z)' if @_ and not wantarray;
 
@@ -1563,6 +1623,7 @@ sub Esjis::z(;*@) {
 # ShiftJIS file test -s expr
 #
 sub Esjis::s(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -s (Esjis::s)' if @_ and not wantarray;
 
@@ -1595,6 +1656,7 @@ sub Esjis::s(;*@) {
 # ShiftJIS file test -f expr
 #
 sub Esjis::f(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -f (Esjis::f)' if @_ and not wantarray;
 
@@ -1627,6 +1689,7 @@ sub Esjis::f(;*@) {
 # ShiftJIS file test -d expr
 #
 sub Esjis::d(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -d (Esjis::d)' if @_ and not wantarray;
 
@@ -1651,6 +1714,7 @@ sub Esjis::d(;*@) {
 # ShiftJIS file test -l expr
 #
 sub Esjis::l(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -l (Esjis::l)' if @_ and not wantarray;
 
@@ -1683,6 +1747,7 @@ sub Esjis::l(;*@) {
 # ShiftJIS file test -p expr
 #
 sub Esjis::p(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -p (Esjis::p)' if @_ and not wantarray;
 
@@ -1715,6 +1780,7 @@ sub Esjis::p(;*@) {
 # ShiftJIS file test -S expr
 #
 sub Esjis::S(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -S (Esjis::S)' if @_ and not wantarray;
 
@@ -1747,6 +1813,7 @@ sub Esjis::S(;*@) {
 # ShiftJIS file test -b expr
 #
 sub Esjis::b(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -b (Esjis::b)' if @_ and not wantarray;
 
@@ -1779,6 +1846,7 @@ sub Esjis::b(;*@) {
 # ShiftJIS file test -c expr
 #
 sub Esjis::c(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -c (Esjis::c)' if @_ and not wantarray;
 
@@ -1811,6 +1879,7 @@ sub Esjis::c(;*@) {
 # ShiftJIS file test -t expr
 #
 sub Esjis::t(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -t (Esjis::t)' if @_ and not wantarray;
 
@@ -1843,6 +1912,7 @@ sub Esjis::t(;*@) {
 # ShiftJIS file test -u expr
 #
 sub Esjis::u(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -u (Esjis::u)' if @_ and not wantarray;
 
@@ -1875,6 +1945,7 @@ sub Esjis::u(;*@) {
 # ShiftJIS file test -g expr
 #
 sub Esjis::g(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -g (Esjis::g)' if @_ and not wantarray;
 
@@ -1907,6 +1978,7 @@ sub Esjis::g(;*@) {
 # ShiftJIS file test -k expr
 #
 sub Esjis::k(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -k (Esjis::k)' if @_ and not wantarray;
 
@@ -1939,6 +2011,7 @@ sub Esjis::k(;*@) {
 # ShiftJIS file test -T expr
 #
 sub Esjis::T(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -T (Esjis::T)' if @_ and not wantarray;
     my $T = 1;
@@ -1950,6 +2023,7 @@ sub Esjis::T(;*@) {
         }
 
         # P.813 tell
+        # in Chapter 29: Functions
         # of ISBN 0-596-00027-8 Programming Perl Third Edition.
         # (and so on)
 
@@ -2009,6 +2083,7 @@ sub Esjis::T(;*@) {
 # ShiftJIS file test -B expr
 #
 sub Esjis::B(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -B (Esjis::B)' if @_ and not wantarray;
     my $B = '';
@@ -2070,6 +2145,7 @@ sub Esjis::B(;*@) {
 # ShiftJIS file test -M expr
 #
 sub Esjis::M(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -M (Esjis::M)' if @_ and not wantarray;
 
@@ -2103,6 +2179,7 @@ sub Esjis::M(;*@) {
 # ShiftJIS file test -A expr
 #
 sub Esjis::A(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -A (Esjis::A)' if @_ and not wantarray;
 
@@ -2136,6 +2213,7 @@ sub Esjis::A(;*@) {
 # ShiftJIS file test -C expr
 #
 sub Esjis::C(;*@) {
+
     local $_ = shift if @_;
     croak 'Too many arguments for -C (Esjis::C)' if @_ and not wantarray;
 
@@ -2169,22 +2247,20 @@ sub Esjis::C(;*@) {
 # ShiftJIS file test -r $_
 #
 sub Esjis::r_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -r _ ? $true : $false;
+        return -r _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -r _ ? $true : $false;
+            return -r _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $r = -r $fh;
                 close $fh;
-                return $r ? $true : $false;
+                return $r ? 1 : '';
             }
         }
     }
@@ -2195,22 +2271,20 @@ sub Esjis::r_() {
 # ShiftJIS file test -w $_
 #
 sub Esjis::w_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -w _ ? $true : $false;
+        return -w _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -w _ ? $true : $false;
+            return -w _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_WRONLY|O_APPEND) {
                 my $w = -w $fh;
                 close $fh;
-                return $w ? $true : $false;
+                return $w ? 1 : '';
             }
         }
     }
@@ -2221,15 +2295,13 @@ sub Esjis::w_() {
 # ShiftJIS file test -x $_
 #
 sub Esjis::x_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -x _ ? $true : $false;
+        return -x _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -x _ ? $true : $false;
+            return -x _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
@@ -2239,7 +2311,7 @@ sub Esjis::x_() {
             }
 
             # filename is not .COM .EXE .BAT .CMD
-            return $false;
+            return '';
         }
     }
     return;
@@ -2249,22 +2321,20 @@ sub Esjis::x_() {
 # ShiftJIS file test -o $_
 #
 sub Esjis::o_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -o _ ? $true : $false;
+        return -o _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -o _ ? $true : $false;
+            return -o _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $o = -o $fh;
                 close $fh;
-                return $o ? $true : $false;
+                return $o ? 1 : '';
             }
         }
     }
@@ -2275,22 +2345,20 @@ sub Esjis::o_() {
 # ShiftJIS file test -R $_
 #
 sub Esjis::R_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -R _ ? $true : $false;
+        return -R _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -R _ ? $true : $false;
+            return -R _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $R = -R $fh;
                 close $fh;
-                return $R ? $true : $false;
+                return $R ? 1 : '';
             }
         }
     }
@@ -2301,22 +2369,20 @@ sub Esjis::R_() {
 # ShiftJIS file test -W $_
 #
 sub Esjis::W_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -W _ ? $true : $false;
+        return -W _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -W _ ? $true : $false;
+            return -W _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_WRONLY|O_APPEND) {
                 my $W = -W $fh;
                 close $fh;
-                return $W ? $true : $false;
+                return $W ? 1 : '';
             }
         }
     }
@@ -2327,15 +2393,13 @@ sub Esjis::W_() {
 # ShiftJIS file test -X $_
 #
 sub Esjis::X_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -X _ ? $true : $false;
+        return -X _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -X _ ? $true : $false;
+            return -X _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
@@ -2345,7 +2409,7 @@ sub Esjis::X_() {
             }
 
             # filename is not .COM .EXE .BAT .CMD
-            return $false;
+            return '';
         }
     }
     return;
@@ -2355,22 +2419,20 @@ sub Esjis::X_() {
 # ShiftJIS file test -O $_
 #
 sub Esjis::O_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -O _ ? $true : $false;
+        return -O _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -O _ ? $true : $false;
+            return -O _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $O = -O $fh;
                 close $fh;
-                return $O ? $true : $false;
+                return $O ? 1 : '';
             }
         }
     }
@@ -2381,22 +2443,20 @@ sub Esjis::O_() {
 # ShiftJIS file test -e $_
 #
 sub Esjis::e_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return $true;
+        return 1;
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return $true;
+            return 1;
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $e = -e $fh;
                 close $fh;
-                return $e ? $true : $false;
+                return $e ? 1 : '';
             }
         }
     }
@@ -2407,22 +2467,20 @@ sub Esjis::e_() {
 # ShiftJIS file test -z $_
 #
 sub Esjis::z_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -z _ ? $true : $false;
+        return -z _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -z _ ? $true : $false;
+            return -z _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $z = -z $fh;
                 close $fh;
-                return $z ? $true : $false;
+                return $z ? 1 : '';
             }
         }
     }
@@ -2433,6 +2491,7 @@ sub Esjis::z_() {
 # ShiftJIS file test -s $_
 #
 sub Esjis::s_() {
+
     if (-e $_) {
         return -s _;
     }
@@ -2456,22 +2515,20 @@ sub Esjis::s_() {
 # ShiftJIS file test -f $_
 #
 sub Esjis::f_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -f _ ? $true : $false;
+        return -f _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return $false;
+            return '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $f = -f $fh;
                 close $fh;
-                return $f ? $true : $false;
+                return $f ? 1 : '';
             }
         }
     }
@@ -2482,14 +2539,12 @@ sub Esjis::f_() {
 # ShiftJIS file test -d $_
 #
 sub Esjis::d_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -d _ ? $true : $false;
+        return -d _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
-        return -d "$_/" ? $true : $false;
+        return -d "$_/" ? 1 : '';
     }
     return;
 }
@@ -2498,22 +2553,20 @@ sub Esjis::d_() {
 # ShiftJIS file test -l $_
 #
 sub Esjis::l_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -l _ ? $true : $false;
+        return -l _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -l _ ? $true : $false;
+            return -l _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $l = -l $fh;
                 close $fh;
-                return $l ? $true : $false;
+                return $l ? 1 : '';
             }
         }
     }
@@ -2524,22 +2577,20 @@ sub Esjis::l_() {
 # ShiftJIS file test -p $_
 #
 sub Esjis::p_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -p _ ? $true : $false;
+        return -p _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -p _ ? $true : $false;
+            return -p _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $p = -p $fh;
                 close $fh;
-                return $p ? $true : $false;
+                return $p ? 1 : '';
             }
         }
     }
@@ -2550,22 +2601,20 @@ sub Esjis::p_() {
 # ShiftJIS file test -S $_
 #
 sub Esjis::S_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -S _ ? $true : $false;
+        return -S _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -S _ ? $true : $false;
+            return -S _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $S = -S $fh;
                 close $fh;
-                return $S ? $true : $false;
+                return $S ? 1 : '';
             }
         }
     }
@@ -2576,22 +2625,20 @@ sub Esjis::S_() {
 # ShiftJIS file test -b $_
 #
 sub Esjis::b_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -b _ ? $true : $false;
+        return -b _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -b _ ? $true : $false;
+            return -b _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $b = -b $fh;
                 close $fh;
-                return $b ? $true : $false;
+                return $b ? 1 : '';
             }
         }
     }
@@ -2602,22 +2649,20 @@ sub Esjis::b_() {
 # ShiftJIS file test -c $_
 #
 sub Esjis::c_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -c _ ? $true : $false;
+        return -c _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -c _ ? $true : $false;
+            return -c _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $c = -c $fh;
                 close $fh;
-                return $c ? $true : $false;
+                return $c ? 1 : '';
             }
         }
     }
@@ -2628,32 +2673,28 @@ sub Esjis::c_() {
 # ShiftJIS file test -t $_
 #
 sub Esjis::t_() {
-    my $true  = 1;
-    my $false = '';
 
-    return -t STDIN ? $true : $false;
+    return -t STDIN ? 1 : '';
 }
 
 #
 # ShiftJIS file test -u $_
 #
 sub Esjis::u_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -u _ ? $true : $false;
+        return -u _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -u _ ? $true : $false;
+            return -u _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $u = -u $fh;
                 close $fh;
-                return $u ? $true : $false;
+                return $u ? 1 : '';
             }
         }
     }
@@ -2664,22 +2705,20 @@ sub Esjis::u_() {
 # ShiftJIS file test -g $_
 #
 sub Esjis::g_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -g _ ? $true : $false;
+        return -g _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -g _ ? $true : $false;
+            return -g _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $g = -g $fh;
                 close $fh;
-                return $g ? $true : $false;
+                return $g ? 1 : '';
             }
         }
     }
@@ -2690,22 +2729,20 @@ sub Esjis::g_() {
 # ShiftJIS file test -k $_
 #
 sub Esjis::k_() {
-    my $true  = 1;
-    my $false = '';
 
     if (-e $_) {
-        return -k _ ? $true : $false;
+        return -k _ ? 1 : '';
     }
     elsif (_MSWin32_5Cended_path($_)) {
         if (-d "$_/") {
-            return -k _ ? $true : $false;
+            return -k _ ? 1 : '';
         }
         else {
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 my $k = -k $fh;
                 close $fh;
-                return $k ? $true : $false;
+                return $k ? 1 : '';
             }
         }
     }
@@ -2716,9 +2753,8 @@ sub Esjis::k_() {
 # ShiftJIS file test -T $_
 #
 sub Esjis::T_() {
-    my $true  = 1;
-    my $false = '';
-    my $T     = $true;
+
+    my $T = 1;
 
     if (-d $_ or -d "$_/") {
         return;
@@ -2730,16 +2766,16 @@ sub Esjis::T_() {
 
     if (sysread $fh, my $block, 512) {
         if ($block =~ /[\000\377]/oxms) {
-            $T = $false;
+            $T = '';
         }
         elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > length $block) {
-            $T = $false;
+            $T = '';
         }
     }
 
     # 0 byte or eof
     else {
-        $T = $true;
+        $T = 1;
     }
     close $fh;
 
@@ -2751,9 +2787,8 @@ sub Esjis::T_() {
 # ShiftJIS file test -B $_
 #
 sub Esjis::B_() {
-    my $true  = 1;
-    my $false = '';
-    my $B     = $false;
+
+    my $B = '';
 
     if (-d $_ or -d "$_/") {
         return;
@@ -2765,16 +2800,16 @@ sub Esjis::B_() {
 
     if (sysread $fh, my $block, 512) {
         if ($block =~ /[\000\377]/oxms) {
-            $B = $true;
+            $B = 1;
         }
         elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > length $block) {
-            $B = $true;
+            $B = 1;
         }
     }
 
     # 0 byte or eof
     else {
-        $B = $true;
+        $B = 1;
     }
     close $fh;
 
@@ -2786,6 +2821,7 @@ sub Esjis::B_() {
 # ShiftJIS file test -M $_
 #
 sub Esjis::M_() {
+
     if (-e $_) {
         return -M _;
     }
@@ -2810,6 +2846,7 @@ sub Esjis::M_() {
 # ShiftJIS file test -A $_
 #
 sub Esjis::A_() {
+
     if (-e $_) {
         return -A _;
     }
@@ -2834,6 +2871,7 @@ sub Esjis::A_() {
 # ShiftJIS file test -C $_
 #
 sub Esjis::C_() {
+
     if (-e $_) {
         return -C _;
     }
@@ -2858,6 +2896,7 @@ sub Esjis::C_() {
 # ShiftJIS path globbing (with parameter)
 #
 sub Esjis::glob($) {
+
     if ($^O =~ /\A (?:MSWin32|NetWare|symbian|dos) \z/oxms) {
         return _dosglob(@_);
     }
@@ -2870,6 +2909,7 @@ sub Esjis::glob($) {
 # ShiftJIS path globbing (without parameter)
 #
 sub Esjis::glob_() {
+
     if ($^O =~ /\A (?:MSWin32|NetWare|symbian|dos) \z/oxms) {
         return _dosglob();
     }
@@ -2933,6 +2973,7 @@ sub _dosglob {
 # ShiftJIS path globbing subroutine
 #
 sub _do_glob {
+
     my($cond,@expr) = @_;
     my @glob = ();
 
@@ -3095,6 +3136,7 @@ INNER:
 # ShiftJIS parse line
 #
 sub _parse_line {
+
     my($line) = @_;
 
     $line .= ' ';
@@ -3113,6 +3155,7 @@ sub _parse_line {
 # ShiftJIS parse path
 #
 sub _parse_path {
+
     my($path,$pathsep) = @_;
 
     $path .= '/';
@@ -3131,16 +3174,19 @@ sub _parse_path {
 # ShiftJIS file lstat (with parameter)
 #
 sub Esjis::lstat(*) {
-    my $fh = Symbol::qualify_to_ref $_[0];
+
+    local $_ = shift if @_;
+
+    my $fh = Symbol::qualify_to_ref $_;
     if (fileno $fh) {
         return CORE::lstat $fh;
     }
-    elsif (-e $_[0]) {
+    elsif (-e $_) {
         return CORE::lstat _;
     }
-    elsif (_MSWin32_5Cended_path($_[0])) {
+    elsif (_MSWin32_5Cended_path($_)) {
         my $fh = Symbol::gensym();
-        if (sysopen $fh, $_[0], O_RDONLY) {
+        if (sysopen $fh, $_, O_RDONLY) {
             my @lstat = CORE::lstat $fh;
             close $fh;
             return @lstat;
@@ -3153,6 +3199,7 @@ sub Esjis::lstat(*) {
 # ShiftJIS file lstat (without parameter)
 #
 sub Esjis::lstat_() {
+
     my $fh = Symbol::qualify_to_ref $_;
     if (fileno $fh) {
         return CORE::lstat $fh;
@@ -3196,16 +3243,19 @@ sub Esjis::opendir(*$) {
 # ShiftJIS file stat (with parameter)
 #
 sub Esjis::stat(*) {
-    my $fh = Symbol::qualify_to_ref $_[0];
+
+    local $_ = shift if @_;
+
+    my $fh = Symbol::qualify_to_ref $_;
     if (fileno $fh) {
         return CORE::stat $fh;
     }
-    elsif (-e $_[0]) {
+    elsif (-e $_) {
         return CORE::stat _;
     }
-    elsif (_MSWin32_5Cended_path($_[0])) {
+    elsif (_MSWin32_5Cended_path($_)) {
         my $fh = Symbol::gensym();
-        if (sysopen $fh, $_[0], O_RDONLY) {
+        if (sysopen $fh, $_, O_RDONLY) {
             my @stat = CORE::stat $fh;
             close $fh;
             return @stat;
@@ -3218,6 +3268,7 @@ sub Esjis::stat(*) {
 # ShiftJIS file stat (without parameter)
 #
 sub Esjis::stat_() {
+
     my $fh = Symbol::qualify_to_ref $_;
     if (fileno $fh) {
         return CORE::stat $fh;
@@ -3240,9 +3291,13 @@ sub Esjis::stat_() {
 # ShiftJIS path unlink
 #
 sub Esjis::unlink(@) {
-    if (@_ == 0) {
+
+    local @_ = ($_) unless @_;
+
+    my $unlink = 0;
+    for (@_) {
         if (CORE::unlink) {
-            return 1;
+            $unlink++;
         }
         elsif (_MSWin32_5Cended_path($_)) {
             my @char = /\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
@@ -3256,41 +3311,18 @@ sub Esjis::unlink(@) {
                 close $fh;
             }
             else {
-                return 1;
-            }
-        }
-        return 0;
-    }
-    else {
-        my $unlink = 0;
-        for (@_) {
-            if (CORE::unlink) {
                 $unlink++;
             }
-            elsif (_MSWin32_5Cended_path($_)) {
-                my @char = /\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
-                my $file = join '', map {{'/' => '\\'}->{$_} || $_} @char;
-                if ($file =~ m/ \A (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*? [ ] /oxms) {
-                    $file = qq{"$file"};
-                }
-                system(qq{del $file >NUL 2>NUL});
-                my $fh = Symbol::gensym();
-                if (sysopen $fh, $_, O_RDONLY) {
-                    close $fh;
-                }
-                else {
-                    $unlink++;
-                }
-            }
         }
-        return $unlink;
     }
+    return $unlink;
 }
 
 #
 # ShiftJIS chr(0x5C) ended path on MSWin32
 #
 sub _MSWin32_5Cended_path {
+
     if ((@_ >= 1) and ($_[0] ne '')) {
         if ($^O =~ /\A (?:MSWin32|NetWare|symbian|dos) \z/oxms) {
             my @char = $_[0] =~ /\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
@@ -3350,8 +3382,8 @@ Esjis - Run-time routines for Sjis.pm
 
 =head1 ABSTRACT
 
-It output "use Esjis;" automatically when Sjis.pm converts your script.
-So you need not use this module directly.
+This module is a run-time routines of the Sjis module.
+Because the Sjis module automatically uses this module, you need not use directly.
 
 =head1 BUGS AND LIMITATIONS
 

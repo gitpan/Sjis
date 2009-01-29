@@ -2,7 +2,7 @@
 #
 # make-gbk.pl - Source code filter for making source code filter to escape GBK
 #
-# Copyright (c) 2008 INABA Hitoshi <ina@cpan.org>
+# Copyright (c) 2008, 2009 INABA Hitoshi <ina@cpan.org>
 #
 ######################################################################
 

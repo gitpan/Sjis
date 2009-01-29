@@ -1,4 +1,6 @@
-This file is encoded in ShiftJIS.
+# This file is encoded in ShiftJIS.
+1;
+__END__
 
 ƒ\ƒtƒgƒEƒFƒA–¼Ì
 
@@ -79,35 +81,9 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
     Esjis.pm          --- Sjis.pm ‚Ìƒ‰ƒ“ƒ^ƒCƒ€ƒ‹[ƒ`ƒ“
     perl58.bat        --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.8 ‚ğ’T‚µ‚ÄÀs‚·‚é
     perl510.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.10 ‚ğ’T‚µ‚ÄÀs‚·‚é
-    make-ebig5plus.pl --- ebig5plus.pl, Ebig5plus.pm, Big5Plus.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-    make-egbk.pl      --- egbk.pl, Egbk.pm, GBK.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-    make-euhc.pl      --- euhc.pl, Euhc.pm, UHC.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-
-ƒ\ƒtƒgƒEƒFƒA‚Ì‘g‡‚¹‚É‚Â‚¢‚Ä
-
-‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚ÍˆÈ‰º‚Ì‘g‡‚¹‚Åg‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚·B
-
-  * ‘g‡‚¹ 1
-
-    Sjis.pm + Esjis.pm
-
-    ƒXƒNƒŠƒvƒg’†‚É "use Sjis;" ‚Æ‹Lq‚·‚é‚Æ‹Lq‚³‚ê‚Ä‚¢‚éƒXƒNƒŠƒvƒg‚ğƒGƒXƒP[ƒv
-    ‚µAƒGƒXƒP[ƒv‚µ‚Ä‚Å‚«‚½ƒtƒ@ƒCƒ‹‚ğÀs‚µ‚Ü‚·BƒGƒXƒP[ƒv‚³‚ê‚½ƒtƒ@ƒCƒ‹‚Í•Û‘¶
-    ‚³‚êŸ‰ñ‚ÌÀs‚É—˜—p‚³‚ê‚Ü‚·B
-
-  * ‘g‡‚¹ 2
-
-    perl58.bat + Sjis.pm + Esjis.pm
-
-    ‘g‡‚¹ 1 ‚Ì perl5.8 ”Å‚Å‚·B
-    ŠÂ‹«•Ï” PATH ‚É Perl5.8 ‚Ö‚ÌƒpƒX‚ªİ’è‚³‚ê‚Ä‚¢‚È‚¢ê‡Aperl58.bat ‚Í•Ö—˜‚Å‚·B
-
-  * ‘g‡‚¹ 3
-
-    perl510.bat + Sjis.pm + Esjis.pm
-
-    ‘g‡‚¹ 1 ‚Ì perl5.10 ”Å‚Å‚·B
-    ŠÂ‹«•Ï” PATH ‚É Perl5.10 ‚Ö‚ÌƒpƒX‚ªİ’è‚³‚ê‚Ä‚¢‚È‚¢ê‡Aperl510.bat ‚Í•Ö—˜‚Å‚·B
+    make-big5plus.pl  --- Ebig5plus.pm, Big5Plus.pm ‚ğì‚éƒXƒNƒŠƒvƒg
+    make-gbk.pl       --- Egbk.pm, GBK.pm ‚ğì‚éƒXƒNƒŠƒvƒg
+    make-uhc.pl       --- Euhc.pm, UHC.pm ‚ğì‚éƒXƒNƒŠƒvƒg
 
 JPerl ŒİŠ·‚Ì‹@”\
 
@@ -308,12 +284,6 @@ JPerl ‚ÆŒİŠ·«‚Ì‚È‚¢‹@”\
   * §ŒÀ–€ 3
 
     do, require, use ‚Å“Ç‚Ü‚ê‚½ƒXƒNƒŠƒvƒg‚ÍƒGƒXƒP[ƒv‚³‚ê‚Ü‚¹‚ñB
-
-—š—ğ
-
-‚±‚Ì Sjis.pm ‚Í 'jcode.pl' ‚Ìƒ\[ƒXƒR[ƒh‚ğŠî‚É‚µ‚ÄA'Jperl.exe' ‚Æ“¯“™‚Ì
-‹@”\‚ğ–Úw‚µ‚Ä ActivePerl Build 522 Built under MSWin32 Compiled at Nov 2
-1999 09:52:28 ‚Å—˜—p‰Â”\‚È‚æ‚¤‚Éì‚ç‚ê‚Ü‚µ‚½B
 
 ìÒ
 
@@ -999,8 +969,8 @@ Programming Perl, 3rd ed. ‚ª‘‚©‚ê‚½ ‚É‚ÍAUTF-8 ƒtƒ‰ƒO‚Í¶‚Ü‚ê‚Ä‚¨‚ç‚¸APerl ‚
 
 Ó«
 
-‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚ÍAˆÈ‰º‚Ì•ûX‚Ì‚¨‚©‚°‚É‚æ‚èì¬‚³‚ê‚Ü‚µ‚½B“Á‚É‚±‚Ì POD ‚Í
-Encode ƒ‚ƒWƒ…[ƒ‹‚ğQl‚É‚µ‚Ä‘‚©‚ê‚Ä‚¢‚Ü‚·B‘S‚Ä‚Ì•û‚ÉŠ´Ó‚¢‚½‚µ‚Ü‚·B
+‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚ÍAˆÈ‰º‚Ì•ûX‚Ìì¬‚µ‚½ƒ\ƒtƒgƒEƒFƒA‚¨‚æ‚Ñ•¶‘‚Ì‚¨‚©‚°‚É‚æ‚èì¬
+‚³‚ê‚Ü‚µ‚½B‘S‚Ä‚Ì•û‚ÉŠ´Ó‚¢‚½‚µ‚Ü‚·B
 
  R‰º —Ç‘ ‚³‚ñ, ƒVƒtƒgJIS‚ÌƒfƒUƒCƒ“‚Ì˜b
  ttp://furukawablog.spaces.live.com/Blog/cns!1pmWgsL289nm7Shn7cS0jHzA!2225.entry

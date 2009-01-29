@@ -1,10 +1,15 @@
+use Sjis;
+
+mkdir('hoge', 0777);
+system("echo 1 >hoge\\テストソース.txt");
+
 while (<DATA>) {
     chomp;
     if (`perl $_` =~ /Match/) {
-        print "ok - perl $_\n";
+        print "ok - $_\n";
     }
     else {
-        print "not ok - perl $_\n";
+        print "not ok - $_\n";
     }
 }
 
