@@ -28,17 +28,6 @@ else {
 }
 
 END
-
-    printf(<<'END',$o,$o,$o,$o,$o,$o);
-if (((Esjis::%s DIR) ne '') == ((-%s DIR) ne '')) {
-    print "ok - Esjis::%s DIR == -%s DIR\n";
-}
-else {
-    print "not ok - Esjis::%s DIR == -%s DIR\n";
-}
-
-END
-
 }
 
 print <<'END';

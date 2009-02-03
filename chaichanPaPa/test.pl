@@ -1,15 +1,20 @@
+use strict;
 use Sjis;
 
-mkdir('hoge', 0777);
-system("echo 1 >hoge\\テストソース.txt");
+chomp(my @script = <DATA>);
 
-while (<DATA>) {
-    chomp;
-    if (`perl $_` =~ /Match/) {
-        print "ok - $_\n";
-    }
-    else {
-        print "not ok - $_\n";
+for my $perlbin (qw(perl55 perl58 perl510)) {
+    next unless `$perlbin -v` =~ /This is perl,/;
+
+    mkdir('hoge', 0777);
+    system("echo 1 >hoge\\テストソース.txt");
+    for my $script (@script) {
+        if (`$perlbin $script` =~ /Match/) {
+            print "ok - $perlbin $script\n";
+        }
+        else {
+            print "not ok - $perlbin $script\n";
+        }
     }
 }
 

@@ -1,19 +1,27 @@
 # This file is encoded in ShiftJIS.
 die "This file is not encoded in ShiftJIS.\n" if q{あ} ne "\x82\xa0";
 
+use strict;
 use Sjis;
 
-system("echo > F機能 2>NUL");
-system("mkdir D機能 2>NUL");
-system("echo > D機能\\a.txt 2>NUL");
-system("echo > D機能\\b.txt 2>NUL");
-system("echo > D機能\\c.txt 2>NUL");
-system("echo > D機能\\F機能 2>NUL");
-system("mkdir D機能\\D機能 2>NUL");
+chomp(my @script = <DATA>);
 
-while (<DATA>) {
-    chomp;
-    system "perl $_";
+for my $perlbin (qw(perl55 perl58 perl510)) {
+    next unless `$perlbin -v` =~ /This is perl,/;
+    print "perlbin=$perlbin\n";
+
+    system("echo > F機能 2>NUL");
+    system("mkdir D機能 2>NUL");
+    system("echo > D機能\\a.txt 2>NUL");
+    system("echo > D機能\\b.txt 2>NUL");
+    system("echo > D機能\\c.txt 2>NUL");
+    system("echo > D機能\\F機能 2>NUL");
+    system("mkdir D機能\\D機能 2>NUL");
+
+    for my $script (@script) {
+        system "$perlbin $script";
+    }
+    print "\n";
 }
 
 __END__

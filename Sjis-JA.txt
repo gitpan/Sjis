@@ -30,8 +30,8 @@ Perl5.8 以降は Encode モジュールによってマルチリンガル処理がサポートされ、jperl
 
 UTF-8 は最も普及しているオペレーティングシステムである(私たちの大好きな；)
 Microsoft Windows 上で利用されることは、まだまれです。なので多くのユーザが 
-ShiftJIS でスクリプトを書きたいと望んでいます。しかも Perl5.8/5.10 の新機能を
-利用して。
+ShiftJIS でスクリプトを書きたいと望んでいます。しかも Perl5.8, Perl5.10 の新機能
+を利用して。
 
 ShiftJIS はもともと過去の規格との互換性を考慮して開発されました。一般的にオペ
 レーティングシステムやプログラミング言語は過去の規格を継承して作られます。
@@ -79,6 +79,7 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
     Sjis.pm           --- ShiftJIS ソースコードフィルタモジュール
     Esjis.pm          --- Sjis.pm のランタイムルーチン
+    perl55.bat        --- 環境変数 PATH の設定なしに perl5.5 を探して実行する
     perl58.bat        --- 環境変数 PATH の設定なしに perl5.8 を探して実行する
     perl510.bat       --- 環境変数 PATH の設定なしに perl5.10 を探して実行する
     make-big5plus.pl  --- Ebig5plus.pm, Big5Plus.pm を作るスクリプト
@@ -169,6 +170,10 @@ JPerl と互換性のない機能
   * format
 
     オリジナルの Perl と機能が同じです(ShiftJIS に対応していません)。
+
+  * chdir は Esjis::chdir に書き換わります
+
+    MSWin32 環境にて文字コード(0x5C)で終わるパスを扱うことができません
 
 バグと制限事項
 
@@ -263,7 +268,7 @@ JPerl と互換性のない機能
         END3
 
     例9
-        print <<"END1", <<'END2', "END3";
+        print <<"END1", <<'END2', <<"END3";
         ============================================================
         ダブルクォートとしてエスケープされます。
         'END2' は "END1" と "END3" のせいでダブルクォートされた
