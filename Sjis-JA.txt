@@ -80,6 +80,7 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
     Sjis.pm           --- ShiftJIS ƒ\[ƒXƒR[ƒhƒtƒBƒ‹ƒ^ƒ‚ƒWƒ…[ƒ‹
     Esjis.pm          --- Sjis.pm ‚Ìƒ‰ƒ“ƒ^ƒCƒ€ƒ‹[ƒ`ƒ“
     perl55.bat        --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.5 ‚ğ’T‚µ‚ÄÀs‚·‚é
+    perl56.bat        --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.6 ‚ğ’T‚µ‚ÄÀs‚·‚é
     perl58.bat        --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.8 ‚ğ’T‚µ‚ÄÀs‚·‚é
     perl510.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.10 ‚ğ’T‚µ‚ÄÀs‚·‚é
     make-big5plus.pl  --- Ebig5plus.pm, Big5Plus.pm ‚ğì‚éƒXƒNƒŠƒvƒg
@@ -120,6 +121,11 @@ JPerl ŒİŠ·‚Ì‹@”\
   * tr/// ‚Ü‚½‚Í y/// ‚Í Esjis::tr ‚É‘‚«Š·‚í‚è‚Ü‚·
 
     /b ‚Æ /B Cüq‚ª—˜—p‚Å‚«‚Ü‚·
+
+  * chdir ‚Í Esjis::chdir ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+    MSWin32 ŠÂ‹«‚Ìê‡‚Í perl5.005 ‚ÉŒÀ‚è•¶šƒR[ƒh(0x5C)‚ÅI‚í‚éƒpƒX‚ğˆµ‚¤‚±‚Æ
+    ‚ª‚Å‚«‚Ü‚·
 
 JPerl ‚ÆãˆÊŒİŠ·‚Ì‹@”\
 
@@ -163,27 +169,25 @@ JPerl ‚ÆãˆÊŒİŠ·‚Ì‹@”\
 
     MSWin32 ŠÂ‹«‚É‚Ä•¶šƒR[ƒh(0x5C)‚ÅI‚í‚éƒpƒX‚ğˆµ‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚·
 
-JPerl ‚ÆŒİŠ·«‚Ì‚È‚¢‹@”\
+ƒoƒO‚Æ§ŒÀ–€‚È‚¢‚µ JPerl ‚ÆŒİŠ·«‚Ì‚È‚¢‹@”\
 
-ˆÈ‰º‚Ì‹@”\‚Í JPerl ‚ÆŒİŠ·«‚ª‚ ‚è‚Ü‚¹‚ñBƒIƒŠƒWƒiƒ‹‚Ì Perl ‚Æ“¯‚¶‹@”\‚É‚È‚è‚Ü‚·B
+ƒoƒO•ñAƒpƒbƒ`‚ğŠ½Œ}‚µ‚Ü‚·B
 
   * format
 
     ƒIƒŠƒWƒiƒ‹‚Ì Perl ‚Æ‹@”\‚ª“¯‚¶‚Å‚·(ShiftJIS ‚É‘Î‰‚µ‚Ä‚¢‚Ü‚¹‚ñ)B
 
-  * chdir ‚Í Esjis::chdir ‚É‘‚«Š·‚í‚è‚Ü‚·
+  * chdir
 
-    MSWin32 ŠÂ‹«‚É‚Ä•¶šƒR[ƒh(0x5C)‚ÅI‚í‚éƒpƒX‚ğˆµ‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚¹‚ñ
+    MSWin32 ŠÂ‹«‚Ì perl5.006, perl5.008, perl5.010 ‚É‚Ä•¶šƒR[ƒh(0x5C)‚ÅI‚í‚éƒpƒX
+    ‚ğˆµ‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚¹‚ñ
 
-ƒoƒO‚Æ§ŒÀ–€
+    QlƒŠƒ“ƒN
+    Bug #81839
+    chdir does not work with chr(0x5C) at end of path
+    http://bugs.activestate.com/show_bug.cgi?id=81839
 
-ƒoƒO•ñAƒpƒbƒ`‚ğŠ½Œ}‚µ‚Ü‚·B
-
-  * §ŒÀ–€ 1
-
-    format ŠÖ”‚Í2ƒIƒNƒeƒbƒgƒR[ƒh‚É‘Î‰‚µ‚Ä‚¢‚Ü‚¹‚ñB
-
-  * §ŒÀ–€ 2
+  * ƒqƒAƒhƒLƒ…ƒƒ“ƒg
 
     ƒXƒNƒŠƒvƒg‚Ì1s‚ÉƒqƒAƒhƒLƒ…ƒƒ“ƒg‚ÌƒfƒŠƒ~ƒ^‚ğ2‚ÂˆÈãw’è‚µ‚½ê‡A‚»‚ê‚ç‚Ì‚¤‚¿
     1‚Â‚Å‚àƒ_ƒuƒ‹ƒNƒH[ƒgƒ‰ƒCƒN‚È‚à‚Ì(<<"END", <<END, <<`END`)‚ª‚ ‚ê‚Îc‚è‚ÌƒfƒŠƒ~
@@ -286,7 +290,7 @@ JPerl ‚ÆŒİŠ·«‚Ì‚È‚¢‹@”\
         ============================================================
         END3
 
-  * §ŒÀ–€ 3
+  * do, require, use
 
     do, require, use ‚Å“Ç‚Ü‚ê‚½ƒXƒNƒŠƒvƒg‚ÍƒGƒXƒP[ƒv‚³‚ê‚Ü‚¹‚ñB
 
@@ -971,6 +975,13 @@ Programming Perl, 3rd ed. ‚ª‘‚©‚ê‚½ ‚É‚ÍAUTF-8 ƒtƒ‰ƒO‚Í¶‚Ü‚ê‚Ä‚¨‚ç‚¸APerl ‚
  172ƒy[ƒW
  T1008901080816 G08901-8
  http://ascii.asciimw.jp/books/magazines/unix.shtml
+
+ PerlƒfƒoƒbƒO–¾‰õ‹Z–@
+ Martin Brown, ‰ª“c ’·¡ ŠÄ–ó
+ 2001”N5Œ”­s
+ 512 €
+ ISBN 4-274-06420-4
+ http://ssl.ohmsha.co.jp/cgi-bin/menu.cgi?ISBN=4-274-06420-4
 
 Ó«
 

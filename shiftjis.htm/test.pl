@@ -6,7 +6,7 @@ use FindBin;
 my $bin = $FindBin::Bin;
 $bin =~ s#/#\\#g;
 
-for my $perlbin (qw(perl55 perl58 perl510)) {
+for my $perlbin (qw(perl55 perl56 perl58 perl510)) {
     next unless `$perlbin -v` =~ /This is perl,/;
 
     # "•\¦"

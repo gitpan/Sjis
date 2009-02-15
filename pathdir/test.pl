@@ -6,7 +6,7 @@ use Sjis;
 $| = 1;
 
 my @script = map {"$_.pl"} (qw(chdir chmod chown glob mkdir opendir qx rename rmdir system utime));
-for my $perlbin (qw(perl55 perl58 perl510)) {
+for my $perlbin (qw(perl55 perl56 perl58 perl510)) {
     next unless `$perlbin -v` =~ /This is perl,/;
     print "perlbin=$perlbin\n";
 

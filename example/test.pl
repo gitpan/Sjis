@@ -79,7 +79,7 @@ dt\alphabet\sjis.txt:•\
 dt\“ú–{Œê\sjis.txt:•\
 END
 
-for my $perlbin (qw(perl55 perl58 perl510)) {
+for my $perlbin (qw(perl55 perl56 perl58 perl510)) {
     next unless `$perlbin -v` =~ /This is perl,/;
 
     $_ = `$perlbin grepdir.pl aaa dt`;

@@ -3,7 +3,7 @@ use Sjis;
 
 chomp(my @script = <DATA>);
 
-for my $perlbin (qw(perl55 perl58 perl510)) {
+for my $perlbin (qw(perl55 perl56 perl58 perl510)) {
     next unless `$perlbin -v` =~ /This is perl,/;
 
     mkdir('hoge', 0777);

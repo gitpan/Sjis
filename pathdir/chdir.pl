@@ -25,11 +25,45 @@ else {
 eval {
     chdir('D‹@”\');
 };
-if ($@) {
-    print "ok - chdir (2/2)\n";
+if ($] =~ /^5\.005/) {
+    if ($@) {
+        print "not ok - chdir (2/2)\n";
+    }
+    else {
+        print "ok - chdir (2/2)\n";
+    }
+}
+elsif ($] =~ /^5\.006/) {
+    if ($@) {
+        print "ok - chdir (2/2)\n";
+    }
+    else {
+        print "not ok - chdir (2/2)\n";
+    }
+}
+elsif ($] =~ /^5\.008/) {
+    if ($@) {
+        print "ok - chdir (2/2)\n";
+    }
+    else {
+        print "not ok - chdir (2/2)\n";
+    }
+}
+elsif ($] =~ /^5\.010/) {
+    if ($@) {
+        print "ok - chdir (2/2)\n";
+    }
+    else {
+        print "not ok - chdir (2/2)\n";
+    }
 }
 else {
-    print "not ok - chdir (2/2)\n";
+    if ($@) {
+        print "ok - chdir (2/2)\n";
+    }
+    else {
+        print "not ok - chdir (2/2)\n";
+    }
 }
 
 __END__
