@@ -58,8 +58,15 @@ for my $target (@ARGV) {
         # install *.pm files to /Perl/site/lib
         my($perl_site_lib) = grep(m{/site/}xmsi, @INC);
         for (grep m/ \. pm \z /xmsi, @file) {
-            print STDERR "copy $_ $perl_site_lib\n";
-            copy($_, $perl_site_lib);
+            if (m#^(.+)/#) {
+                print STDERR "copy $_ $perl_site_lib/$1\n";
+                mkpath("$perl_site_lib/$1", 0, 0777) unless -d "$perl_site_lib/$1";
+                copy($_, "$perl_site_lib/$1");
+            }
+            else {
+                print STDERR "copy $_ $perl_site_lib\n";
+                copy($_, $perl_site_lib);
+            }
         }
 
         # install *.pl and *.bat files to /Perl/bin
@@ -67,8 +74,15 @@ for my $target (@ARGV) {
         for (grep m/ \. (?: pl | bat ) \z /xmsi, @file) {
             next if m/(?: Makefile | test ) \.pl  $/xmsi;
             next if m/(?: make | tar )      \.bat $/xmsi;
-            print STDERR "copy $_ $perl_bin\n";
-            copy($_, $perl_bin);
+            if (m#^(.+)/#) {
+                print STDERR "copy $_ $perl_bin/$1\n";
+                mkpath("$perl_site_lib/$1", 0, 0777) unless -d "$perl_site_lib/$1";
+                copy($_, "$perl_bin/$1");
+            }
+            else {
+                print STDERR "copy $_ $perl_bin\n";
+                copy($_, $perl_bin);
+            }
         }
     }
     elsif ($target eq 'dist') {
@@ -85,8 +99,16 @@ for my $target (@ARGV) {
             }
         }
         close(CHANGES);
+        my $dirname  = dirname($file[0]);
         my $basename = basename($file[0], '.pm','.pl','.bat');
-        my $tardir = "$basename-$version";
+        my $tardir;
+        if ($dirname ne '.') {
+            $dirname =~ tr#/#-#;
+            $tardir = "$dirname-$basename-$version";
+        }
+        else {
+            $tardir = "$basename-$version";
+        }
         rmtree($tardir,0,0);
 
         # rewrite META.yml file
@@ -129,9 +151,9 @@ for my $target (@ARGV) {
         $gz->gzclose;
         unlink $tarfile;
 
-		# untar test
-		system("make.bat tar.bat");
-		system("tar.bat xzvf $tarfile.gz");
+        # untar test
+        system("make.bat tar.bat");
+        system("tar.bat xzvf $tarfile.gz");
     }
     elsif ($target eq 'tar.bat') {
 

@@ -4,7 +4,7 @@ __END__
 
 ƒ\ƒtƒgƒEƒFƒA–¼Ì
 
-Sjis-JA - "Yet Another JPerl" Source code filter to escape ShiftJIS (Japanese document)
+Sjis-JA - "Yet Another JPerl with Tk" Source code filter to escape ShiftJIS (Japanese document)
 
 ŠT—v
 
@@ -71,21 +71,25 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
   * C ƒvƒƒOƒ‰ƒ~ƒ“ƒO‚ğs‚í‚È‚¢‚Å‚·‚Ş
 
+  * “ú–{Œê”Å‚Ì GUI ƒvƒƒOƒ‰ƒ€‚ğì¬‚·‚é
+
 ‚±‚Æ‚ª‚Å‚«‚Ü‚·B
 
 ‚³‚ AJPerl ‚Ì–¢—ˆ‚ğì‚è‚Ü‚µ‚å‚¤B
 
 ƒ\ƒtƒgƒEƒFƒA‚Ìˆê——
 
-    Sjis.pm           --- ShiftJIS ƒ\[ƒXƒR[ƒhƒtƒBƒ‹ƒ^ƒ‚ƒWƒ…[ƒ‹
-    Esjis.pm          --- Sjis.pm ‚Ìƒ‰ƒ“ƒ^ƒCƒ€ƒ‹[ƒ`ƒ“
-    perl55.bat        --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.5 ‚ğ’T‚µ‚ÄÀs‚·‚é
-    perl56.bat        --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.6 ‚ğ’T‚µ‚ÄÀs‚·‚é
-    perl58.bat        --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.8 ‚ğ’T‚µ‚ÄÀs‚·‚é
-    perl510.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.10 ‚ğ’T‚µ‚ÄÀs‚·‚é
-    make-big5plus.pl  --- Ebig5plus.pm, Big5Plus.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-    make-gbk.pl       --- Egbk.pm, GBK.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-    make-uhc.pl       --- Euhc.pm, UHC.pm ‚ğì‚éƒXƒNƒŠƒvƒg
+   Sjis.pm          --- ShiftJIS ƒ\[ƒXƒR[ƒhƒtƒBƒ‹ƒ^ƒ‚ƒWƒ…[ƒ‹
+   Esjis.pm         --- Sjis.pm ‚Ìƒ‰ƒ“ƒ^ƒCƒ€ƒ‹[ƒ`ƒ“
+   perl55.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.5 ‚ğ’T‚µ‚ÄÀs‚·‚é
+   perl56.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.6 ‚ğ’T‚µ‚ÄÀs‚·‚é
+   perl58.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.8 ‚ğ’T‚µ‚ÄÀs‚·‚é
+   perl510.bat      --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.10 ‚ğ’T‚µ‚ÄÀs‚·‚é
+   make-big5plus.pl --- Ebig5plus.pm, Big5Plus.pm ‚ğì‚éƒXƒNƒŠƒvƒg
+   make-gbk.pl      --- Egbk.pm, GBK.pm ‚ğì‚éƒXƒNƒŠƒvƒg
+   make-uhc.pl      --- Euhc.pm, UHC.pm ‚ğì‚éƒXƒNƒŠƒvƒg
+   Sjis::Encode.pm  --- ShiftJIS Ì UTF-8 ƒGƒ“ƒR[ƒ_/ƒfƒR[ƒ_
+   Sjis::Tk::*      --- Sjis.pm —p Tk ƒ‚ƒWƒ…[ƒ‹
 
 JPerl ŒİŠ·‚Ì‹@”\
 
@@ -929,12 +933,19 @@ Programming Perl, 3rd ed. ‚ª‘‚©‚ê‚½ ‚É‚ÍAUTF-8 ƒtƒ‰ƒO‚Í¶‚Ü‚ê‚Ä‚¨‚ç‚¸APerl ‚
  ISBN 4-87311-203-6
  http://www.oreilly.co.jp/books/4873112036/
 
- Perl ƒNƒCƒbƒNƒŠƒtƒ@ƒŒƒ“ƒX
+ PerlƒNƒCƒbƒNƒŠƒtƒ@ƒŒƒ“ƒX
  By Stephen Spainhour, Ellen Siever, Nathan Patwardhan, ‹ß“¡ ‰Ãá, ‘äê Œ\ˆê ŠÄ–ó
  2000”N03Œ ”­s
  784ƒy[ƒW
  ISBN 4-900900-72-9
  http://www.oreilly.co.jp/books/4900900729/
+
+ “ü–åPerl/Tk
+ By Nancy Walsh ’˜AÎ‘]ª M, ¼’† –FK –ó
+ 1999”N12Œ ”­s
+ 440ƒy[ƒW
+ ISBN 4-87311-008-4
+ http://www.oreilly.co.jp/books/4873110084/
 
  CJKV“ú’†ŠØ‰zî•ñˆ—
  Chinese, Japanese, Korean & Vietnamese Computing

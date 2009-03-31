@@ -1,6 +1,6 @@
 NAME
 
-       Sjis - "Yet Another JPerl" Source code filter for ShiftJIS script
+      Sjis - "Yet Another JPerl with Tk" Source code filter for ShiftJIS script
 
 SYNOPSIS
 
@@ -18,8 +18,8 @@ SYNOPSIS
 
 DESCRIPTION
 
-      This software is "Yet Another JPerl" written by Perl.
-      We can write the script in ShiftJIS again.
+      This software is "Yet Another JPerl with Tk" written by Perl.
+      We can write the Perl/Tk script in ShiftJIS again.
 
       This software is a beta version for the public comment.
 
@@ -28,7 +28,7 @@ INSTALLATION
 To install this software, type the following:
 
    perl Makefile.PL    --- Makefile.PL makes "make.bat" only, and ...
-   make.bat
+   make.bat install
    make.bat test
 
    make.bat install              --- install to current using Perl
@@ -47,12 +47,14 @@ MAKE OTHER
 
 PROGRAM COMPOSITION
 
-   Sjis.pm      --- source code filter to escape ShiftJIS
-   Esjis.pm     --- run-time routines for Sjis.pm
-   perl55.bat   --- find and run perl5.5  without %PATH% settings
-   perl56.bat   --- find and run perl5.6  without %PATH% settings
-   perl58.bat   --- find and run perl5.8  without %PATH% settings
-   perl510.bat  --- find and run perl5.10 without %PATH% settings
+   Sjis.pm         --- source code filter to escape ShiftJIS
+   Esjis.pm        --- run-time routines for Sjis.pm
+   perl55.bat      --- find and run perl5.5  without %PATH% settings
+   perl56.bat      --- find and run perl5.6  without %PATH% settings
+   perl58.bat      --- find and run perl5.8  without %PATH% settings
+   perl510.bat     --- find and run perl5.10 without %PATH% settings
+   Sjis::Encode.pm --- UTF-8 encoder/decoder for ShiftJIS script
+   Sjis::Tk::*     --- Tk modules on Sjis software
 
 DEPENDENCIES
 
@@ -66,6 +68,22 @@ modify it under the same terms as Perl itself. See perlartistic.
 This software is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+TODO
+
+   Tk::getOpenFile
+   Tk::getSaveFile
+   Tk::Menu
+   Tk::MenuButton
+   Tk::HList
+   Tk::Tree
+   Tk::DirTree
+   Tk::Balloon
+   Tk::BrowseEntry
+   Tk::FileSelect
+   Tk::LabFrame
+   Tk::TixGrid
+   Tk::TList
 
 MAINTAINER
 

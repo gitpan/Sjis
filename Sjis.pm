@@ -1,7 +1,7 @@
 package Sjis;
 ######################################################################
 #
-# Sjis - "Yet Another JPerl" Source code filter to escape ShiftJIS
+# Sjis - "Yet Another JPerl with Tk" Source code filter to escape ShiftJIS
 #
 # Copyright (c) 2008, 2009 INABA Hitoshi <ina@cpan.org>
 #
@@ -12,7 +12,7 @@ use 5.00503;
 use Esjis;
 use vars qw($VERSION);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.33 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.34 $ =~ m/(\d+)/oxmsg;
 
 use Carp qw(carp croak confess cluck verbose);
 local $SIG{__DIE__}  = sub { confess @_ } if exists $ENV{'SJIS_DEBUG'};
@@ -165,34 +165,44 @@ END
         s/^ \s* use \s+ Sjis \s* ; \s* \n? $//oxms;
     }
 
-    # use Tk; --> use Sjis::Tk;
-    my $use_tk = <<'USE_TK';
+    # use Tk; --> use Sjis::Tk::Widget;
+    my $tkmodule = '';
+    for my $widget (qw(
+        Button
+        Canvas
+        Checkbutton
+        Entry
+        Frame
+        Label
+        Listbox
+        Message
+        Menu
+        Menubutton
+        Radiobutton
+        Scale
+        Text
+        Toplevel
+    )) {
+        if (m/ $widget /xms) {
+            $tkmodule .= "        eval qq{ use Sjis::Tk::$widget; };\n";
+        }
+    }
+
+    my $use_tk = <<"USE_TK";
 BEGIN {
-    eval qq{ use Sjis::Tk; };
-    if ($] >= 5.007) {
-        eval qq{ use Sjis::Tk::Canvas58;    };
-        eval qq{ use Sjis::Tk::Entry58;     };
-        eval qq{ use Sjis::Tk::Text58;      };
-        eval qq{ use Sjis::Tk::Button;      };
-        eval qq{ use Sjis::Tk::Checkbutton; };
-        eval qq{ use Sjis::Tk::Frame;       };
-        eval qq{ use Sjis::Tk::Label;       };
-        eval qq{ use Sjis::Tk::Listbox;     };
-        eval qq{ use Sjis::Tk::Menu;        };
-        eval qq{ use Sjis::Tk::Menubutton;  };
-        eval qq{ use Sjis::Tk::Message;     };
-        eval qq{ use Sjis::Tk::Radiobutton; };
-        eval qq{ use Sjis::Tk::Scale;       };
-        eval qq{ use Sjis::Tk::Toplevel;    };
+    eval qq{ use Sjis::Encode; };
+    if (\$] >= 5.007) {
+$tkmodule
     }
     else {
-        eval qq{ use Sjis::Tk::Canvas55;    };
-        eval qq{ use Sjis::Tk::Entry55;     };
-        eval qq{ use Sjis::Tk::Text55;      };
+        eval qq{ use Sjis::Tk::Entry55; };
     }
 }
+sub MainWindow::title { \$_[0]->wm('title', Sjis::Encode::utf8(\$_[1])); }
 USE_TK
-    s/^ (\s* use \s+ Tk [^;]* ; \s*? \n) /$1$use_tk/oxmsg;
+    s/^ (\s* use \s+ Tk [^:;]* ; \s*? \n) /$1$use_tk/oxmsg;
+    s/^ (\s* use \s+ )(Tk::(?:Ballon|BrowseEntry|ColorEditor|Dialog|DialogBox|DirTree|FileSelect|HList|ROText|Table|TixGrid|TList|Tree) [^:;]* ; \s*? ) \n /BEGIN { eval qq{ $1$2 ${1}Sjis::${2} }};\n/oxmsg;
+    s/^ (\s* use \s+ )(Tk::(?:LabFrame) [^:;]*) ; \s*? \n /BEGIN { eval qq{ $1$2; ${1}Sjis::${2}55; }};\n/oxmsg;
 
     $slash = 'm//';
 
@@ -258,34 +268,44 @@ use Esjis %s;
 END
         s/^ \s* use \s+ Sjis \s* ; \s* \n? $//oxms;
 
-        # use Tk; --> use Sjis::Tk;
-        my $use_tk = <<'USE_TK';
+        # use Tk; --> use Sjis::Tk::Widget;
+        my $tkmodule = '';
+        for my $widget (qw(
+            Button
+            Canvas
+            Checkbutton
+            Entry
+            Frame
+            Label
+            Listbox
+            Message
+            Menu
+            Menubutton
+            Radiobutton
+            Scale
+            Text
+            Toplevel
+        )) {
+            if (m/ $widget /xms) {
+                $tkmodule .= "        eval qq{ use Sjis::Tk::$widget; };\n";
+            }
+        }
+
+        my $use_tk = <<"USE_TK";
 BEGIN {
-    eval qq{ use Sjis::Tk; };
-    if ($] >= 5.007) {
-        eval qq{ use Sjis::Tk::Canvas58;    };
-        eval qq{ use Sjis::Tk::Entry58;     };
-        eval qq{ use Sjis::Tk::Text58;      };
-        eval qq{ use Sjis::Tk::Button;      };
-        eval qq{ use Sjis::Tk::Checkbutton; };
-        eval qq{ use Sjis::Tk::Frame;       };
-        eval qq{ use Sjis::Tk::Label;       };
-        eval qq{ use Sjis::Tk::Listbox;     };
-        eval qq{ use Sjis::Tk::Menu;        };
-        eval qq{ use Sjis::Tk::Menubutton;  };
-        eval qq{ use Sjis::Tk::Message;     };
-        eval qq{ use Sjis::Tk::Radiobutton; };
-        eval qq{ use Sjis::Tk::Scale;       };
-        eval qq{ use Sjis::Tk::Toplevel;    };
+    eval qq{ use Sjis::Encode; };
+    if (\$] >= 5.007) {
+$tkmodule
     }
     else {
-        eval qq{ use Sjis::Tk::Canvas55;    };
-        eval qq{ use Sjis::Tk::Entry55;     };
-        eval qq{ use Sjis::Tk::Text55;      };
+        eval qq{ use Sjis::Tk::Entry55; };
     }
 }
+sub MainWindow::title { \$_[0]->wm('title', Sjis::Encode::utf8(\$_[1])); }
 USE_TK
-        s/^ (\s* use \s+ Tk [^;]* ; \s*? \n) /$1$use_tk/oxmsg;
+        s/^ (\s* use \s+ Tk [^:;]* ; \s*? \n) /$1$use_tk/oxmsg;
+        s/^ (\s* use \s+ )(Tk::(?:Ballon|BrowseEntry|ColorEditor|Dialog|DialogBox|DirTree|FileSelect|HList|ROText|Table|TixGrid|TList|Tree) [^:;]* ; \s*? ) \n /BEGIN { eval qq{ $1$2 ${1}Sjis::${2} }};\n/oxmsg;
+        s/^ (\s* use \s+ )(Tk::(?:LabFrame) [^:;]*) ; \s*? \n /BEGIN { eval qq{ $1$2; ${1}Sjis::${2}55; }};\n/oxmsg;
 
         $slash = 'm//';
         study $_;
@@ -1389,7 +1409,7 @@ E_STRING_LOOP:
     while ($string !~ /\G \z/oxgc) {
 
 # bareword
-        if ($string =~ /\G ( \{ \s* (?: tr|index |rindex|reverse) \s* \} ) /oxmsgc) {
+        if ($string =~ /\G ( \{ \s* (?: tr|index|rindex|reverse) \s* \} ) /oxmsgc) {
             $e_string .= $1;
             $slash = 'div';
         }
@@ -1656,100 +1676,100 @@ E_STRING_LOOP:
         }
 
 # << (bit shift)   --- not here document
-	    elsif ($string =~ /\G ( << \s* ) (?= [0-9\$\@\&] ) /oxgc) { $slash = 'm//'; $e_string .= $1;           }
+        elsif ($string =~ /\G ( << \s* ) (?= [0-9\$\@\&] ) /oxgc) { $slash = 'm//'; $e_string .= $1;           }
 
 # <<'HEREDOC'
-	    elsif ($string =~ /\G ( << '([a-zA-Z_0-9]*)' ) /oxgc) {
-	        $slash = 'm//';
-	        my $here_quote = $1;
-	        my $delimiter  = $2;
+        elsif ($string =~ /\G ( << '([a-zA-Z_0-9]*)' ) /oxgc) {
+            $slash = 'm//';
+            my $here_quote = $1;
+            my $delimiter  = $2;
 
-	        # get here document
-	        my $script = substr $_, pos $_;
-	        $script =~ s/.*?\n//oxm;
-	        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
-	            $heredoc{$delimiter} = $1;
-	        }
-	        else {
-	            croak "$__FILE__: Can't find string terminator $delimiter anywhere before EOF";
-	        }
-	        $e_string .= $here_quote;
-	    }
+            # get here document
+            my $script = substr $_, pos $_;
+            $script =~ s/.*?\n//oxm;
+            if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+                $heredoc{$delimiter} = $1;
+            }
+            else {
+                croak "$__FILE__: Can't find string terminator $delimiter anywhere before EOF";
+            }
+            $e_string .= $here_quote;
+        }
 
 # <<\HEREDOC
-	    elsif ($string =~ /\G ( << \\([a-zA-Z_0-9]+) ) /oxgc) {
-	        $slash = 'm//';
-	        my $here_quote = $1;
-	        my $delimiter  = $2;
+        elsif ($string =~ /\G ( << \\([a-zA-Z_0-9]+) ) /oxgc) {
+            $slash = 'm//';
+            my $here_quote = $1;
+            my $delimiter  = $2;
 
-	        # get here document
-	        my $script = substr $_, pos $_;
-	        $script =~ s/.*?\n//oxm;
-	        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
-	            $heredoc{$delimiter} = $1;
-	        }
-	        else {
-	            croak "$__FILE__: Can't find string terminator $delimiter anywhere before EOF";
-	        }
-	        $e_string .= $here_quote;
-	    }
+            # get here document
+            my $script = substr $_, pos $_;
+            $script =~ s/.*?\n//oxm;
+            if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+                $heredoc{$delimiter} = $1;
+            }
+            else {
+                croak "$__FILE__: Can't find string terminator $delimiter anywhere before EOF";
+            }
+            $e_string .= $here_quote;
+        }
 
 # <<"HEREDOC"
-	    elsif ($string =~ /\G ( << "([a-zA-Z_0-9]*)" ) /oxgc) {
-	        $slash = 'm//';
-	        my $here_quote = $1;
-	        my $delimiter  = $2;
-	        $heredoc_qq++;
+        elsif ($string =~ /\G ( << "([a-zA-Z_0-9]*)" ) /oxgc) {
+            $slash = 'm//';
+            my $here_quote = $1;
+            my $delimiter  = $2;
+            $heredoc_qq++;
 
-	        # get here document
-	        my $script = substr $_, pos $_;
-	        $script =~ s/.*?\n//oxm;
-	        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
-	            $heredoc{$delimiter} = $1;
-	        }
-	        else {
-	            croak "$__FILE__: Can't find string terminator $delimiter anywhere before EOF";
-	        }
-	        $e_string .= $here_quote;
-	    }
+            # get here document
+            my $script = substr $_, pos $_;
+            $script =~ s/.*?\n//oxm;
+            if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+                $heredoc{$delimiter} = $1;
+            }
+            else {
+                croak "$__FILE__: Can't find string terminator $delimiter anywhere before EOF";
+            }
+            $e_string .= $here_quote;
+        }
 
 # <<HEREDOC
-	    elsif ($string =~ /\G ( << ([a-zA-Z_0-9]+) ) /oxgc) {
-	        $slash = 'm//';
-	        my $here_quote = $1;
-	        my $delimiter  = $2;
-	        $heredoc_qq++;
+        elsif ($string =~ /\G ( << ([a-zA-Z_0-9]+) ) /oxgc) {
+            $slash = 'm//';
+            my $here_quote = $1;
+            my $delimiter  = $2;
+            $heredoc_qq++;
 
-	        # get here document
-	        my $script = substr $_, pos $_;
-	        $script =~ s/.*?\n//oxm;
-	        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
-	            $heredoc{$delimiter} = $1;
-	        }
-	        else {
-	            croak "$__FILE__: Can't find string terminator $delimiter anywhere before EOF";
-	        }
-	        $e_string .= $here_quote;
-	    }
+            # get here document
+            my $script = substr $_, pos $_;
+            $script =~ s/.*?\n//oxm;
+            if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+                $heredoc{$delimiter} = $1;
+            }
+            else {
+                croak "$__FILE__: Can't find string terminator $delimiter anywhere before EOF";
+            }
+            $e_string .= $here_quote;
+        }
 
 # <<`HEREDOC`
-	    elsif ($string =~ /\G ( << `([a-zA-Z_0-9]*)` ) /oxgc) {
-	        $slash = 'm//';
-	        my $here_quote = $1;
-	        my $delimiter  = $2;
-	        $heredoc_qq++;
+        elsif ($string =~ /\G ( << `([a-zA-Z_0-9]*)` ) /oxgc) {
+            $slash = 'm//';
+            my $here_quote = $1;
+            my $delimiter  = $2;
+            $heredoc_qq++;
 
-	        # get here document
-	        my $script = substr $_, pos $_;
-	        $script =~ s/.*?\n//oxm;
-	        if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
-	            $heredoc{$delimiter} = $1;
-	        }
-	        else {
-	            croak "$__FILE__: Can't find string terminator $delimiter anywhere before EOF";
-	        }
-	        $e_string .= $here_quote;
-	    }
+            # get here document
+            my $script = substr $_, pos $_;
+            $script =~ s/.*?\n//oxm;
+            if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
+                $heredoc{$delimiter} = $1;
+            }
+            else {
+                croak "$__FILE__: Can't find string terminator $delimiter anywhere before EOF";
+            }
+            $e_string .= $here_quote;
+        }
 
         # any operator before div
         elsif ($string =~ /\G (
@@ -4101,7 +4121,7 @@ __END__
 
 =head1 NAME
 
-Sjis - "Yet Another JPerl" Source code filter to escape ShiftJIS
+Sjis - "Yet Another JPerl with Tk" Source code filter to escape ShiftJIS
 
 =head1 SYNOPSIS
 
@@ -4169,18 +4189,22 @@ What's this software good for ...
 
 =item * No C programming
 
+=item * Making GUI program of Japanese version
+
 =back
 
 Let's make the future of JPerl.
 
 =head1 SOFTWARE COMPOSITION
 
-    Sjis.pm      --- source code filter to escape ShiftJIS
-    Esjis.pm     --- run-time routines for Sjis.pm
-    perl55.bat   --- find and run perl5.5 without %PATH% settings
-    perl56.bat   --- find and run perl5.6 without %PATH% settings
-    perl58.bat   --- find and run perl5.8 without %PATH% settings
-    perl510.bat  --- find and run perl5.10 without %PATH% settings
+   Sjis.pm         --- source code filter to escape ShiftJIS
+   Esjis.pm        --- run-time routines for Sjis.pm
+   perl55.bat      --- find and run perl5.5  without %PATH% settings
+   perl56.bat      --- find and run perl5.6  without %PATH% settings
+   perl58.bat      --- find and run perl5.8  without %PATH% settings
+   perl510.bat     --- find and run perl5.10 without %PATH% settings
+   Sjis::Encode.pm --- UTF-8 encoder/decoder for ShiftJIS script
+   Sjis::Tk::*     --- Tk modules on Sjis software
 
 =head1 JPerl COMPATIBLE FUNCTIONS
 
@@ -4550,6 +4574,13 @@ programming environment like at that time.
  Series: In a Nutshell
  ISBN 10: 0-596-00241-6 | ISBN 13: 9780596002411
  L<http://oreilly.com/catalog/9780596002411/index.html>
+
+ C<Mastering Perl/Tk>
+ By Stephen Lidie, Nancy Walsh
+ January 2002
+ Pages: 768
+ ISBN 10: 1-56592-716-8 | ISBN 13: 9781565927162
+ L<http://oreilly.com/catalog/9781565927162/index.html>
 
  C<CJKV Information Processing>
  Chinese, Japanese, Korean & Vietnamese Computing
