@@ -12,7 +12,10 @@ use 5.00503;
 use Esjis;
 use vars qw($VERSION);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.34 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.35 $ =~ m/(\d+)/oxmsg;
+
+use Fcntl;
+use Symbol;
 
 use Carp qw(carp croak confess cluck verbose);
 local $SIG{__DIE__}  = sub { confess @_ } if exists $ENV{'SJIS_DEBUG'};
@@ -29,6 +32,7 @@ BEGIN {
 
 sub import() {}
 sub unimport() {}
+sub Sjis::escape_script;
 
 # regexp of character
 my $qq_char   = qr/\\c[\x40-\x5F]|\\[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]/oxms;
@@ -121,6 +125,253 @@ use vars qw($slash);      # when 'm//', '/' means regexp match 'm//' and '?' mea
 my %heredoc      = ();    # here document
 my $heredoc_qq   = 0;     # here document quote type
 
+my $ignore_modules = join('|', qw(
+    utf8
+    I18N::Japanese
+    I18N::Collate
+));
+
+# in Chapter 8: Standard Modules
+# of ISBN 0-596-00241-6 Perl in a Nutshell, Second Edition
+
+my $standard_modules = join('|', qw(
+    AnyDBM_File
+    Attribute::Handlers
+    attributes
+    attrs
+    AutoLoader
+    AutoSplit
+    autouse
+    B
+    B::Asmdata
+    B::Assembler
+    B::Bblock
+    B::Bytecode
+    B::C
+    B::CC
+    B::Concise
+    B::Debug
+    B::Deparse
+    B::Disassembler
+    B::Lint
+    B::Showlex
+    B::Stackobj
+    B::Terse
+    B::Xref
+    base
+    Benchmark
+    bigint
+    bignum
+    bigrat
+    blib
+    bytes
+    ByteLoader
+    Carp
+    CGI
+    CGI::Apache
+    CGI::Carp
+    CGI::Cookie
+    CGI::Fast
+    CGI::Pretty
+    CGI::Push
+    CGI::Switch
+    charnames
+    Class::ISA
+    Class::Struct
+    Config
+    constant
+    CPAN
+    CPAN::FirstTime
+    CPAN::Nox
+    Cwd
+    Data::Dumper
+    DB
+    DB_File
+    Devel::DProf
+    Devel::PPPort
+    Devel::SelfStubber
+    diagnostics
+    Digest
+    Digest::MD5
+    DirHandle
+    Dumpvalue
+    DynaLoader
+    encoding
+    English
+    Env
+    Errno
+    Exporter
+    ExtUtils::Command
+    ExtUtils::Command::MM
+    ExtUtils::Constant
+    ExtUtils::Embed
+    ExtUtils::Install
+    ExtUtils::Installed
+    ExtUtils::Liblist
+    ExtUtils::MakeMaker
+    ExtUtils::Manifest
+    ExtUtils::Miniperl
+    ExtUtils::Mkbootstrap
+    ExtUtils::Mksymlists
+    ExtUtils::MM
+    ExtUtils::MM_Any
+    ExtUtils::MM_BeOS
+    ExtUtils::MM_DOS
+    ExtUtils::MM_NW5
+    ExtUtils::MM_OS2
+    ExtUtils::MM_Unix
+    ExtUtils::MM_UWIN
+    ExtUtils::MM_VMS
+    ExtUtils::MM_Win32
+    ExtUtils::MY
+    ExtUtils::Packlist
+    ExtUtils::testlib
+    Fatal
+    Fcntl
+    fields
+    File::Basename
+    File::CheckTree
+    File::Compare
+    File::Copy
+    File::DosGlob
+    File::Find
+    File::Path
+    File::Spec
+    File::Spec::Cygwin
+    File::Spec::Mac
+    File::Spec::OS2
+    File::Spec::Unix
+    File::Spec::VMS
+    File::Spec::Win32
+    File::stat
+    File::Temp
+    FileCache
+    FileHandle
+    Filter::Simple 
+    Filter::Util::Call
+    FindBin
+    GDBM_File
+    Getopt::Long
+    Getopt::Std
+    Hash::Util
+    I18N::Collate
+    I18N::Langinfo
+    I18N::LangTags
+    I18N::LangTags::List
+    if
+    integer
+    IO
+    IO::File
+    IO::Handle
+    IO::Pipe
+    IO::Seekable
+    IO::Select
+    IO::Socket
+    IPC::Msg
+    IPC::Open2
+    IPC::Open3
+    IPC::Semaphore
+    IPC::SysV
+    less
+    lib
+    List::Util
+    locale
+    Math::BigFloat
+    Math::BigInt
+    Math::BigInt::Calc
+    Math::BigRat
+    Math::Complex
+    Math::Trig
+    MIME::Base64
+    MIME::QuotedPrint
+    NDBM_File
+    Net::Cmd
+    Net::Config
+    Net::Domain
+    Net::FTP
+    Net::hostent
+    Net::netent
+    Net::Netrc
+    Net::NNTP
+    Net::Ping
+    Net::POP3
+    Net::protoent
+    Net::servent
+    Net::SMTP
+    Net::Time
+    O
+    ODBM_File
+    Opcode
+    ops
+    overload
+    PerlIO
+    PerlIO::Scalar
+    PerlIO::Via
+    Pod::Functions
+    Pod::Html
+    Pod::ParseLink
+    Pod::Text
+    POSIX
+    re
+    Safe
+    Scalar::Util
+    SDBM_File
+    Search::Dict
+    SelectSaver
+    SelfLoader
+    Shell
+    sigtrap
+    Socket
+    sort
+    Storable
+    strict
+    subs
+    Switch
+    Symbol
+    Sys::Hostname
+    Sys::Syslog
+    Term::Cap
+    Term::Complete
+    Term::ReadLine
+    Test
+    Test::Builder
+    Test::Harness
+    Test::More
+    Test::Simple
+    Text::Abbrev
+    Text::Balanced
+    Text::ParseWords
+    Text::Soundex
+    Text::Tabs
+    Text::Wrap
+    Thread
+    Thread::Queue
+    Thread::Semaphore
+    Thread::Signal
+    Thread::Specific
+    Tie::Array
+    Tie::StdArray
+    Tie::File
+    Tie::Handle
+    Tie::Hash
+    Tie::Memoize 
+    Tie::RefHash
+    Tie::Scalar
+    Tie::SubstrHash
+    Time::gmtime
+    Time::HiRes
+    Time::Local
+    Time::localtime
+    Time::tm
+    UNIVERSAL
+    User::grent
+    User::pwent
+    utf8
+    vars
+    vmsish
+    XS::Typemap
+));
+
 # When this script is main program
 if ($0 eq __FILE__) {
 
@@ -133,12 +384,63 @@ perl $0 ShiftJIS_script.pl > Escaped_script.pl.e
 END
     }
 
+    print Sjis::escape_script($ARGV[0]);
+    exit 0;
+}
+
+my $__PACKAGE__ = __PACKAGE__;
+my $__FILE__    = __FILE__;
+my($package,$filename,$line,$subroutine,$hasargs,$wantarray,$evaltext,$is_require,$hints,$bitmask) = caller 0;
+
+# called any package not main
+if ($package ne 'main') {
+    croak <<END;
+$__FILE__: escape by manually command '$^X $__FILE__ "$filename" > "$__PACKAGE__::$filename"'
+and rewrite "use $package;" to "use $__PACKAGE__::$package;" of script "$0".
+END
+}
+
+# delete escaped script always while debug
+if (exists $ENV{'SJIS_DEBUG'}) {
+#   print STDERR "$__FILE__: delete $filename.e (\$ENV{'SJIS_DEBUG'}=$ENV{'SJIS_DEBUG'})\n";
+    Esjis::unlink "$filename.e";
+}
+
+# make escaped script
+my $e_script  = '';
+my $e_mtime   = (Esjis::stat("$filename.e"))[9];
+my $mtime     = (Esjis::stat($filename))[9];
+my $__mtime__ = (Esjis::stat($__FILE__))[9];
+if ((not Esjis::e("$filename.e")) or ($e_mtime < $mtime) or ($mtime < $__mtime__)) {
+    my $fh = Symbol::gensym();
+    sysopen($fh, "$filename.e", O_WRONLY | O_TRUNC | O_CREAT) or croak "$__FILE__: Can't open file: $filename.e";
+    print {$fh} Sjis::escape_script($filename);
+    close($fh) or croak "$__FILE__: Can't close file: $filename.e";
+}
+
+# P.565 Cleaning Up Your Environment
+# in Chapter 23: Security
+# of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
+# local $ENV{'PATH'} = '.';
+local @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+
+exit system map {m/ $your_gap [ ] /oxms ? qq{"$_"} : $_} $^X, "$filename.e", @ARGV;
+
+# escape ShiftJIS script
+sub Sjis::escape_script {
+    my($script) = @_;
+    my $e_script = '';
+
     # read ShiftJIS script
+    my $fh = Symbol::gensym();
+    sysopen($fh, $script, O_RDONLY) or croak "$__FILE__: Can't open file: $script";
     local $/ = undef; # slurp mode
-    $_ = <>;
-    if (m/^use Esjis(?:\s+[0-9\.]*)?\s*;$/oxms) {
-        print $_;
-        exit 0;
+    $_ = <$fh>;
+    close($fh) or croak "$__FILE__: Can't close file: $script";
+
+    if (m/^ use Esjis(?:\s+[0-9\.]*)?\s*; $/oxms) {
+        return $_;
     }
     else {
 
@@ -150,19 +452,45 @@ END
         if (m/(.*#\s*line\s+\d+(?:\s*"(?:$q_char)*?")?\s*\n)/omsgc) {
             my $head = $1;
             $head =~ s/\bjperl\b/perl/gi;
-            print $head;
+            $e_script .= $head;
         }
 
         # P.850 use lib
         # in Chapter 31: Pragmatic Modules
         # of ISBN 0-596-00027-8 Programming Perl Third Edition.
 
-        printf(<<'END', $Esjis::VERSION); # require run-time routines version
+        $e_script .= sprintf(<<'END', $Esjis::VERSION); # require run-time routines version
 use FindBin;
 use lib $FindBin::Bin;
 use Esjis %s;
 END
-        s/^ \s* use \s+ Sjis \s* ; \s* \n? $//oxms;
+
+        # use Sjis version qw(ord reverse);
+        use vars qw($function_ord $function_ord_ $function_reverse);
+        $function_ord     = 'ord';
+        $function_ord_    = 'ord';
+        $function_reverse = 'reverse';
+        if (s/^ \s* use \s+ Sjis \s* ([^;]*) ; \s* \n? $//oxms) {
+
+            # require version
+            my $list = $1;
+            if ($list =~ s/\A ([0-9]+(?:\.[0-9]*)) \s* //oxms) {
+                my $version = $1;
+                if ($version > $VERSION) {
+                    croak "$__FILE__: version $version required--this is only version $VERSION";
+                }
+            }
+
+            # demand ord and reverse
+            if ($list !~ m/\A \s* \z/oxms) {
+                my @list = eval $list;
+                for (@list) {
+                    $function_ord     = 'Esjis::ord'     if m/\A ord \z/oxms;
+                    $function_ord_    = 'Esjis::ord_'    if m/\A ord \z/oxms;
+                    $function_reverse = 'Esjis::reverse' if m/\A reverse \z/oxms;
+                }
+            }
+        }
     }
 
     # use Tk; --> use Sjis::Tk::Widget;
@@ -221,106 +549,13 @@ USE_TK
     # of ISBN 0-596-00289-0 Mastering Regular Expressions, Second edition
 
     while (not /\G \z/oxgc) { # member
-        print escape();
+        $e_script .= escape();
     }
-    exit 0;
+
+    return $e_script;
 }
 
-my $__PACKAGE__ = __PACKAGE__;
-my $__FILE__    = __FILE__;
-my($package,$filename,$line,$subroutine,$hasargs,$wantarray,$evaltext,$is_require,$hints,$bitmask) = caller 0;
-
-# called any package not main
-if ($package ne 'main') {
-    croak <<END;
-$__FILE__: escape by manually command '$^X $__FILE__ "$filename" > "$__PACKAGE__::$filename"'
-and rewrite "use $package;" to "use $__PACKAGE__::$package;" of script "$0".
-END
-}
-
-# delete escaped script always while debug
-if (exists $ENV{'SJIS_DEBUG'}) {
-#   print STDERR "$__FILE__: delete $filename.e (\$ENV{'SJIS_DEBUG'}=$ENV{'SJIS_DEBUG'})\n";
-    unlink "$filename.e";
-}
-
-# make escaped script
-my $e_script = '';
-if ((not -e "$filename.e") or (-M "$filename.e" < -M $filename) or (-M $filename < -M $__FILE__)) {
-    open FILE, $filename or croak "$__FILE__: Can't open file: $filename";
-    local $/ = undef; # slurp mode
-    $_ = <FILE>;
-    close FILE or croak "$__FILE__: Can't close file: $filename";
-
-    if (m/\b use \s+ Esjis \s* ; /oxms) {
-        $e_script .= $_;
-    }
-    else {
-        if (m/(.*#\s*line\s+\d+(?:\s*"(?:$q_char)*?")?\s*\n)/omsgc) {
-            my $head = $1;
-            $head =~ s/\bjperl\b/perl/gi;
-            $e_script .= $head;
-        }
-        $e_script .= sprintf(<<'END', $Esjis::VERSION); # require run-time routines version
-use FindBin;
-use lib $FindBin::Bin;
-use Esjis %s;
-END
-        s/^ \s* use \s+ Sjis \s* ; \s* \n? $//oxms;
-
-        # use Tk; --> use Sjis::Tk::Widget;
-        my $tkmodule = '';
-        for my $widget (qw(
-            Button
-            Canvas
-            Checkbutton
-            Entry
-            Frame
-            Label
-            Listbox
-            Message
-            Menu
-            Menubutton
-            Radiobutton
-            Scale
-            Text
-            Toplevel
-        )) {
-            if (m/ $widget /xms) {
-                $tkmodule .= "        eval qq{ use Sjis::Tk::$widget; };\n";
-            }
-        }
-
-        my $use_tk = <<"USE_TK";
-BEGIN {
-    eval qq{ use Sjis::Encode; };
-    if (\$] >= 5.007) {
-$tkmodule
-    }
-    else {
-        eval qq{ use Sjis::Tk::Entry55; };
-    }
-}
-sub MainWindow::title { \$_[0]->wm('title', Sjis::Encode::utf8(\$_[1])); }
-USE_TK
-        s/^ (\s* use \s+ Tk [^:;]* ; \s*? \n) /$1$use_tk/oxmsg;
-        s/^ (\s* use \s+ )(Tk::(?:Ballon|BrowseEntry|ColorEditor|Dialog|DialogBox|DirTree|FileSelect|HList|ROText|Table|TixGrid|TList|Tree) [^:;]* ; \s*? ) \n /BEGIN { eval qq{ $1$2 ${1}Sjis::${2} }};\n/oxmsg;
-        s/^ (\s* use \s+ )(Tk::(?:LabFrame) [^:;]*) ; \s*? \n /BEGIN { eval qq{ $1$2; ${1}Sjis::${2}55; }};\n/oxmsg;
-
-        $slash = 'm//';
-        study $_;
-        while (not /\G \z/oxgc) { # member
-            $e_script .= escape();
-        }
-    }
-    open E_FILE, ">$filename.e" or croak "$__FILE__: Can't open file: $filename.e";
-    print E_FILE $e_script;
-    close E_FILE or croak "$__FILE__: Can't close file: $filename.e";
-}
-
-exit system map {m/ $your_gap [ ] /oxms ? qq{"$_"} : $_} $^X, "$filename.e", @ARGV;
-
-# escape ShiftJIS script
+# escape ShiftJIS part of script
 sub escape {
 
 # \n output here document
@@ -445,12 +680,32 @@ sub escape {
     elsif (m{\G \b rindex \b  (?! \s* => )                    }oxgc) { $slash = 'm//'; return   'Esjis::rindex';       }
     elsif (m{\G \b lc    (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $slash = 'm//'; return   'Esjis::lc';           }
     elsif (m{\G \b uc    (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $slash = 'm//'; return   'Esjis::uc';           }
-    elsif (m{\G    -([rwxoRWXOezsfdlpSbctugkTBMAC])
-                         (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $slash = 'm//'; return   "Esjis::$1";           }
+
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+    \s* (\") ((?:$qq_char)+?)             (\") }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_qq('',  $2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\#) ((?:$qq_char)+?)             (\#) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\() ((?:$qq_paren)+?)            (\)) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\{) ((?:$qq_brace)+?)            (\}) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\[) ((?:$qq_bracket)+?)          (\]) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\<) ((?:$qq_angle)+?)            (\>) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\S) ((?:$qq_char)+?)             (\3) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; }
+
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+    \s* (\') ((?:\\\1|\\\\|$q_char)+?)    (\') }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_q ('',  $2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\#) ((?:\\\#|\\\\|$q_char)+?)    (\#) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\() ((?:\\\)|\\\\|$q_paren)+?)   (\)) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\{) ((?:\\\}|\\\\|$q_brace)+?)   (\}) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\[) ((?:\\\]|\\\\|$q_bracket)+?) (\]) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\<) ((?:\\\>|\\\\|$q_angle)+?)   (\>) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\S) ((?:\\\1|\\\\|$q_char)+?)    (\3) }oxgc) { $slash = 'm//'; return "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; }
+
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s* (\$ \w+(?: ::\w+)* (?: (?: ->)? (?: \( (?:$qq_paren)*? \) | \{ (?:$qq_brace)+? \} | \[ (?:$qq_bracket)+? \] ) )*) }oxgc)
+                                                                                                          { $slash = 'm//'; return "Esjis::$1($2)"; }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) (?= \s+ [a-z]+) }oxgc)                                   { $slash = 'm//'; return "Esjis::$1";     }
+    elsif (m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ (\w+) }oxgc)                                         { $slash = 'm//'; return "Esjis::$1($2)"; }
+
     elsif (m{\G \b lstat (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $slash = 'm//'; return   'Esjis::lstat';        }
     elsif (m{\G \b stat  (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $slash = 'm//'; return   'Esjis::stat';         }
     elsif (m{\G \b chr   (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $slash = 'm//'; return   'Esjis::chr';          }
-    elsif (m{\G \b ord   (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $slash = 'div'; return   'Esjis::ord';          }
+    elsif (m{\G \b ord   (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $slash = 'div'; return   $function_ord;         }
     elsif (m{\G \b glob  (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $slash = 'm//'; return   'Esjis::glob';         }
     elsif (m{\G \b lc \b      (?! \s* => )                    }oxgc) { $slash = 'm//'; return   'Esjis::lc_';          }
     elsif (m{\G \b uc \b      (?! \s* => )                    }oxgc) { $slash = 'm//'; return   'Esjis::uc_';          }
@@ -459,9 +714,9 @@ sub escape {
     elsif (m{\G \b lstat \b   (?! \s* => )                    }oxgc) { $slash = 'm//'; return   'Esjis::lstat_';       }
     elsif (m{\G \b stat \b    (?! \s* => )                    }oxgc) { $slash = 'm//'; return   'Esjis::stat_';        }
     elsif (m{\G \b chr \b     (?! \s* => )                    }oxgc) { $slash = 'm//'; return   'Esjis::chr_';         }
-    elsif (m{\G \b ord \b     (?! \s* => )                    }oxgc) { $slash = 'div'; return   'Esjis::ord_';         }
+    elsif (m{\G \b ord \b     (?! \s* => )                    }oxgc) { $slash = 'div'; return   $function_ord_;        }
     elsif (m{\G \b glob \b    (?! \s* => )                    }oxgc) { $slash = 'm//'; return   'Esjis::glob_';        }
-    elsif (m{\G \b reverse \b (?! \s* => )                    }oxgc) { $slash = 'm//'; return   'Esjis::reverse';      }
+    elsif (m{\G \b reverse \b (?! \s* => )                    }oxgc) { $slash = 'm//'; return   $function_reverse;     }
     elsif (m{\G \b opendir (\s* \( \s*) (?=[A-Za-z_])         }oxgc) { $slash = 'm//'; return   "Esjis::opendir$1*";   }
     elsif (m{\G \b opendir (\s+)        (?=[A-Za-z_])         }oxgc) { $slash = 'm//'; return   "Esjis::opendir$1*";   }
     elsif (m{\G \b unlink \b  (?! \s* => )                    }oxgc) { $slash = 'm//'; return   'Esjis::unlink';       }
@@ -518,17 +773,17 @@ sub escape {
 
 # split qr//
         elsif (/\G \b (qr) \b /oxgc) {
-            if (/\G (\#) ((?:$qq_char)*?) (\#) ([imsox]*) /oxgc)                             { return $e . e_split  ('qr',$1,$3,$2,$4);   } # qr# #
+            if (/\G (\#) ((?:$qq_char)*?) (\#) ([imosxp]*) /oxgc)                             { return $e . e_split  ('qr',$1,$3,$2,$4);   } # qr# #
             else {
                 while (not /\G \z/oxgc) {
-                    if    (/\G (\s+|\#.*)                                             /oxgc) { $e .= $1; }
-                    elsif (/\G (\()               ((?:$qq_paren)*?)   (\)) ([imsox]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # qr ( )
-                    elsif (/\G (\{)               ((?:$qq_brace)*?)   (\}) ([imsox]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # qr { }
-                    elsif (/\G (\[)               ((?:$qq_bracket)*?) (\]) ([imsox]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # qr [ ]
-                    elsif (/\G (\<)               ((?:$qq_angle)*?)   (\>) ([imsox]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # qr < >
-                    elsif (/\G (\')               ((?:$qq_char)*?)    (\') ([imsox]*) /oxgc) { return $e . e_split_q('qr',$1, $3, $2,$4); } # qr ' '
-                    elsif (/\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([imsox]*) /oxgc) { return $e . e_split  ('qr','{','}',$2,$4); } # qr | | --> qr { }
-                    elsif (/\G (\S)               ((?:$qq_char)*?)    (\1) ([imsox]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # qr * *
+                    if    (/\G (\s+|\#.*)                                              /oxgc) { $e .= $1; }
+                    elsif (/\G (\()               ((?:$qq_paren)*?)   (\)) ([imosxp]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # qr ( )
+                    elsif (/\G (\{)               ((?:$qq_brace)*?)   (\}) ([imosxp]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # qr { }
+                    elsif (/\G (\[)               ((?:$qq_bracket)*?) (\]) ([imosxp]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # qr [ ]
+                    elsif (/\G (\<)               ((?:$qq_angle)*?)   (\>) ([imosxp]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # qr < >
+                    elsif (/\G (\')               ((?:$qq_char)*?)    (\') ([imosxp]*) /oxgc) { return $e . e_split_q('qr',$1, $3, $2,$4); } # qr ' '
+                    elsif (/\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([imosxp]*) /oxgc) { return $e . e_split  ('qr','{','}',$2,$4); } # qr | | --> qr { }
+                    elsif (/\G (\S)               ((?:$qq_char)*?)    (\1) ([imosxp]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # qr * *
                 }
                 croak "$__FILE__: Can't find string terminator anywhere before EOF";
             }
@@ -553,17 +808,17 @@ sub escape {
 
 # split m//
         elsif (/\G \b (m) \b /oxgc) {
-            if (/\G (\#) ((?:$qq_char)*?) (\#) ([cgimosx]*) /oxgc)                             { return $e . e_split  ('qr',$1,$3,$2,$4);   } # m# #  --> qr # #
+            if (/\G (\#) ((?:$qq_char)*?) (\#) ([cgimosxp]*) /oxgc)                             { return $e . e_split  ('qr',$1,$3,$2,$4);   } # m# #  --> qr # #
             else {
                 while (not /\G \z/oxgc) {
-                    if    (/\G (\s+|\#.*)                                               /oxgc) { $e .= $1; }
-                    elsif (/\G (\()               ((?:$qq_paren)*?)   (\)) ([cgimosx]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # m ( ) --> qr ( )
-                    elsif (/\G (\{)               ((?:$qq_brace)*?)   (\}) ([cgimosx]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # m { } --> qr { }
-                    elsif (/\G (\[)               ((?:$qq_bracket)*?) (\]) ([cgimosx]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # m [ ] --> qr [ ]
-                    elsif (/\G (\<)               ((?:$qq_angle)*?)   (\>) ([cgimosx]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # m < > --> qr < >
-                    elsif (/\G (\')               ((?:$qq_char)*?)    (\') ([cgimosx]*) /oxgc) { return $e . e_split_q('qr',$1, $3, $2,$4); } # m ' ' --> qr ' '
-                    elsif (/\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([cgimosx]*) /oxgc) { return $e . e_split  ('qr','{','}',$2,$4); } # m | | --> qr { }
-                    elsif (/\G (\S)               ((?:$qq_char)*?)    (\1) ([cgimosx]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # m * * --> qr * *
+                    if    (/\G (\s+|\#.*)                                                /oxgc) { $e .= $1; }
+                    elsif (/\G (\()               ((?:$qq_paren)*?)   (\)) ([cgimosxp]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # m ( ) --> qr ( )
+                    elsif (/\G (\{)               ((?:$qq_brace)*?)   (\}) ([cgimosxp]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # m { } --> qr { }
+                    elsif (/\G (\[)               ((?:$qq_bracket)*?) (\]) ([cgimosxp]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # m [ ] --> qr [ ]
+                    elsif (/\G (\<)               ((?:$qq_angle)*?)   (\>) ([cgimosxp]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # m < > --> qr < >
+                    elsif (/\G (\')               ((?:$qq_char)*?)    (\') ([cgimosxp]*) /oxgc) { return $e . e_split_q('qr',$1, $3, $2,$4); } # m ' ' --> qr ' '
+                    elsif (/\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([cgimosxp]*) /oxgc) { return $e . e_split  ('qr','{','}',$2,$4); } # m | | --> qr { }
+                    elsif (/\G (\S)               ((?:$qq_char)*?)    (\1) ([cgimosxp]*) /oxgc) { return $e . e_split  ('qr',$1, $3, $2,$4); } # m * * --> qr * *
                 }
                 croak "$__FILE__: Search pattern not terminated";
             }
@@ -597,10 +852,10 @@ sub escape {
         elsif (/\G (\/) /oxgc) {
             my $regexp = '';
             while (not /\G \z/oxgc) {
-                if    (/\G (\\\\)          /oxgc) { $regexp .= $1; }
-                elsif (/\G (\\\/)          /oxgc) { $regexp .= $1; }                           # splitqr// --> split qr//
-                elsif (/\G \/ ([cgimosx]*) /oxgc)                                              { return $e . e_split(q{ qr}, '/','/',$regexp,$1); } # / / --> qr / /
-                elsif (/\G ($q_char)       /oxgc) { $regexp .= $1; }
+                if    (/\G (\\\\)           /oxgc) { $regexp .= $1; }
+                elsif (/\G (\\\/)           /oxgc) { $regexp .= $1; }                          # splitqr// --> split qr//
+                elsif (/\G \/ ([cgimosxp]*) /oxgc)                                             { return $e . e_split(q{ qr}, '/','/',$regexp,$1); } # / / --> qr / /
+                elsif (/\G ($q_char)        /oxgc) { $regexp .= $1; }
             }
             croak "$__FILE__: Search pattern not terminated";
         }
@@ -793,20 +1048,20 @@ sub escape {
 # qr//
     elsif (/\G \b (qr) \b /oxgc) {
         my $ope = $1;
-        if (/\G (\#) ((?:$qq_char)*?) (\#) ([imsox]*) /oxgc) { # qr# # #
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ([imosxp]*) /oxgc) { # qr# # #
             return e_qr($ope,$1,$3,$2,$4);
         }
         else {
             my $e = '';
             while (not /\G \z/oxgc) {
-                if    (/\G (\s+|\#.*)                                             /oxgc) { $e .= $1; }
-                elsif (/\G (\()               ((?:$qq_paren)*?)   (\)) ([imsox]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr ( )
-                elsif (/\G (\{)               ((?:$qq_brace)*?)   (\}) ([imsox]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr { }
-                elsif (/\G (\[)               ((?:$qq_bracket)*?) (\]) ([imsox]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr [ ]
-                elsif (/\G (\<)               ((?:$qq_angle)*?)   (\>) ([imsox]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr < >
-                elsif (/\G (\')               ((?:$qq_char)*?)    (\') ([imsox]*) /oxgc) { return $e . e_qr_q($ope,$1, $3, $2,$4); } # qr ' '
-                elsif (/\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([imsox]*) /oxgc) { return $e . e_qr  ($ope,'{','}',$2,$4); } # qr | | --> qr { }
-                elsif (/\G (\S)               ((?:$qq_char)*?)    (\1) ([imsox]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr * *
+                if    (/\G (\s+|\#.*)                                              /oxgc) { $e .= $1; }
+                elsif (/\G (\()               ((?:$qq_paren)*?)   (\)) ([imosxp]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr ( )
+                elsif (/\G (\{)               ((?:$qq_brace)*?)   (\}) ([imosxp]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr { }
+                elsif (/\G (\[)               ((?:$qq_bracket)*?) (\]) ([imosxp]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr [ ]
+                elsif (/\G (\<)               ((?:$qq_angle)*?)   (\>) ([imosxp]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr < >
+                elsif (/\G (\')               ((?:$qq_char)*?)    (\') ([imosxp]*) /oxgc) { return $e . e_qr_q($ope,$1, $3, $2,$4); } # qr ' '
+                elsif (/\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([imosxp]*) /oxgc) { return $e . e_qr  ($ope,'{','}',$2,$4); } # qr | | --> qr { }
+                elsif (/\G (\S)               ((?:$qq_char)*?)    (\1) ([imosxp]*) /oxgc) { return $e . e_qr  ($ope,$1, $3, $2,$4); } # qr * *
             }
             croak "$__FILE__: Can't find string terminator anywhere before EOF";
         }
@@ -971,20 +1226,20 @@ sub escape {
 # m//
     elsif (/\G \b (m) \b /oxgc) {
         my $ope = $1;
-        if (/\G (\#) ((?:$qq_char)*?) (\#) ([cgimosx]*) /oxgc) { # m# #
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ([cgimosxp]*) /oxgc) { # m# #
             return e_m($ope,$1,$3,$2,$4);
         }
         else {
             my $e = '';
             while (not /\G \z/oxgc) {
-                if    (/\G (\s+|\#.*)                                               /oxgc) { $e .= $1; }
-                elsif (/\G (\()               ((?:$qq_paren)*?)   (\)) ([cgimosx]*) /oxgc) { return $e . e_m  ($ope,$1, $3, $2,$4); } # m ( )
-                elsif (/\G (\{)               ((?:$qq_brace)*?)   (\}) ([cgimosx]*) /oxgc) { return $e . e_m  ($ope,$1, $3, $2,$4); } # m { }
-                elsif (/\G (\[)               ((?:$qq_bracket)*?) (\]) ([cgimosx]*) /oxgc) { return $e . e_m  ($ope,$1, $3, $2,$4); } # m [ ]
-                elsif (/\G (\<)               ((?:$qq_angle)*?)   (\>) ([cgimosx]*) /oxgc) { return $e . e_m  ($ope,$1, $3, $2,$4); } # m < >
-                elsif (/\G (\')               ((?:$qq_char)*?)    (\') ([cgimosx]*) /oxgc) { return $e . e_m_q($ope,$1, $3, $2,$4); } # m ' '
-                elsif (/\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([cgimosx]*) /oxgc) { return $e . e_m  ($ope,'{','}',$2,$4); } # m | | --> m { }
-                elsif (/\G (\S)               ((?:$qq_char)*?)    (\1) ([cgimosx]*) /oxgc) { return $e . e_m  ($ope,$1, $3, $2,$4); } # m * *
+                if    (/\G (\s+|\#.*)                                                /oxgc) { $e .= $1; }
+                elsif (/\G (\()               ((?:$qq_paren)*?)   (\)) ([cgimosxp]*) /oxgc) { return $e . e_m  ($ope,$1, $3, $2,$4); } # m ( )
+                elsif (/\G (\{)               ((?:$qq_brace)*?)   (\}) ([cgimosxp]*) /oxgc) { return $e . e_m  ($ope,$1, $3, $2,$4); } # m { }
+                elsif (/\G (\[)               ((?:$qq_bracket)*?) (\]) ([cgimosxp]*) /oxgc) { return $e . e_m  ($ope,$1, $3, $2,$4); } # m [ ]
+                elsif (/\G (\<)               ((?:$qq_angle)*?)   (\>) ([cgimosxp]*) /oxgc) { return $e . e_m  ($ope,$1, $3, $2,$4); } # m < >
+                elsif (/\G (\')               ((?:$qq_char)*?)    (\') ([cgimosxp]*) /oxgc) { return $e . e_m_q($ope,$1, $3, $2,$4); } # m ' '
+                elsif (/\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([cgimosxp]*) /oxgc) { return $e . e_m  ($ope,'{','}',$2,$4); } # m | | --> m { }
+                elsif (/\G (\S)               ((?:$qq_char)*?)    (\1) ([cgimosxp]*) /oxgc) { return $e . e_m  ($ope,$1, $3, $2,$4); } # m * *
             }
             croak "$__FILE__: Search pattern not terminated";
         }
@@ -992,7 +1247,7 @@ sub escape {
 
 # s///
 
-    # about [cegimosx]* (/cg modifier)
+    # about [cegimosxp]* (/cg modifier)
     #
     # P.67 in Pattern-Matching Operators
     # of ISBN 0-596-00241-6 Perl in a Nutshell, Second Edition.
@@ -1001,7 +1256,7 @@ sub escape {
         my $ope = $1;
 
         #        $1   $2               $3   $4               $5   $6
-        if (/\G (\#) ((?:$qq_char)*?) (\#) ((?:$qq_char)*?) (\#) ([cegimosx]*) /oxgc) { # s# # #
+        if (/\G (\#) ((?:$qq_char)*?) (\#) ((?:$qq_char)*?) (\#) ([cegimosxp]*) /oxgc) { # s# # #
             my @s = ($ope,$1,$3,$2);
             return e_s1(@s,$6) . e_s2('',$5,$4,$6);
         }
@@ -1012,86 +1267,86 @@ sub escape {
                 elsif (/\G (\() ((?:$qq_paren)*?) (\)) /oxgc) {
                     my @s = ($ope,$1,$3,$2);
                     while (not /\G \z/oxgc) {
-                        if    (/\G (\s+|\#.*)                                  /oxgc) { $e .= $1; }
+                        if    (/\G (\s+|\#.*)                                   /oxgc) { $e .= $1; }
                         #           $1   $2                  $3   $4
-                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s ( ) ( )
-                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s ( ) { } --> s ( ) < >
-                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s ( ) [ ] --> s ( ) < >
-                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s ( ) < >
-                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_q  ('"','"',$2,$4);} # s ( ) ' ' --> s ( ) " "
-                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_dol('"','"',$2,$4);} # s ( ) $ $ --> s ( ) " "
-                        elsif (/\G (\:) ((?:$qq_char)*?)    (\:) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s ( ) : : --> s ( ) < >
-                        elsif (/\G (\@) ((?:$qq_char)*?)    (\@) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s ( ) @ @ --> s ( ) < >
-                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s ( ) * *
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s ( ) ( )
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s ( ) { } --> s ( ) < >
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s ( ) [ ] --> s ( ) < >
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s ( ) < >
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_q  ('"','"',$2,$4);} # s ( ) ' ' --> s ( ) " "
+                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_dol('"','"',$2,$4);} # s ( ) $ $ --> s ( ) " "
+                        elsif (/\G (\:) ((?:$qq_char)*?)    (\:) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s ( ) : : --> s ( ) < >
+                        elsif (/\G (\@) ((?:$qq_char)*?)    (\@) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s ( ) @ @ --> s ( ) < >
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s ( ) * *
                     }
                     croak "$__FILE__: Substitution replacement not terminated";
                 }
                 elsif (/\G (\{) ((?:$qq_brace)*?) (\}) /oxgc) {
                     my @s = ($ope,$1,$3,$2);
                     while (not /\G \z/oxgc) {
-                        if    (/\G (\s+|\#.*)                                  /oxgc) { $e .= $1; }
+                        if    (/\G (\s+|\#.*)                                   /oxgc) { $e .= $1; }
                         #           $1   $2                  $3   $4
-                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s { } ( )
-                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s { } { } --> s { } < >
-                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s { } [ ] --> s { } < >
-                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s { } < >
-                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_q  ('"','"',$2,$4);} # s { } ' ' --> s { } " "
-                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_dol('"','"',$2,$4);} # s { } $ $ --> s { } " "
-                        elsif (/\G (\:) ((?:$qq_char)*?)    (\:) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s { } : : --> s { } < >
-                        elsif (/\G (\@) ((?:$qq_char)*?)    (\@) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s { } @ @ --> s { } < >
-                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s { } * *
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s { } ( )
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s { } { } --> s { } < >
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s { } [ ] --> s { } < >
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s { } < >
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_q  ('"','"',$2,$4);} # s { } ' ' --> s { } " "
+                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_dol('"','"',$2,$4);} # s { } $ $ --> s { } " "
+                        elsif (/\G (\:) ((?:$qq_char)*?)    (\:) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s { } : : --> s { } < >
+                        elsif (/\G (\@) ((?:$qq_char)*?)    (\@) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s { } @ @ --> s { } < >
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s { } * *
                     }
                     croak "$__FILE__: Substitution replacement not terminated";
                 }
                 elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) /oxgc) {
                     my @s = ($ope,$1,$3,$2);
                     while (not /\G \z/oxgc) {
-                        if    (/\G (\s+|\#.*)                                  /oxgc) { $e .= $1; }
+                        if    (/\G (\s+|\#.*)                                   /oxgc) { $e .= $1; }
                         #           $1   $2                  $3   $4
-                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s [ ] ( )
-                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s [ ] { }
-                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s [ ] [ ]
-                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s [ ] < >
-                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_q  ('"','"',$2,$4);} # s [ ] ' ' --> s [ ] " "
-                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_dol('"','"',$2,$4);} # s [ ] $ $ --> s [ ] " "
-                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s [ ] * *
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s [ ] ( )
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s [ ] { }
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s [ ] [ ]
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s [ ] < >
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_q  ('"','"',$2,$4);} # s [ ] ' ' --> s [ ] " "
+                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_dol('"','"',$2,$4);} # s [ ] $ $ --> s [ ] " "
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s [ ] * *
                     }
                     croak "$__FILE__: Substitution replacement not terminated";
                 }
                 elsif (/\G (\<) ((?:$qq_angle)*?) (\>) /oxgc) {
                     my @s = ($ope,$1,$3,$2);
                     while (not /\G \z/oxgc) {
-                        if    (/\G (\s+|\#.*)                                  /oxgc) { $e .= $1; }
+                        if    (/\G (\s+|\#.*)                                   /oxgc) { $e .= $1; }
                         #           $1   $2                  $3   $4
-                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s < > ( )
-                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s < > { } --> s < > < >
-                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s < > [ ] --> s < > < >
-                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s < > < >
-                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_q  ('"','"',$2,$4);} # s < > ' ' --> s < > " "
-                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_dol('"','"',$2,$4);} # s < > $ $ --> s < > " "
-                        elsif (/\G (\:) ((?:$qq_char)*?)    (\:) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s < > : : --> s < > < >
-                        elsif (/\G (\@) ((?:$qq_char)*?)    (\@) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s < > @ @ --> s < > < >
-                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosx]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s < > * *
+                        elsif (/\G (\() ((?:$qq_paren)*?)   (\)) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s < > ( )
+                        elsif (/\G (\{) ((?:$qq_brace)*?)   (\}) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s < > { } --> s < > < >
+                        elsif (/\G (\[) ((?:$qq_bracket)*?) (\]) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s < > [ ] --> s < > < >
+                        elsif (/\G (\<) ((?:$qq_angle)*?)   (\>) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s < > < >
+                        elsif (/\G (\') ((?:$qq_char)*?)    (\') ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_q  ('"','"',$2,$4);} # s < > ' ' --> s < > " "
+                        elsif (/\G (\$) ((?:$qq_char)*?)    (\$) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2_dol('"','"',$2,$4);} # s < > $ $ --> s < > " "
+                        elsif (/\G (\:) ((?:$qq_char)*?)    (\:) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s < > : : --> s < > < >
+                        elsif (/\G (\@) ((?:$qq_char)*?)    (\@) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ('<','>',$2,$4);} # s < > @ @ --> s < > < >
+                        elsif (/\G (\S) ((?:$qq_char)*?)    (\1) ([cegimosxp]*) /oxgc) { return e_s1(@s,$4) . $e . e_s2    ($1,$3,$2,$4);  } # s < > * *
                     }
                     croak "$__FILE__: Substitution replacement not terminated";
                 }
                 #           $1   $2               $3   $4               $5   $6
-                elsif (/\G (\') ((?:$qq_char)*?) (\') ((?:$qq_char)*?) (\') ([cegimosx]*) /oxgc) { # s ' ' ' --> s " " "
+                elsif (/\G (\') ((?:$qq_char)*?) (\') ((?:$qq_char)*?) (\') ([cegimosxp]*) /oxgc) { # s ' ' ' --> s " " "
                     my @s = ($ope,'"','"',$2);
                     return $e . e_s1_q(@s,$6) . e_s2_q('','"',$4,$6);
                 }
                 #           $1                 $2               $3   $4               $5   $6
-                elsif (/\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?) (\1) ((?:$qq_char)*?) (\1) ([cegimosx]*) /oxgc) { # s | | | --> s { } { }
+                elsif (/\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?) (\1) ((?:$qq_char)*?) (\1) ([cegimosxp]*) /oxgc) { # s | | | --> s { } { }
                     my @s = ($ope,'{','}',$2);
                     return $e . e_s1(@s,$6) . e_s2('{','}',$4,$6);
                 }
                 #           $1   $2               $3   $4               $5   $6
-                elsif (/\G (\$) ((?:$qq_char)*?) (\1) ((?:$qq_char)*?) (\1) ([cegimosx]*) /oxgc) { # s $ $ $ --> s " " "
+                elsif (/\G (\$) ((?:$qq_char)*?) (\1) ((?:$qq_char)*?) (\1) ([cegimosxp]*) /oxgc) { # s $ $ $ --> s " " "
                     my @s = ($ope,'"','"',$2);
                     return $e . e_s1_dol(@s,$6) . e_s2_dol('','"',$4,$6);
                 }
                 #           $1   $2               $3   $4               $5   $6
-                elsif (/\G (\S) ((?:$qq_char)*?) (\1) ((?:$qq_char)*?) (\1) ([cegimosx]*) /oxgc) { # s * * *
+                elsif (/\G (\S) ((?:$qq_char)*?) (\1) ((?:$qq_char)*?) (\1) ([cegimosxp]*) /oxgc) { # s * * *
                     my @s = ($ope,$1,$3,$2);
                     return $e . e_s1(@s,$6) . e_s2('',$5,$4,$6);
                 }
@@ -1100,27 +1355,54 @@ sub escape {
         }
     }
 
-# do ''
-    elsif (/\G \b (do) \s* ' ((?:$your_char)+?) ' /oxgc) {
-        my $path = $2;
-        if (MSWin32_5Cended_path($path)) {
-            return qq{do '$path.'};
-        }
-        else {
-            return qq{do '$path'};
-        }
-    }
+# do
+    elsif (/\G \b do (?= \s* \{ )                    /oxmsgc) { return 'do';        }
+    elsif (/\G \b do (?= \s+ (?: q|qq|qx) \b)        /oxmsgc) { return 'Esjis::do'; }
+    elsif (/\G \b do (?= \s+ \w+)                    /oxmsgc) { return 'do';        }
+    elsif (/\G \b do (?= \s* \$ \w+ (?: ::\w+)* \( ) /oxmsgc) { return 'do';        }
+    elsif (/\G \b do \b                              /oxmsgc) { return 'Esjis::do'; }
 
-# require ''
-    elsif (/\G \b (require) \s* ' ((?:$your_char)+?) ' /oxgc) {
-        my $path = $2;
-        if (MSWin32_5Cended_path($path)) {
-            return qq{require '$path.'};
-        }
-        else {
-            return qq{require '$path'};
-        }
-    }
+# require ignore module
+    elsif (/\G \b require \s+ ($ignore_modules) \b              /oxmsgc) { return "# require $1";    }
+
+# require standard module
+    elsif (/\G \b require \s+ ($standard_modules) \b            /oxmsgc) { return "require $1";      }
+
+# require
+    elsif (/\G \b require \s+ (v? [0-9]+(?: [._][0-9]+)*) \s* ; /oxmsgc) { return "require $1;";     }
+    elsif (/\G \b require \s+ (\w+(?: ::\w+)*)            \s* ; /oxmsgc) { return e_require($1);     }
+    elsif (/\G \b require                                 \s* ; /oxmsgc) { return 'Esjis::require;'; }
+    elsif (/\G \b require \b                                    /oxmsgc) { return 'Esjis::require';  }
+
+# use ignore module
+    elsif (/\G \b use \s+ ($ignore_modules) \b                                        /oxmsgc) { return "# use $1";         }
+
+# use standard module
+    elsif (/\G \b use \s+ ($standard_modules) \b                                      /oxmsgc) { return "use $1";           }
+
+# use without import
+    elsif (/\G \b use \s+ (v? [0-9]+(?: [._][0-9]+)*)                           \s* ; /oxmsgc) { return "use $1;";          }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s*        (\()          \s* \) \s* ; /oxmsgc) { return e_use_noimport($1); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ qw \s* (\()          \s* \) \s* ; /oxmsgc) { return e_use_noimport($1); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ qw \s* (\{)          \s* \} \s* ; /oxmsgc) { return e_use_noimport($1); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ qw \s* (\[)          \s* \] \s* ; /oxmsgc) { return e_use_noimport($1); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ qw \s* (\<)          \s* \> \s* ; /oxmsgc) { return e_use_noimport($1); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ qw \s* ([\x21-\x3F]) \s* \2 \s* ; /oxmsgc) { return e_use_noimport($1); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ qw \s* (\S)          \s* \2 \s* ; /oxmsgc) { return e_use_noimport($1); }
+
+# use with import no parameter
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*)                                 \s* ; /oxmsgc) { return e_use_noparam($1);  }
+
+# use with import parameters
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s* (                (\()          [^)]*         \)) \s* ; /oxmsgc) { return e_use($1,$2); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s* (                (\')          [^']*         \') \s* ; /oxmsgc) { return e_use($1,$2); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s* (                (\")          [^"]*         \") \s* ; /oxmsgc) { return e_use($1,$2); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ ((?:q|qq|qw) \s* (\()          [^)]*         \)) \s* ; /oxmsgc) { return e_use($1,$2); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ ((?:q|qq|qw) \s* (\{)          (?:$q_char)*? \}) \s* ; /oxmsgc) { return e_use($1,$2); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ ((?:q|qq|qw) \s* (\[)          (?:$q_char)*? \]) \s* ; /oxmsgc) { return e_use($1,$2); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ ((?:q|qq|qw) \s* (\<)          [^>]*         \>) \s* ; /oxmsgc) { return e_use($1,$2); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ ((?:q|qq|qw) \s* ([\x21-\x3F]) .*?           \3) \s* ; /oxmsgc) { return e_use($1,$2); }
+    elsif (/\G \b use \s+ ([A-Z]\w*(?: ::\w+)*) \s+ ((?:q|qq|qw) \s* (\S)          (?:$q_char)*? \3) \s* ; /oxmsgc) { return e_use($1,$2); }
 
 # ''
     elsif (/\G (?<![\w\$\@\%\&\*]) (\') /oxgc) {
@@ -1132,28 +1414,6 @@ sub escape {
             elsif (/\G ($q_char) /oxgc)            { $q_string .= $1;                   }
         }
         croak "$__FILE__: Can't find string terminator anywhere before EOF";
-    }
-
-# do ""
-    elsif (/\G \b (do) \s* " ((?:$your_char)+?) " /oxgc) {
-        my $path = $2;
-        if (MSWin32_5Cended_path($path)) {
-            return qq{do "$path."};
-        }
-        else {
-            return qq{do "$path"};
-        }
-    }
-
-# require ""
-    elsif (/\G \b (require) \s* " ((?:$your_char)+?) " /oxgc) {
-        my $path = $2;
-        if (MSWin32_5Cended_path($path)) {
-            return qq{require "$path."};
-        }
-        else {
-            return qq{require "$path"};
-        }
     }
 
 # ""
@@ -1184,10 +1444,10 @@ sub escape {
     elsif (($slash eq 'm//') and /\G (\/) /oxgc) {
         my $regexp = '';
         while (not /\G \z/oxgc) {
-            if    (/\G (\\\\)          /oxgc)      { $regexp .= $1;                       }
-            elsif (/\G (\\\/)          /oxgc)      { $regexp .= $1;                       }
-            elsif (/\G \/ ([cgimosx]*) /oxgc)      { return e_m ('', '/','/',$regexp,$1); }
-            elsif (/\G ($q_char)       /oxgc)      { $regexp .= $1;                       }
+            if    (/\G (\\\\)           /oxgc)     { $regexp .= $1;                       }
+            elsif (/\G (\\\/)           /oxgc)     { $regexp .= $1;                       }
+            elsif (/\G \/ ([cgimosxp]*) /oxgc)     { return e_m ('', '/','/',$regexp,$1); }
+            elsif (/\G ($q_char)        /oxgc)     { $regexp .= $1;                       }
         }
         croak "$__FILE__: Search pattern not terminated";
     }
@@ -1196,10 +1456,10 @@ sub escape {
     elsif (($slash eq 'm//') and /\G (\?) /oxgc) {
         my $regexp = '';
         while (not /\G \z/oxgc) {
-            if    (/\G (\\\\)          /oxgc)      { $regexp .= $1;                       }
-            elsif (/\G (\\\?)          /oxgc)      { $regexp .= $1;                       }
-            elsif (/\G \? ([cgimosx]*) /oxgc)      { return e_m ('', '?','?',$regexp,$1); }
-            elsif (/\G ($q_char)       /oxgc)      { $regexp .= $1;                       }
+            if    (/\G (\\\\)           /oxgc)     { $regexp .= $1;                       }
+            elsif (/\G (\\\?)           /oxgc)     { $regexp .= $1;                       }
+            elsif (/\G \? ([cgimosxp]*) /oxgc)     { return e_m ('', '?','?',$regexp,$1); }
+            elsif (/\G ($q_char)        /oxgc)     { $regexp .= $1;                       }
         }
         croak "$__FILE__: Search pattern not terminated";
     }
@@ -1350,7 +1610,7 @@ sub escape {
     # any operator before m//
     elsif (/\G (
 
-            != | !~ | ! |
+            !~~ | !~ | != | ! |
             %= | % |
             &&= | && | &= | & |
             -= | -> | - |
@@ -1434,12 +1694,32 @@ E_STRING_LOOP:
         elsif ($string =~ m{\G \b rindex \b                                  }oxgc) { $e_string .=   'Esjis::rindex';        $slash = 'm//'; }
         elsif ($string =~ m{\G \b lc    (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $e_string .=   'Esjis::lc';            $slash = 'm//'; }
         elsif ($string =~ m{\G \b uc    (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $e_string .=   'Esjis::uc';            $slash = 'm//'; }
-        elsif ($string =~ m{\G    -([rwxoRWXOezsfdlpSbctugkTBMAC])
-                                        (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $e_string .=   "Esjis::$1";            $slash = 'm//'; }
+
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+    \s* (\") ((?:$qq_char)+?)             (\") }oxgc) { $e_string .= "Esjis::$1(" . e_qq('',  $2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\#) ((?:$qq_char)+?)             (\#) }oxgc) { $e_string .= "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\() ((?:$qq_paren)+?)            (\)) }oxgc) { $e_string .= "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\{) ((?:$qq_brace)+?)            (\}) }oxgc) { $e_string .= "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\[) ((?:$qq_bracket)+?)          (\]) }oxgc) { $e_string .= "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\<) ((?:$qq_angle)+?)            (\>) }oxgc) { $e_string .= "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ qq \s* (\S) ((?:$qq_char)+?)             (\3) }oxgc) { $e_string .= "Esjis::$1(" . e_qq('qq',$2,$4,$3) . ")"; $slash = 'm//'; }
+
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+    \s* (\') ((?:\\\1|\\\\|$q_char)+?)    (\') }oxgc) { $e_string .= "Esjis::$1(" . e_q ('',  $2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\#) ((?:\\\#|\\\\|$q_char)+?)    (\#) }oxgc) { $e_string .= "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\() ((?:\\\)|\\\\|$q_paren)+?)   (\)) }oxgc) { $e_string .= "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\{) ((?:\\\}|\\\\|$q_brace)+?)   (\}) }oxgc) { $e_string .= "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\[) ((?:\\\]|\\\\|$q_bracket)+?) (\]) }oxgc) { $e_string .= "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\<) ((?:\\\>|\\\\|$q_angle)+?)   (\>) }oxgc) { $e_string .= "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ q  \s* (\S) ((?:\\\1|\\\\|$q_char)+?)    (\3) }oxgc) { $e_string .= "Esjis::$1(" . e_q ('q', $2,$4,$3) . ")"; $slash = 'm//'; }
+
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s* (\$ \w+(?: ::\w+)* (?: (?: ->)? (?: \( (?:$qq_paren)*? \) | \{ (?:$qq_brace)+? \} | \[ (?:$qq_bracket)+? \] ) )*) }oxgc)
+                                                                                                                         { $e_string .= "Esjis::$1($2)"; $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) (?= \s+ [a-z]+) }oxgc)                                   { $e_string .= "Esjis::$1";     $slash = 'm//'; }
+        elsif ($string =~ m{\G -([rwxoRWXOezsfdlpSbctugkTBMAC]) \s+ (\w+) }oxgc)                                         { $e_string .= "Esjis::$1($2)"; $slash = 'm//'; }
+
         elsif ($string =~ m{\G \b lstat (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $e_string .=   'Esjis::lstat';         $slash = 'm//'; }
         elsif ($string =~ m{\G \b stat  (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $e_string .=   'Esjis::stat';          $slash = 'm//'; }
         elsif ($string =~ m{\G \b chr   (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $e_string .=   'Esjis::chr';           $slash = 'm//'; }
-        elsif ($string =~ m{\G \b ord   (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $e_string .=   'Esjis::ord';           $slash = 'div'; }
+        elsif ($string =~ m{\G \b ord   (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $e_string .=   $function_ord;          $slash = 'div'; }
         elsif ($string =~ m{\G \b glob  (?= \s+[A-Za-z_]|\s*['"`\$\@\&\*\(]) }oxgc) { $e_string .=   'Esjis::glob';          $slash = 'm//'; }
         elsif ($string =~ m{\G \b lc \b                                      }oxgc) { $e_string .=   'Esjis::lc_';           $slash = 'm//'; }
         elsif ($string =~ m{\G \b uc \b                                      }oxgc) { $e_string .=   'Esjis::uc_';           $slash = 'm//'; }
@@ -1447,9 +1727,9 @@ E_STRING_LOOP:
         elsif ($string =~ m{\G \b lstat \b                                   }oxgc) { $e_string .=   'Esjis::lstat_';        $slash = 'm//'; }
         elsif ($string =~ m{\G \b stat \b                                    }oxgc) { $e_string .=   'Esjis::stat_';         $slash = 'm//'; }
         elsif ($string =~ m{\G \b chr \b                                     }oxgc) { $e_string .=   'Esjis::chr_';          $slash = 'm//'; }
-        elsif ($string =~ m{\G \b ord \b                                     }oxgc) { $e_string .=   'Esjis::ord_';          $slash = 'div'; }
+        elsif ($string =~ m{\G \b ord \b                                     }oxgc) { $e_string .=   $function_ord_;         $slash = 'div'; }
         elsif ($string =~ m{\G \b glob \b                                    }oxgc) { $e_string .=   'Esjis::glob_';         $slash = 'm//'; }
-        elsif ($string =~ m{\G \b reverse \b                                 }oxgc) { $e_string .=   'Esjis::reverse';       $slash = 'm//'; }
+        elsif ($string =~ m{\G \b reverse \b                                 }oxgc) { $e_string .=   $function_reverse;      $slash = 'm//'; }
         elsif ($string =~ m{\G \b opendir (\s* \( \s*) (?=[A-Za-z_])         }oxgc) { $e_string .=   "Esjis::opendir$1*";    $slash = 'm//'; }
         elsif ($string =~ m{\G \b opendir (\s+)        (?=[A-Za-z_])         }oxgc) { $e_string .=   "Esjis::opendir$1*";    $slash = 'm//'; }
         elsif ($string =~ m{\G \b unlink \b                                  }oxgc) { $e_string .=   'Esjis::unlink';        $slash = 'm//'; }
@@ -1506,17 +1786,17 @@ E_STRING_LOOP:
 
 # split qr//
             elsif ($string =~ /\G \b (qr) \b /oxgc) {
-                if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) ([imsox]*) /oxgc)                             { $e_string .= e_split  ('qr',$1,$3,$2,$4);   next E_STRING_LOOP; } # qr# #
+                if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) ([imosxp]*) /oxgc)                             { $e_string .= e_split  ('qr',$1,$3,$2,$4);   next E_STRING_LOOP; } # qr# #
                 else {
                     while ($string !~ /\G \z/oxgc) {
-                        if    ($string =~ /\G (\s+|\#.*)                                             /oxgc) { $e_string .= $1; }
-                        elsif ($string =~ /\G (\()               ((?:$qq_paren)*?)   (\)) ([imsox]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr ( )
-                        elsif ($string =~ /\G (\{)               ((?:$qq_brace)*?)   (\}) ([imsox]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr { }
-                        elsif ($string =~ /\G (\[)               ((?:$qq_bracket)*?) (\]) ([imsox]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr [ ]
-                        elsif ($string =~ /\G (\<)               ((?:$qq_angle)*?)   (\>) ([imsox]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr < >
-                        elsif ($string =~ /\G (\')               ((?:$qq_char)*?)    (\') ([imsox]*) /oxgc) { $e_string .= e_split_q('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr ' '
-                        elsif ($string =~ /\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([imsox]*) /oxgc) { $e_string .= e_split  ('qr','{','}',$2,$4); next E_STRING_LOOP; } # qr | | --> qr { }
-                        elsif ($string =~ /\G (\S)               ((?:$qq_char)*?)    (\1) ([imsox]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr * *
+                        if    ($string =~ /\G (\s+|\#.*)                                              /oxgc) { $e_string .= $1; }
+                        elsif ($string =~ /\G (\()               ((?:$qq_paren)*?)   (\)) ([imosxp]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr ( )
+                        elsif ($string =~ /\G (\{)               ((?:$qq_brace)*?)   (\}) ([imosxp]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr { }
+                        elsif ($string =~ /\G (\[)               ((?:$qq_bracket)*?) (\]) ([imosxp]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr [ ]
+                        elsif ($string =~ /\G (\<)               ((?:$qq_angle)*?)   (\>) ([imosxp]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr < >
+                        elsif ($string =~ /\G (\')               ((?:$qq_char)*?)    (\') ([imosxp]*) /oxgc) { $e_string .= e_split_q('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr ' '
+                        elsif ($string =~ /\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([imosxp]*) /oxgc) { $e_string .= e_split  ('qr','{','}',$2,$4); next E_STRING_LOOP; } # qr | | --> qr { }
+                        elsif ($string =~ /\G (\S)               ((?:$qq_char)*?)    (\1) ([imosxp]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # qr * *
                     }
                     croak "$__FILE__: Can't find string terminator anywhere before EOF";
                 }
@@ -1541,17 +1821,17 @@ E_STRING_LOOP:
 
 # split m//
             elsif ($string =~ /\G \b (m) \b /oxgc) {
-                if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) ([cgimosx]*) /oxgc)                             { $e_string .= e_split  ('qr',$1,$3,$2,$4);   next E_STRING_LOOP; } # m# #  --> qr # #
+                if ($string =~ /\G (\#) ((?:$qq_char)*?) (\#) ([cgimosxp]*) /oxgc)                             { $e_string .= e_split  ('qr',$1,$3,$2,$4);   next E_STRING_LOOP; } # m# #  --> qr # #
                 else {
                     while ($string !~ /\G \z/oxgc) {
-                        if    ($string =~ /\G (\s+|\#.*)                                               /oxgc) { $e_string .= $1; }
-                        elsif ($string =~ /\G (\()               ((?:$qq_paren)*?)   (\)) ([cgimosx]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m ( ) --> qr ( )
-                        elsif ($string =~ /\G (\{)               ((?:$qq_brace)*?)   (\}) ([cgimosx]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m { } --> qr { }
-                        elsif ($string =~ /\G (\[)               ((?:$qq_bracket)*?) (\]) ([cgimosx]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m [ ] --> qr [ ]
-                        elsif ($string =~ /\G (\<)               ((?:$qq_angle)*?)   (\>) ([cgimosx]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m < > --> qr < >
-                        elsif ($string =~ /\G (\')               ((?:$qq_char)*?)    (\') ([cgimosx]*) /oxgc) { $e_string .= e_split_q('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m ' ' --> qr ' '
-                        elsif ($string =~ /\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([cgimosx]*) /oxgc) { $e_string .= e_split  ('qr','{','}',$2,$4); next E_STRING_LOOP; } # m | | --> qr { }
-                        elsif ($string =~ /\G (\S)               ((?:$qq_char)*?)    (\1) ([cgimosx]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m * * --> qr * *
+                        if    ($string =~ /\G (\s+|\#.*)                                                /oxgc) { $e_string .= $1; }
+                        elsif ($string =~ /\G (\()               ((?:$qq_paren)*?)   (\)) ([cgimosxp]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m ( ) --> qr ( )
+                        elsif ($string =~ /\G (\{)               ((?:$qq_brace)*?)   (\}) ([cgimosxp]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m { } --> qr { }
+                        elsif ($string =~ /\G (\[)               ((?:$qq_bracket)*?) (\]) ([cgimosxp]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m [ ] --> qr [ ]
+                        elsif ($string =~ /\G (\<)               ((?:$qq_angle)*?)   (\>) ([cgimosxp]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m < > --> qr < >
+                        elsif ($string =~ /\G (\')               ((?:$qq_char)*?)    (\') ([cgimosxp]*) /oxgc) { $e_string .= e_split_q('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m ' ' --> qr ' '
+                        elsif ($string =~ /\G ([\*\-\:\?\\\^\|]) ((?:$qq_char)*?)    (\1) ([cgimosxp]*) /oxgc) { $e_string .= e_split  ('qr','{','}',$2,$4); next E_STRING_LOOP; } # m | | --> qr { }
+                        elsif ($string =~ /\G (\S)               ((?:$qq_char)*?)    (\1) ([cgimosxp]*) /oxgc) { $e_string .= e_split  ('qr',$1, $3, $2,$4); next E_STRING_LOOP; } # m * * --> qr * *
                     }
                     croak "$__FILE__: Search pattern not terminated";
                 }
@@ -1585,10 +1865,10 @@ E_STRING_LOOP:
             elsif ($string =~ /\G (\/) /oxgc) {
                 my $regexp = '';
                 while ($string !~ /\G \z/oxgc) {
-                    if    ($string =~ /\G (\\\\)          /oxgc) { $regexp .= $1; }
-                    elsif ($string =~ /\G (\\\/)          /oxgc) { $regexp .= $1; }                           # splitqr// --> split qr//
-                    elsif ($string =~ /\G \/ ([cgimosx]*) /oxgc)                                              { $e_string .= e_split(q{ qr}, '/','/',$regexp,$1); next E_STRING_LOOP; } # / / --> qr / /
-                    elsif ($string =~ /\G ($q_char)       /oxgc) { $regexp .= $1; }
+                    if    ($string =~ /\G (\\\\)           /oxgc) { $regexp .= $1; }
+                    elsif ($string =~ /\G (\\\/)           /oxgc) { $regexp .= $1; }                          # splitqr// --> split qr//
+                    elsif ($string =~ /\G \/ ([cgimosxp]*) /oxgc)                                             { $e_string .= e_split(q{ qr}, '/','/',$regexp,$1); next E_STRING_LOOP; } # / / --> qr / /
+                    elsif ($string =~ /\G ($q_char)        /oxgc) { $regexp .= $1; }
                 }
                 croak "$__FILE__: Search pattern not terminated";
             }
@@ -3631,6 +3911,106 @@ sub e_split_q {
 }
 
 #
+# escape require
+#
+sub e_require {
+    my($module) = @_;
+
+    my $expr = $module;
+    $expr =~ s#::#/#g;
+    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+
+    return qq<Esjis::require '$expr';>;
+}
+
+#
+# escape use without import
+#
+sub e_use_noimport {
+    my($module) = @_;
+
+    my $expr = $module;
+    $expr =~ s#::#/#g;
+    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+
+    my $fh = Symbol::gensym();
+    for my $prefix (@INC) {
+        my $realfilename = "$prefix/$expr";
+
+        if (sysopen($fh, $realfilename, O_RDONLY)) {
+            local $/ = undef; # slurp mode
+            my $script = <$fh>;
+            close($fh) or croak "Can't close file: $realfilename";
+
+            if ($script =~ m/^ \s* use \s+ Sjis \s* ([^;]*) ; \s* \n? $/oxms) {
+                return qq<BEGIN { Esjis::require '$expr'; }>;
+            }
+            last;
+        }
+    }
+
+    return qq<use $module ();>;
+}
+
+#
+# escape use with import no parameter
+#
+sub e_use_noparam {
+    my($module) = @_;
+
+    my $expr = $module;
+    $expr =~ s#::#/#g;
+    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+
+    my $fh = Symbol::gensym();
+    for my $prefix (@INC) {
+        my $realfilename = "$prefix/$expr";
+
+        if (sysopen($fh, $realfilename, O_RDONLY)) {
+            local $/ = undef; # slurp mode
+            my $script = <$fh>;
+            close($fh) or croak "Can't close file: $realfilename";
+
+            if ($script =~ m/^ \s* use \s+ Sjis \s* ([^;]*) ; \s* \n? $/oxms) {
+                return qq[BEGIN { Esjis::require '$expr'; $module->import(); }];
+            }
+            last;
+        }
+    }
+
+    return qq<use $module;>;
+}
+
+#
+# escape use with import parameters
+#
+sub e_use {
+    my($module,$list) = @_;
+
+    my $expr = $module;
+    $expr =~ s#::#/#g;
+    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+
+    my $fh = Symbol::gensym();
+    for my $prefix (@INC) {
+        my $realfilename = "$prefix/$expr";
+
+        if (sysopen($fh, $realfilename, O_RDONLY)) {
+            local $/ = undef; # slurp mode
+            my $script = <$fh>;
+            close($fh) or croak "Can't close file: $realfilename";
+
+            if ($script =~ m/^ \s* use \s+ Sjis \s* ([^;]*) ; \s* \n? $/oxms) {
+                return qq[BEGIN { Esjis::require '$expr'; $module->import($list); }];
+            }
+            last;
+        }
+    }
+
+    return qq<use $module $list;>;
+}
+
+#
 # ShiftJIS open character list for qr
 #
 sub charlist_qr {
@@ -4125,6 +4505,9 @@ Sjis - "Yet Another JPerl with Tk" Source code filter to escape ShiftJIS
 
 =head1 SYNOPSIS
 
+  use Sjis version qw(ord reverse);
+  use Sjis version;         --- require version
+  use Sjis qw(ord reverse); --- demand enhanced feature of ord and reverse
   use Sjis;
 
   # "no Sjis;" not supported
@@ -4157,8 +4540,11 @@ Shall we escape from the encode problem?
 
 =head1 THE FUTURE OF JPERL
 
-JPerl is very useful software.
-However, the last version of JPerl is 5.005_04 and is not maintained now.
+JPerl is very useful software. -- Oops, note, this "JPerl" means Japanized or
+Japanese Perl, so is unrelated to Java and JVM. Therefore, I named this software
+better, fitter Sjis.
+
+Now, the last version of JPerl is 5.005_04 and is not maintained now.
 
 Japanization modifier Hirofumi Watanabe said,
 
@@ -4170,7 +4556,7 @@ in The Perl Confernce Japan 1998.
 
 When I heard it, I thought that someone excluding me would maintain JPerl.
 And I slept every night hanging a sock. Night and day, I kept having hope.
-After 10 years, I noticed that white beard exists in the sock.
+After 10 years, I noticed that white beard exists in the sock :-)
 
 This software is a source code filter to escape Perl script encoded by ShiftJIS
 given from STDIN or command line parameter. The character code is never converted
@@ -4197,14 +4583,18 @@ Let's make the future of JPerl.
 
 =head1 SOFTWARE COMPOSITION
 
-   Sjis.pm         --- source code filter to escape ShiftJIS
-   Esjis.pm        --- run-time routines for Sjis.pm
-   perl55.bat      --- find and run perl5.5  without %PATH% settings
-   perl56.bat      --- find and run perl5.6  without %PATH% settings
-   perl58.bat      --- find and run perl5.8  without %PATH% settings
-   perl510.bat     --- find and run perl5.10 without %PATH% settings
-   Sjis::Encode.pm --- UTF-8 encoder/decoder for ShiftJIS script
-   Sjis::Tk::*     --- Tk modules on Sjis software
+   Sjis.pm          --- source code filter to escape ShiftJIS
+   Esjis.pm         --- run-time routines for Sjis.pm
+   perl55.com       --- find and run perl5.5  without %PATH% settings
+   perl56.com       --- find and run perl5.6  without %PATH% settings
+   perl58.com       --- find and run perl5.8  without %PATH% settings
+   perl510.com      --- find and run perl5.10 without %PATH% settings
+   make-hp15.pl     --- make HP15.pm and Ehp15.pm
+   make-big5plus.pl --- make Big5Plus.pm and Ebig5plus.pm
+   make-gbk.pl      --- make GBK.pm and Egbk.pm
+   make-uhc.pl      --- make UHC.pm and Euhc.pm
+   Sjis::Encode.pm  --- UTF-8 encoder/decoder for ShiftJIS script
+   Sjis::Tk::*      --- Tk modules on Sjis software
 
 =head1 JPerl COMPATIBLE FUNCTIONS
 
@@ -4239,6 +4629,10 @@ A part of function in the script is written and changes by this software.
 
 =item * uc --> Esjis::uc or Esjis::uc_
 
+=item * ord (when no import)
+
+=item * reverse (when no import)
+
 =item * tr/// or y/// --> Esjis::tr
 
 /b and /B modifier can also be used.
@@ -4246,6 +4640,14 @@ A part of function in the script is written and changes by this software.
 =item * chdir --> Esjis::chdir
 
 support chr(0x5C) ended path on only perl5.005 if MSWin32.
+
+=item * do --> Esjis::do
+
+=item * require --> Esjis::require
+
+=item * use Perl::Module @list; --> BEGIN { Esjis::require 'Perl/Module.pm'; Perl::Module->import(@list); }
+
+=item * use Perl::Module (); --> BEGIN { Esjis::require 'Perl/Module.pm'; }
 
 =back
 
@@ -4261,11 +4663,13 @@ double octet code can also be handled.
 
 =item * ord --> Esjis::ord or Esjis::ord_
 
-double octet code can also be handled.
+double octet code can also be handled when "use Sjis qw(ord);".
+It means not compatible with JPerl.
 
 =item * reverse --> Esjis::reverse
 
-double octet code can also be handled in scalar context.
+double octet code can also be handled in scalar context when "use Sjis qw(reverse);".
+It means not compatible with JPerl.
 
 =item * -X --> Esjis::X or Esjis::X_
 
@@ -4416,10 +4820,6 @@ escape for double quote type.
         ============================================================
         END3
 
-=item * do, require and use
-
-This software can not escape recursively script loaded by do, require and use.
-
 =back
 
 =head1 AUTHOR
@@ -4549,16 +4949,19 @@ programming environment like at that time.
 
 =head1 SEE ALSO
 
+ C<Programming Perl, Second Edition>
+ By Larry Wall, Tom Christiansen, Randal L. Schwartz
+ January 1900 (really so?)
+ Pages: 670
+ ISBN 10: 1-56592-149-6 | ISBN 13: 9781565921498
+ L<http://oreilly.com/catalog/9781565921498/>
+
  C<Programming Perl, Third Edition>
  By Larry Wall, Tom Christiansen, Jon Orwant
  Third Edition  July 2000
  Pages: 1104
  ISBN 10: 0-596-00027-8 | ISBN 13:9780596000271
  L<http://www.oreilly.com/catalog/pperl3/index.html>
- ISBN 4-87311-096-3
- L<http://www.oreilly.co.jp/books/4873110963/>
- ISBN 4-87311-097-1
- L<http://www.oreilly.co.jp/books/4873110971/>
 
  C<Perl Cookbook, Second Edition>
  By Tom Christiansen, Nathan Torkington
@@ -4581,6 +4984,20 @@ programming environment like at that time.
  Pages: 768
  ISBN 10: 1-56592-716-8 | ISBN 13: 9781565927162
  L<http://oreilly.com/catalog/9781565927162/index.html>
+
+ C<Learning Perl on Win32 Systems>
+ By Randal L. Schwartz, Erik Olson, Tom Christiansen
+ August 1997
+ Pages: 306
+ ISBN 10: 1-56592-324-3 | ISBN 13: 9781565923249
+ L<http://oreilly.com/catalog/9781565923249/>
+
+ C<Understanding Japanese Information Processing>
+ By Ken Lunde
+ January 1900
+ Pages: 470
+ ISBN 10: 1-56592-043-0 | ISBN 13: 9781565920439
+ L<http://oreilly.com/catalog/9781565920439/>
 
  C<CJKV Information Processing>
  Chinese, Japanese, Korean & Vietnamese Computing
@@ -4667,6 +5084,12 @@ I am thankful to all persons.
 
  chaichanPaPa, Matching ShiftJIS file name
  L<http://d.hatena.ne.jp/chaichanPaPa/20080802/1217660826>
+
+ Hardsoft, Japanese folder name on Perl/Tk(Win32)
+ L<http://hardsoft.at.webry.info/200802/article_5.html>
+
+ Nobody knows 2.0, Japanizing Menu widget of Perl/Tk on Windows
+ L<http://home.hiroshima-u.ac.jp/m072848/blog/blosxom.cgi/perl/tk/japanese/menu.htm>
 
  SUZUKI Norio, Jperl
  L<http://homepage2.nifty.com/kipp/perl/jperl/>

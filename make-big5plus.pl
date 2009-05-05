@@ -7,6 +7,8 @@
 ######################################################################
 
 use strict;
+use Fcntl;
+use Symbol;
 
 for my $io (
     ['Esjis.pm' => 'Ebig5plus.pm'],
@@ -17,11 +19,14 @@ for my $io (
 
     print STDERR "$i --> $o\n";
 
-    open(I,$i)    || die "Can't open file: $i\n";
-    open(O,">$o") || die "Can't open file: $o\n";
-    binmode(O);
+    my $fh_i = Symbol::gensym();
+    sysopen($fh_i, $i, O_RDONLY)                     || die "Can't open file: $i\n";
 
-    while (<I>) {
+    my $fh_o = Symbol::gensym();
+    sysopen($fh_o, $o, O_WRONLY | O_TRUNC | O_CREAT) || die "Can't open file: $o\n";
+    binmode $fh_o;
+
+    while (<$fh_i>) {
         s/\\x81-\\x9F\\xE0-\\xFC/\\x81-\\xFE/g;
         s/\(\?:8\[1-9A-Fa-f\]\|9\[0-9A-Fa-f\]\|\[Ee\]\[0-9A-Fa-f\]\|\[Ff\]\[0-9A-Ca-c\]\)/(?:8[1-9A-Fa-f]|[9A-Ea-e][0-9A-Fa-f]|[Ff][0-9A-Ea-e])/g;
         s/\(\?:20\[1-7\]\|2\[123\]\[0-7\]\|3\[4-6\]\[0-7\]\|37\[0-4\]\)/(?:2[0-7][1-7]|3[0-7][0-6])/g;
@@ -30,11 +35,11 @@ for my $io (
         s/ShiftJIS/Big5Plus/g;
         s/Sjis/Big5Plus/g;
 
-        print O $_;
+        print {$fh_o} $_;
     }
 
-    close(I);
-    close(O);
+    close $fh_i;
+    close $fh_o;
 }
 
 __END__

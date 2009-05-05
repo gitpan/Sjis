@@ -31,6 +31,7 @@ test.pl
 README
 META.yml
 make-sjis.pl
+make-hp15.pl
 make-big5plus.pl
 make-gbk.pl
 make-uhc.pl
@@ -123,6 +124,7 @@ t/smoke-tr.pl
 t/smoke-uc.pl
 t/test.pl
 sjisencode/sjisencode.pl
+sjisencode/test.pl
 tktest/coloreditor.pl
 tktest/dialog.pl
 tktest/dialogbox.pl
@@ -131,3 +133,4 @@ tktest/message.pl
 tktest/rotext.pl
 tktest/table.pl
 tktest/tk.pl
+tktest/icon/exit.xbm

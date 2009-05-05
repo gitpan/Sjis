@@ -6,11 +6,20 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..1\n"; }
+# BEGIN { $| = 1; print "1..1\n"; }
+# use Sjis;
+# print "ok 1\n";
 
-use Sjis;
+for my $testdir (sort split(/\n/,`dir /ad /b 2>NUL`)) {
+    next if $testdir eq 't';
 
-print "ok 1\n";
+    if (($testdir =~ m/\A [a-z] /oxms) and (-f "$testdir/test.pl")) {
+        print STDERR "Testing $testdir/test.pl...\n";
+        chdir $testdir;
+        system $^X, 'test.pl';
+        chdir '..';
+    }
+}
 
 ######################### End of black magic.
 

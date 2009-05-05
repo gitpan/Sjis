@@ -11,10 +11,11 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.34 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.35 $ =~ m/(\d+)/xmsg;
 
 use Fcntl;
 use Symbol;
+use FindBin;
 
 use Carp qw(carp croak confess cluck verbose);
 local $SIG{__DIE__}  = sub { confess @_ } if exists $ENV{'SJIS_DEBUG'};
@@ -113,6 +114,8 @@ sub Esjis::stat(*);
 sub Esjis::stat_();
 sub Esjis::unlink(@);
 sub Esjis::chdir(;$);
+sub Esjis::do($);
+sub Esjis::require(;$);
 
 # @ARGV wildcard globbing
 if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
@@ -3336,7 +3339,17 @@ sub Esjis::unlink(@) {
             if ($file =~ m/ \A (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*? [ ] /oxms) {
                 $file = qq{"$file"};
             }
-            system(qq{del $file >NUL 2>NUL});
+
+            # P.565 Cleaning Up Your Environment
+            # in Chapter 23: Security
+            # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+            # (and so on)
+
+            # local $ENV{'PATH'} = '.';
+            local @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+
+            system qq{del $file >NUL 2>NUL};
+
             my $fh = Symbol::gensym();
             if (sysopen $fh, $_, O_RDONLY) {
                 close $fh;
@@ -3369,16 +3382,16 @@ sub Esjis::chdir(;$) {
             return CORE::chdir $dir;
         }
         elsif ($] =~ /^5\.006/) {
-            croak "perl$] can't chdir $dir (chr(0x5C) ended path)";
+            croak "perl$] can't chdir to $dir (chr(0x5C) ended path)";
         }
         elsif ($] =~ /^5\.008/) {
-            croak "perl$] can't chdir $dir (chr(0x5C) ended path)";
+            croak "perl$] can't chdir to $dir (chr(0x5C) ended path)";
         }
         elsif ($] =~ /^5\.010/) {
-            croak "perl$] can't chdir $dir (chr(0x5C) ended path)";
+            croak "perl$] can't chdir to $dir (chr(0x5C) ended path)";
         }
         else {
-            croak "perl$] can't chdir $dir (chr(0x5C) ended path)";
+            croak "perl$] can't chdir to $dir (chr(0x5C) ended path)";
         }
     }
     else {
@@ -3400,6 +3413,125 @@ sub _MSWin32_5Cended_path {
         }
     }
     return;
+}
+
+#
+# do ShiftJIS file
+#
+sub Esjis::do($) {
+    my($filename) = @_;
+
+    my $realfilename;
+    my $result;
+ITER_DO:
+    {
+        for my $prefix (@INC) {
+            $realfilename = "$prefix/$filename";
+            if (Esjis::f($realfilename)) {
+
+                my $script = '';
+
+                my $e_mtime      = (Esjis::stat("$realfilename.e"))[9];
+                my $mtime        = (Esjis::stat($realfilename))[9];
+                my $module_mtime = (Esjis::stat("$FindBin::Bin/Sjis.pm"))[9];
+                if (Esjis::e("$realfilename.e") and ($mtime < $e_mtime) and ($module_mtime < $e_mtime)) {
+                    my $fh = Symbol::gensym();
+                    sysopen $fh, "$realfilename.e", O_RDONLY;
+                    local $/ = undef; # slurp mode
+                    $script = <$fh>;
+                    close $fh;
+                }
+                else {
+                    my $fh = Symbol::gensym();
+                    sysopen $fh, $realfilename, O_RDONLY;
+                    local $/ = undef; # slurp mode
+                    $script = <$fh>;
+                    close $fh;
+
+                    if ($script =~ m/^ \s* use \s+ Sjis \s* ([^;]*) ; \s* \n? $/oxms) {
+                        CORE::require Sjis;
+                        $script = Sjis::escape_script($script);
+                        my $fh = Symbol::gensym();
+                        sysopen $fh, "$realfilename.e", O_WRONLY | O_TRUNC | O_CREAT;
+                        print {$fh} $script;
+                        close $fh;
+                    }
+                }
+
+                no strict;
+                local $^W = $_warning;
+                $result = eval $script;
+
+                last ITER_DO;
+            }
+        }
+    }
+    $INC{$filename} = $realfilename;
+    return $result;
+}
+
+#
+# require ShiftJIS file
+#
+
+# require
+# in Chapter 3: Functions
+# of ISBN 1-56592-149-6 Programming Perl, Second Edition.
+
+sub Esjis::require(;$) {
+    local $_ = shift if @_;
+    return 1 if $INC{$_};
+
+    my $realfilename;
+    my $result;
+ITER_REQUIRE:
+    {
+        for my $prefix (@INC) {
+            $realfilename = "$prefix/$_";
+            if (Esjis::f($realfilename)) {
+
+                my $script = '';
+
+                my $e_mtime      = (Esjis::stat("$realfilename.e"))[9];
+                my $mtime        = (Esjis::stat($realfilename))[9];
+                my $module_mtime = (Esjis::stat("$FindBin::Bin/Sjis.pm"))[9];
+                if (Esjis::e("$realfilename.e") and ($mtime < $e_mtime) and ($module_mtime < $e_mtime)) {
+                    my $fh = Symbol::gensym();
+                    sysopen($fh, "$realfilename.e", O_RDONLY) or croak "Can't open file: $realfilename.e";
+                    local $/ = undef; # slurp mode
+                    $script = <$fh>;
+                    close($fh) or croak "Can't close file: $realfilename";
+                }
+                else {
+                    my $fh = Symbol::gensym();
+                    sysopen($fh, $realfilename, O_RDONLY) or croak "Can't open file: $realfilename";
+                    local $/ = undef; # slurp mode
+                    $script = <$fh>;
+                    close($fh) or croak "Can't close file: $realfilename";
+
+                    if ($script =~ m/^ \s* use \s+ Sjis \s* ([^;]*) ; \s* \n? $/oxms) {
+                        CORE::require Sjis;
+                        $script = Sjis::escape_script($script);
+                        my $fh = Symbol::gensym();
+                        sysopen($fh, "$realfilename.e", O_WRONLY | O_TRUNC | O_CREAT) or croak "Can't open file: $realfilename.e";
+                        print {$fh} $script;
+                        close($fh) or croak "Can't close file: $realfilename";
+                    }
+                }
+
+                no strict;
+                local $^W = $_warning;
+                $result = eval $script;
+
+                last ITER_REQUIRE;
+            }
+        }
+        croak "Can't find $_ in \@INC";
+    }
+    croak $@ if $@;
+    croak "$_ did not return true value" unless $result;
+    $INC{$_} = $realfilename;
+    return $result;
 }
 
 # pop warning
@@ -3446,6 +3578,8 @@ Esjis - Run-time routines for Sjis.pm
     Esjis::stat_;
     Esjis::unlink(...);
     Esjis::chdir(...);
+    Esjis::do(...);
+    Esjis::require(...);
 
   # "no Esjis;" not supported
 
@@ -3552,17 +3686,17 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   Returns the position of the first occurrence of $substr in ShiftJIS $string.
   The start, if specified, specifies the $position to start looking in the ShiftJIS
   $string. Positions are integer numbers based at 0. If the substring is not found,
-  the index function returns -1.
+  the Esjis::index function returns -1.
 
 =item Reverse index string
 
   $pos = Esjis::rindex($string,$substr,$position);
   $pos = Esjis::rindex($string,$substr);
 
-  Works just like index except that it returns the position of the last occurence
-  of $substr in ShiftJIS $string (a reverse index). The function returns -1 if not
-  found. $position, if specified, is the rightmost position that may be returned,
-  i.e., how far in the ShiftJIS string the function can search.
+  Works just like Esjis::index except that it returns the position of the last
+  occurence of $substr in ShiftJIS $string (a reverse index). The function returns
+  -1 if not found. $position, if specified, is the rightmost position that may be
+  returned, i.e., how far in the ShiftJIS string the function can search.
 
 =item Lower case string
 
@@ -3599,8 +3733,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   $chr = Esjis::chr_;
 
   This function returns the character represented by that $code in the character
-  set. For example, chr(65) is "A" in either ASCII or ShiftJIS, and chr(0x82a0)
-  is a ShiftJIS HIRAGANA LETTER A. For the reverse of chr, use ord.
+  set. For example, Esjis::chr(65) is "A" in either ASCII or ShiftJIS, and
+  Esjis::chr(0x82a0) is a ShiftJIS HIRAGANA LETTER A. For the reverse of Esjis::chr,
+  use Esjis::ord.
 
 =item Order of Character
 
@@ -3618,12 +3753,12 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   In list context, this function returns a list value consisting of the elements of
   @list in the opposite order. The function can be used to create descending sequences:
 
-  for (reverse 1 .. 10) { ... }
+  for (Esjis::reverse(1 .. 10)) { ... }
 
   Because of the way hashes flatten into lists when passed as a @list, reverse can also
   be used to invert a hash, presuming the values are unique:
 
-  %barfoo = reverse %foobar;
+  %barfoo = Esjis::reverse(%foobar);
 
   In scalar context, the function concatenates all the elements of LIST and then returns
   the reverse of that resulting string, character by character.
@@ -3725,11 +3860,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   @lstat = Esjis::lstat($file);
   @lstat = Esjis::lstat_;
 
-  Like stat, returns information on file, except that if file is a symbolic link,
-  lstat returns information about the link; stat returns information about the
-  file pointed to by the link. (If symbolic links are unimplemented on your
-  system, a normal stat is done instead.) If file is omitted, returns information
-  on file given in $_.
+  Like Esjis::stat, returns information on file, except that if file is a symbolic
+  link, Esjis::lstat returns information about the link; Esjis::stat returns
+  information about the file pointed to by the link. (If symbolic links are
+  unimplemented on your system, a normal Esjis::stat is done instead.) If file is
+  omitted, returns information on file given in $_.
   This function function when the filename ends with chr(0x5C) on MSWin32.
 
 =item Open directory handle
@@ -3804,6 +3939,78 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
   This function can't function when the $dirname ends with chr(0x5C) on perl5.006,
   perl5.008, perl5.010 on MSWin32.
+
+=item do file
+
+  $return = Esjis::do($file);
+
+  The do FILE form uses the value of FILE as a filename and executes the contents
+  of the file as a Perl script. Its primary use is (or rather was) to include
+  subroutines from a Perl subroutine library, so that:
+
+  Esjis::do('stat.pl');
+
+  is rather like: 
+
+  scalar eval `cat stat.pl`;   # `type stat.pl` on Windows
+
+  except that Esjis::do is more efficient, more concise, keeps track of the current
+  filename for error messages, searches all the directories listed in the @INC
+  array, and updates %INC if the file is found.
+  It also differs in that code evaluated with Esjis::do FILE can not see lexicals in
+  the enclosing scope, whereas code in eval FILE does. It's the same, however, in
+  that it reparses the file every time you call it -- so you might not want to do
+  this inside a loop unless the filename itself changes at each loop iteration.
+
+  If Esjis::do can't read the file, it returns undef and sets $! to the error. If 
+  Esjis::do can read the file but can't compile it, it returns undef and sets an
+  error message in $@. If the file is successfully compiled, do returns the value of
+  the last expression evaluated.
+
+  Inclusion of library modules (which have a mandatory .pm suffix) is better done
+  with the use and require operators, which also Esjis::do error checking and raise
+  an exception if there's a problem. They also offer other benefits: they avoid
+  duplicate loading, help with object-oriented programming, and provide hints to the
+  compiler on function prototypes.
+
+  But Esjis::do FILE is still useful for such things as reading program configuration
+  files. Manual error checking can be done this way:
+
+  # read in config files: system first, then user
+  for $file ("/usr/share/proggie/defaults.rc", "$ENV{HOME}/.someprogrc") {
+      unless ($return = Esjis::do($file)) {
+          warn "couldn't parse $file: $@" if $@;
+          warn "couldn't Esjis::do($file): $!" unless defined $return;
+          warn "couldn't run $file"            unless $return;
+      }
+  }
+
+  A long-running daemon could periodically examine the timestamp on its configuration
+  file, and if the file has changed since it was last read in, the daemon could use
+  Esjis::do to reload that file. This is more tidily accomplished with Esjis::do than
+  with Esjis::require.
+
+=item require file
+
+  Esjis::require($file);
+  Esjis::require();
+
+  This function asserts a dependency of some kind on its argument. If an argument is not
+  supplied, $_ is used.
+
+  If the argument is a string, Esjis::require loads and executes the Perl code found in
+  the separate file whose name is given by the string. This is similar to performing a
+  Esjis::do on a file, except that Esjis::require checks to see whether the library
+  file has been loaded already and raises an exception if any difficulties are
+  encountered. (It can thus be used to express file dependencies without worrying about
+  duplicate compilation.) Like its cousins Esjis::do and use, Esjis::require knows how
+  to search the include path stored in the @INC array and to update %INC upon success.
+
+  The file must return true as the last value to indicate successful execution of any
+  initialization code, so it's customary to end such a file with 1; unless you're sure
+  it'll return true otherwise.
+
+  See also do file.
 
 =back
 

@@ -1,9 +1,12 @@
 use strict;
+use Fcntl;
+use Symbol;
 
 # make make.bat
-open(MAKEBAT,">make.bat") || die "Can't open file: make.bat\n";
-print MAKEBAT <DATA>;
-close(MAKEBAT);
+my $fh_makebat = Symbol::gensym();
+sysopen($fh_makebat, 'make.bat', O_WRONLY | O_TRUNC | O_CREAT) || die "Can't open file: make.bat\n";
+print {$fh_makebat} <DATA>;
+close $fh_makebat;
 
 __END__
 @rem = '--*-Perl-*--
@@ -24,6 +27,8 @@ goto endofperl
 
 undef @rem;
 use strict;
+use Fcntl;
+use Symbol;
 use File::Path;
 use File::Copy;
 use File::Basename;
@@ -44,9 +49,10 @@ END
 }
 
 # get file list
-open(MANIFEST,"MANIFEST") || die "Can't open file: MANIFEST\n";
-chomp(my @file = <MANIFEST>);
-close(MANIFEST);
+my $fh_manifest = Symbol::gensym();
+sysopen($fh_manifest, 'MANIFEST', O_RDONLY) || die "Can't open file: MANIFEST\n";
+chomp(my @file = <$fh_manifest>);
+close $fh_manifest;
 
 for my $target (@ARGV) {
     if ($target eq 'test') {
@@ -69,9 +75,9 @@ for my $target (@ARGV) {
             }
         }
 
-        # install *.pl and *.bat files to /Perl/bin
+        # install *.pl, *.bat, *.exe and *.com files to /Perl/bin
         my($perl_bin) = $^X =~ /^(.*)\\[^\\]*$/;
-        for (grep m/ \. (?: pl | bat ) \z /xmsi, @file) {
+        for (grep m/ \. (?: pl | bat | exe | com ) \z /xmsi, @file) {
             next if m/(?: Makefile | test ) \.pl  $/xmsi;
             next if m/(?: make | tar )      \.bat $/xmsi;
             if (m#^(.+)/#) {
@@ -89,16 +95,17 @@ for my $target (@ARGV) {
 
         # make work directory
         my($changes) = grep(/^Changes$/i,@file);
-        open(CHANGES,$changes) || die "Can't open file: $changes\n";
+        my $fh_changes = Symbol::gensym();
+        sysopen($fh_changes, $changes, O_RDONLY) || die "Can't open file: $changes\n";
         my $version = 0;
-        while (<CHANGES>) {
+        while (<$fh_changes>) {
             if (/^(\d+\.\d+)/) {
                 if ($1 > $version) {
                     $version = $1;
                 }
             }
         }
-        close(CHANGES);
+        close $fh_changes;
         my $dirname  = dirname($file[0]);
         my $basename = basename($file[0], '.pm','.pl','.bat');
         my $tardir;
@@ -113,14 +120,16 @@ for my $target (@ARGV) {
 
         # rewrite META.yml file
         if(my($metayml) = grep(/^META\.yml$/i,@file)) {
-            if (open(METAYML,$metayml)) {
-                $_ = join('',<METAYML>);
-                close(METAYML);
-                if (open(METAYML,">$metayml")) {
+            my $fh_metayml = Symbol::gensym();
+            if (sysopen($fh_metayml, $metayml, O_RDONLY)) {
+                $_ = join('',<$fh_metayml>);
+                close $fh_metayml;
+                my $fh_metayml = Symbol::gensym();
+                if (sysopen($fh_metayml, $metayml, O_WRONLY | O_TRUNC | O_CREAT)) {
                     s/^(version:\s*)\d+\.\d+/$1$version/m;
-                    binmode(METAYML);
-                    print METAYML $_;
-                    close(METAYML);
+                    binmode $fh_metayml;
+                    print {$fh_metayml} $_;
+                    close $fh_metayml;
                 }
             }
         }
@@ -144,12 +153,20 @@ for my $target (@ARGV) {
 
         # make *.tar.gz file
         my $gz = gzopen("$tarfile.gz", 'wb');
-        open(TAR, $tarfile) || die "Can't open file: $tarfile\n";
-        binmode(TAR);
-        $gz->gzwrite(join('',<TAR>));
-        close(TAR);
+        my $fh_tar = Symbol::gensym();
+        sysopen($fh_tar, $tarfile, O_RDONLY) || die "Can't open file: $tarfile\n";
+        binmode $fh_tar;
+        $gz->gzwrite(join('',<$fh_tar>));
+        close $fh_tar;
         $gz->gzclose;
         unlink $tarfile;
+
+        # P.565 Cleaning Up Your Environment
+        # in Chapter 23: Security
+        # of ISBN 0-596-00027-8 Programming Perl Third Edition.
+
+        # local $ENV{'PATH'} = '.';
+        local @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
         # untar test
         system("make.bat tar.bat");
@@ -158,9 +175,10 @@ for my $target (@ARGV) {
     elsif ($target eq 'tar.bat') {
 
         # make tar.bat
-        open(TARBAT,">tar.bat") || die "Can't open file: tar.bat\n";
-        print TARBAT <DATA>;
-        close(TARBAT);
+        my $fh_tarbat = Symbol::gensym();
+        sysopen($fh_tarbat, 'tar.bat', O_WRONLY | O_TRUNC | O_CREAT) || die "Can't open file: tar.bat\n";
+        print {$fh_tarbat} <DATA>;
+        close $fh_tarbat;
     }
     else {
         warn "unknown target: $target.\n";
@@ -186,6 +204,8 @@ goto endofperl
 
 undef @rem;
 use strict;
+use Fcntl;
+use Symbol;
 use Compress::Zlib;
 use Archive::Tar;
 
@@ -202,13 +222,14 @@ for my $gzfile (grep m/\.tar\.gz$/xmsi, @ARGV) {
 
     my $gz = gzopen($gzfile, 'rb');
     (my $tarfile = $gzfile) =~ s/\.gz$//xmsi;
-    open(TAR,">$tarfile") || die "Can't open file: $tarfile\n";
-    binmode(TAR);
+    my $fh_tar = Symbol::gensym();
+    sysopen($fh_tar, $tarfile, O_WRONLY | O_TRUNC | O_CREAT) || die "Can't open file: $tarfile\n";
+    binmode $fh_tar;
     while ($gz->gzreadline(my $line)) {
-        print TAR $line;
+        print {$fh_tar} $line;
     }
     $gz->gzclose;
-    close(TAR);
+    close $fh_tar;
 
     my $tar = Archive::Tar->new($tarfile,1);
     for my $file ($tar->list_files){

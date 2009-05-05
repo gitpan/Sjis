@@ -1,18 +1,19 @@
 @rem = '--*-Perl-*--
 @echo off
+if "%PERL58BIN%" == "" set PERL58BIN=perl
 if "%OS%" == "Windows_NT" goto WinNT
-perl -x -S "%0" %1 %2 %3 %4 %5 %6 %7 %8 %9
+%PERL58BIN% -x -S "%0" %1 %2 %3 %4 %5 %6 %7 %8 %9
 goto endofperl
 :WinNT
-perl -x -S "%0" %*
+%PERL58BIN% -x -S "%0" %*
 if NOT "%COMSPEC%" == "%SystemRoot%\system32\cmd.exe" goto endofperl
 if %errorlevel% == 9009 echo You do not have Perl in your PATH.
 exit /b %errorlevel%
 goto endofperl
 @rem ';
 #!perl
-#line 15
-my $VERSION = "1.0.1"; undef @rem;
+#line 16
+my $VERSION = "1.0.3"; undef @rem;
 ######################################################################
 #
 # perl58 -  execute perlscript on the perl5.8 without %PATH% settings
@@ -22,6 +23,10 @@ my $VERSION = "1.0.1"; undef @rem;
 ######################################################################
 
 use strict;
+use Fcntl;
+use Symbol;
+use Win32;
+use Win32::Registry;
 
 # print usage
 unless (@ARGV) {
@@ -50,16 +55,12 @@ END
 
 # if this script running under perl5.8
 if ($] =~ /^5\.008/) {
-    exit system($^X, @ARGV);
+    exit system $^X, @ARGV;
 }
 
-# if .conf file exists
-if (open(CONF,"$0.conf")) {
-    my $perlbin = <CONF>;
-    close CONF;
-    if (-e $perlbin) {
-        exit system($perlbin, @ARGV);
-    }
+# execute by environment variable PERL58BIN
+if (defined $ENV{'PERL58BIN'} and -e $ENV{'PERL58BIN'}) {
+    exit system $ENV{'PERL58BIN'}, @ARGV;
 }
 
 # find perl5.8 in the computer
@@ -99,6 +100,8 @@ if ($@) {
     }
 }
 
+my $perlbin;
+
 # perl5.8 not found
 if (@perlbin == 0) {
     die "$0: nothing \\Perl58\\bin\\perl.exe nowhere.\n";
@@ -106,13 +109,7 @@ if (@perlbin == 0) {
 
 # only one perl5.8 found
 elsif (@perlbin == 1) {
-
-    # execute perlscript on the its perl.exe.
-    if (open(CONF,">$0.conf")) {
-        print CONF $perlbin[0];
-        close CONF;
-    }
-    exit system($perlbin[0], @ARGV);
+    $perlbin = $perlbin[0];
 }
 
 # if many perl5.8 found
@@ -126,17 +123,29 @@ elsif (@perlbin > 1) {
         print STDERR "drive = ";
         my $drive = <STDIN>;
         $drive = substr($drive,0,1);
-        if (my($perlbin) = grep /^$drive/i, @perlbin) {
-
-            # execute perlscript on the its perl.exe.
-            if (open(CONF,">$0.conf")) {
-                print CONF $perlbin;
-                close CONF;
-            }
-            exit system($perlbin, @ARGV);
+        if (($perlbin) = grep /^$drive/i, @perlbin) {
+            last;
         }
     }
 }
+
+# register environment variable PERL58BIN
+if (Win32::IsWinNT) {
+    my $ENVIRONMENT_KEY = 'SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment';
+    my $Environment = 0;
+    if ($main::HKEY_LOCAL_MACHINE->Open($ENVIRONMENT_KEY, $Environment)) {
+        $Environment->SetValueEx('PERL58BIN', 0, REG_SZ, $perlbin);
+    }
+}
+else {
+    my $fh = Symbol::gensym();
+    if (sysopen($fh, substr($ENV{'WINDIR'},0,2) . '\\AUTOEXEC.BAT', O_WRONLY | O_APPEND | O_CREAT)) {
+        print {$fh} "SET PERL58BIN=$perlbin\n";
+        close $fh;
+    }
+}
+
+exit system $perlbin, @ARGV;
 
 __END__
 

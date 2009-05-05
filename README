@@ -4,24 +4,36 @@ NAME
 
 SYNOPSIS
 
-    In your script:
+    In yourscript.pl:
 
+      use Sjis version qw(ord reverse);
+      use Sjis version;
+      use Sjis qw(ord reverse);
       use Sjis;
 
     At command prompt:
 
-      perl.exe     yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl55.bat   yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl56.bat   yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl58.bat   yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl510.bat  yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl     yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl55   yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl56   yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl58   yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl510  yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
+
+    Or command prompt:
+
+      C:\>perl  Sjis.pm  ShiftJIS_script.pl  >  Escaped_script.pl.e
+      C:\>perl  Escaped_script.pl.e
 
 DESCRIPTION
 
       This software is "Yet Another JPerl with Tk" written by Perl.
       We can write the Perl/Tk script in ShiftJIS again.
 
-      This software is a beta version for the public comment.
+      This "JPerl" is Japanized or Japanese Perl.
+      So is unrelated to Mr. Patrick E. Martin's JPerl -- Perl 5 implemented in Java.
+      And is unrelated to Mr. Ben Evans's jPerl -- Perl on the JVM, too.
+
+      This software is a beta2 version for the public comment.
 
 INSTALLATION
 
@@ -31,14 +43,15 @@ To install this software, type the following:
    make.bat install
    make.bat test
 
-   make.bat install              --- install to current using Perl
-   perl55.bat make.bat instal    --- install to Perl5.5
-   perl56.bat make.bat instal    --- install to Perl5.6
-   perl58.bat make.bat instal    --- install to Perl5.8
-   perl510.bat make.bat install  --- install to Perl5.10
-   perl make-big5plus.pl         --- make Ebig5plus.pm and Big5Plus.pm
-   perl make-gbk.pl              --- make Egbk.pm and GBK.pm
-   perl make-uhc.pl              --- make Euhc.pm and UHC.pm
+   make.bat install          --- install to current using Perl
+   perl55 make.bat instal    --- install to Perl5.5
+   perl56 make.bat instal    --- install to Perl5.6
+   perl58 make.bat instal    --- install to Perl5.8
+   perl510 make.bat install  --- install to Perl5.10
+   perl make-hp15.pl         --- make HP15.pm     and Ehp15.pm
+   perl make-big5plus.pl     --- make Big5Plus.pm and Ebig5plus.pm
+   perl make-gbk.pl          --- make GBK.pm      and Egbk.pm
+   perl make-uhc.pl          --- make UHC.pm      and Euhc.pm
 
 MAKE OTHER
 

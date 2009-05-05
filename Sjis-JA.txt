@@ -8,6 +8,9 @@ Sjis-JA - "Yet Another JPerl with Tk" Source code filter to escape ShiftJIS (Jap
 
 ŠT—v
 
+  use Sjis version qw(ord reverse);
+  use Sjis version;          --- Sjis.pm ‚Ìƒo[ƒWƒ‡ƒ“ƒ`ƒFƒbƒN‚ğs‚¤ê‡
+  use Sjis qw(ord reverse);  --- ord, reverse ‚ÌŠg’£‹@”\‚ğg‚¤ê‡
   use Sjis;
 
   # "no Sjis;" ‚Ì‹@”\‚Í‚ ‚è‚Ü‚¹‚ñB
@@ -41,8 +44,11 @@ ShiftJIS ‚Í‚à‚Æ‚à‚Æ‰ß‹‚Ì‹KŠi‚Æ‚ÌŒİŠ·«‚ğl—¶‚µ‚ÄŠJ”­‚³‚ê‚Ü‚µ‚½Bˆê”Ê“I‚ÉƒIƒy
 
 JPerl ‚Ì–¢—ˆ
 
-JPerl ‚Í‚Æ‚Ä‚à—D‚ê‚½ƒ\ƒtƒgƒEƒFƒA‚Å‚·B
-‚µ‚©‚µ‚È‚ª‚çƒo[ƒWƒ‡ƒ“ 5.005_4 ˆÈ~Aƒƒ“ƒeƒiƒ“ƒX‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB
+JPerl ‚Í‚Æ‚Ä‚à—D‚ê‚½ƒ\ƒtƒgƒEƒFƒA‚Å‚·B‚¨‚Á‚ÆA‚±‚±‚Å‚¢‚¤ JPerl ‚Í“ú–{Œê‘Î‰”Å‚Ì
+Perl ‚Ì‚±‚Æ‚ÅAJava ‚â JVM ‚Æ‚ÍŠÖŒW‚ª‚ ‚è‚Ü‚¹‚ñB‚»‚ñ‚È‚í‚¯‚ÅA‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚Ì
+–¼‘O‚ÍÕ“Ë‰ñ”ğ‚Ì‚½‚ß‚É Sjis ‚Æ‚µ‚Ü‚µ‚½B
+
+‚Æ‚±‚ë‚ÅA‚»‚Ì JPerl ‚Íƒo[ƒWƒ‡ƒ“ 5.005_4 ˆÈ~Aƒƒ“ƒeƒiƒ“ƒX‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB
 
 ‘å•Ïc”O‚È‚±‚Æ‚ÉAJPerl‚ÌŠJ”­‚ğs‚Á‚½“n•Ó ”•¶‚³‚ñ‚Í The Perl Confernce Japan
 1998 ‚É‚Ä
@@ -85,9 +91,10 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
    perl56.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.6 ‚ğ’T‚µ‚ÄÀs‚·‚é
    perl58.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.8 ‚ğ’T‚µ‚ÄÀs‚·‚é
    perl510.bat      --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.10 ‚ğ’T‚µ‚ÄÀs‚·‚é
-   make-big5plus.pl --- Ebig5plus.pm, Big5Plus.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-   make-gbk.pl      --- Egbk.pm, GBK.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-   make-uhc.pl      --- Euhc.pm, UHC.pm ‚ğì‚éƒXƒNƒŠƒvƒg
+   make-hp15.pl     --- HP15.pm, Ehp15.pm ‚ğì‚éƒXƒNƒŠƒvƒg
+   make-big5plus.pl --- Big5Plus.pm, Ebig5plus.pm ‚ğì‚éƒXƒNƒŠƒvƒg
+   make-gbk.pl      --- GBK.pm, Egbk.pm ‚ğì‚éƒXƒNƒŠƒvƒg
+   make-uhc.pl      --- UHC.pm, Euhc.pm ‚ğì‚éƒXƒNƒŠƒvƒg
    Sjis::Encode.pm  --- ShiftJIS Ì UTF-8 ƒGƒ“ƒR[ƒ_/ƒfƒR[ƒ_
    Sjis::Tk::*      --- Sjis.pm —p Tk ƒ‚ƒWƒ…[ƒ‹
 
@@ -122,6 +129,10 @@ JPerl ŒİŠ·‚Ì‹@”\
 
   * uc ‚Í Esjis::uc ‚Ü‚½‚Í Esjis::uc_ ‚É‘‚«Š·‚í‚è‚Ü‚·
 
+  * ord ‚Í‚»‚Ì‚Ü‚Ü‚Å‚·(ƒCƒ“ƒ|[ƒg‚µ‚È‚¢ê‡)
+
+  * reverse ‚Í‚»‚Ì‚Ü‚Ü‚Å‚·(ƒCƒ“ƒ|[ƒg‚µ‚È‚¢ê‡)
+
   * tr/// ‚Ü‚½‚Í y/// ‚Í Esjis::tr ‚É‘‚«Š·‚í‚è‚Ü‚·
 
     /b ‚Æ /B Cüq‚ª—˜—p‚Å‚«‚Ü‚·
@@ -130,6 +141,17 @@ JPerl ŒİŠ·‚Ì‹@”\
 
     MSWin32 ŠÂ‹«‚Ìê‡‚Í perl5.005 ‚ÉŒÀ‚è•¶šƒR[ƒh(0x5C)‚ÅI‚í‚éƒpƒX‚ğˆµ‚¤‚±‚Æ
     ‚ª‚Å‚«‚Ü‚·
+
+  * do file ‚Í Esjis::do file ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+  * require ‚Í Esjis::require ‚É‘‚«Š·‚í‚è‚Ü‚·
+
+  * use Perl::Module @list; ‚Í
+    BEGIN { Esjis::require 'Perl/Module.pm'; import Perl::Module @list; } ‚É‘‚«
+    Š·‚í‚è‚Ü‚·
+
+  * use Perl::Module (); ‚Í
+    BEGIN { Esjis::require 'Perl/Module.pm'; } ‚É‘‚«Š·‚í‚è‚Ü‚·
 
 JPerl ‚ÆãˆÊŒİŠ·‚Ì‹@”\
 
@@ -141,13 +163,14 @@ JPerl ‚ÆãˆÊŒİŠ·‚Ì‹@”\
 
   * ord ‚Í Esjis::ord ‚Ü‚½‚Í Esjis::ord_ ‚É‘‚«Š·‚í‚è‚Ü‚·
 
-    2ƒIƒNƒeƒbƒgƒR[ƒh‚É‘Î‰‚µ‚Ä‚¢‚Ü‚·
-    ‚»‚ê‚ä‚¦‚É 2 ƒIƒNƒeƒbƒgƒR[ƒh‚É‘Î‚µ‚Äs‚¤ ord ‚Ì“®ì‚ÍƒIƒŠƒWƒiƒ‹‚Ì JPerl ‚Æ‚Í
-    ”ñŒİŠ·‚Å‚·
+    "use Sjis qw(ord);" ‚É‚æ‚Á‚Ä2ƒIƒNƒeƒbƒgƒR[ƒh‚É‘Î‰‚µ‚Ü‚·
+    ‚±‚Ì“®ì‚Í JPerl ‚Æ”ñŒİŠ·‚Å‚·
 
   * reverse ‚Í Esjis::reverse ‚É‘‚«Š·‚í‚è‚Ü‚·
 
-    ƒXƒJƒ‰ƒRƒ“ƒeƒLƒXƒg‚Åg—p‚³‚ê‚½ê‡‚à2ƒIƒNƒeƒbƒgƒR[ƒh‚É‘Î‰‚µ‚Ä‚¢‚Ü‚·
+    "use Sjis qw(reverse);" ‚É‚æ‚Á‚ÄƒXƒJƒ‰ƒRƒ“ƒeƒLƒXƒg‚Å‚à2ƒIƒNƒeƒbƒg
+    ƒR[ƒh‚É‘Î‰‚µ‚Ü‚·
+    ‚±‚Ì“®ì‚Í JPerl ‚Æ”ñŒİŠ·‚Å‚·
 
   * -X (ƒtƒ@ƒCƒ‹ƒeƒXƒg‰‰Zq) ‚Í Esjis::X ‚Ü‚½‚Í Esjis::X_ ‚É‘‚«Š·‚í‚è‚Ü‚·
 
@@ -155,6 +178,11 @@ JPerl ‚ÆãˆÊŒİŠ·‚Ì‹@”\
 
   * glob ‚Í Esjis::glob ‚Ü‚½‚Í Esjis::glob_ ‚É‘‚«Š·‚í‚è‚Ü‚·
 
+    @glob = Esjis::glob($string);
+    @glob = Esjis::glob_;
+
+    OS ŠÔ‚Å‰Â”À«‚Ì‚ ‚éŠg’£‚³‚ê‚½DOS•—ƒOƒƒu(ƒƒCƒ‹ƒhƒJ[ƒh)‹@”\‚ğ’ñ‹Ÿ‚µ‚Ü‚·B
+    "~" ‚ÍŒ»İ‚Ìƒ†[ƒU‚Ìƒz[ƒ€ƒfƒBƒŒƒNƒgƒŠ‚É“WŠJ‚³‚ê‚Ü‚·B
     MSWin32 ŠÂ‹«‚É‚Ä•¶šƒR[ƒh(0x5C)‚ÅI‚í‚éƒpƒX‚ğˆµ‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚·
 
   * lstat ‚Í Esjis::lstat ‚Ü‚½‚Í Esjis::lstat_ ‚É‘‚«Š·‚í‚è‚Ü‚·
@@ -294,10 +322,6 @@ JPerl ‚ÆãˆÊŒİŠ·‚Ì‹@”\
         ============================================================
         END3
 
-  * do, require, use
-
-    do, require, use ‚Å“Ç‚Ü‚ê‚½ƒXƒNƒŠƒvƒg‚ÍƒGƒXƒP[ƒv‚³‚ê‚Ü‚¹‚ñB
-
 ìÒ
 
 ‚±‚ÌƒvƒƒWƒFƒNƒg‚Í ˆî—t € ina@cpan.org ‚É‚æ‚Á‚Än‚Ü‚è‚Ü‚µ‚½B
@@ -312,6 +336,29 @@ JPerl ‚ÆãˆÊŒİŠ·‚Ì‹@”\
 ‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚Í—L—p‚Å‚ ‚é‚±‚Æ‚ğŠè‚Á‚Ä”Ğ•z‚³‚ê‚Ü‚·‚ªA*‘S‚­‚Ì–³•ÛØ* 
 ‚Å‚·B¤‹Æ‰Â”\«‚Ì•ÛØ‚â“Á’è‚Ì–Ú“I‚Ö‚Ì“K‡«‚ÍAŒ¾ŠO‚É¦‚³‚ê‚½‚à‚Ì‚àŠÜ
 ‚ß‘S‚­‘¶İ‚µ‚Ü‚¹‚ñB
+
+ƒVƒtƒgJISƒR[ƒh‚Æ‚Í(“ú–{Œêî•ñˆ—‚æ‚è)
+
+ƒVƒtƒgJIS•„†‰»‚ÍAƒ}ƒCƒNƒƒ\ƒtƒgĞ‚É‚æ‚èŠJ”­‚³‚ê‚½A“ú–{‚ÌƒRƒ“ƒsƒ…[ƒ^‚ÅÅ‚à‚æ‚­
+—p‚¢‚ç‚ê‚é•„†‰»•û®‚Å‚·BƒVƒtƒgJIS‚ÍuMSŠ¿š(MicrosoftŠ¿š)vA‚Ü‚½‚ÍuSJIS
+(ShiftJIS‚Ì—ªÌ)v‚Æ‚àŒÄ‚Î‚ê‚Ä‚¢‚Ü‚·B
+
+‚©‚Â‚Ä“ú–{‚ÌƒRƒ“ƒsƒ…[ƒ^ƒ†[ƒU‚Í”¼Šp•Ğ‰¼–¼‚µ‚©g‚¦‚È‚©‚Á‚½‚½‚ßA]—ˆ•û®‚Æ‚ÌŒİŠ·«
+‚ğˆÛ‚·‚é–Ú“I‚ÅƒVƒtƒgJIS‚ªŠJ”­‚³‚ê‚Ü‚µ‚½B
+
+ƒVƒtƒgJIS‚É‚¨‚¢‚Ä‚ÍA16i”‚Å 0x81`0x9F ‚Ü‚½‚Í 0xE0`0xEF ‚Ì”ÍˆÍ‚ğ‚ÂƒIƒNƒeƒbƒg
+‚É‚æ‚Á‚Ä1•¶š2ƒIƒNƒeƒbƒgƒ‚[ƒh‚ªŠJn‚µ‚Ü‚·B‚»‚µ‚Ä‚±‚ÌƒIƒNƒeƒbƒg‚ÍA‚»‚±‚©‚çn‚Ü‚é
+2ƒIƒNƒeƒbƒg•¶š‚Ì‘æ1ƒIƒNƒeƒbƒg‚Æ‚µ‚Äˆ—‚³‚ê‚Ü‚·B‘±‚­(‘æ2)ƒIƒNƒeƒbƒg‚ÍA16i”‚Å
+0x40`0x7E ‚Ü‚½‚Í 0x80`0xFC ‚Ì”ÍˆÍ‚ğ‚Â’l‚Å‚È‚¯‚ê‚Î‚È‚è‚Ü‚¹‚ñB‘æ1ƒIƒNƒeƒbƒg‚Ì
+”ÍˆÍ‚ÍŠg’£ASCII•¶šƒZƒbƒgA‚Â‚Ü‚èÅãˆÊƒrƒbƒg‚ªƒIƒ“‚É‚È‚Á‚½8ƒrƒbƒg•¶šƒZƒbƒg‚Ì”ÍˆÍ
+‚ÉŠ®‘S‚Éû‚Ü‚Á‚Ä‚¢‚é‚±‚Æ‚É’–Ú‚µ‚Ä‚­‚¾‚³‚¢B‚Ü‚½ƒVƒtƒgJIS‚ÍA”¼Šp•Ğ‰¼–¼‚ÆASCII/JIS
+ƒ[ƒ}š‚àƒTƒ|[ƒg‚µ‚Ä‚¢‚Ü‚·B
+
+ˆê•”‚ÌƒVƒtƒgJISd—l(“Á‚Éƒ[ƒJd—l)‚Å‚ÍAƒ†[ƒU’è‹`•¶š‚ÌƒR[ƒh—Ìˆæ‚âAê‡‚É‚æ‚Á‚Ä
+‚Í”¼Šp•Ğ‰¼–¼‹ó”’•¶š‚ÌƒR[ƒhˆÊ’u‚à’è‹`‚³‚ê‚Ä‚¢‚Ü‚·B‚à‚µ–{Ši“I‚Èî•ñŒğŠ·‚ğ–]‚Ş‚Ì‚Å
+‚ ‚ê‚ÎA‚±‚Ì‚æ‚¤‚ÈƒR[ƒh—Ìˆæ‚âƒR[ƒhˆÊ’u‚Í•s“s‡‚Å‚·B‚Æ‚¢‚¤‚Ì‚àA‚±‚Ì‚æ‚¤‚È•¶š‚ÍA
+•Ê‚Ì“ú–{Œê•„†‰»•û®(‚Â‚Ü‚èJIS‚ÆEUC)‚ÌƒR[ƒhˆÊ’u‚É•ÏŠ·‚Å‚«‚È‚¢‚æ‚¤‚É•„†‰»‚³‚ê‚Ä‚µ
+‚Ü‚¤‚©‚ç‚Å‚·B
 
 ƒEƒBƒLƒyƒfƒBƒA‚É‚æ‚éuShift_JISv‚Ì’è‹`
 
@@ -550,9 +597,9 @@ Shift_JISX0213•„†‰»•\Œ»‚É‚¨‚¢‚Ä‚ÍA‘æ1ƒoƒCƒgF0(16)ˆÈ~‚ğ2–Ê‚Ì•¶š‚ÉŠ„‚è“–‚Ä
       0x81-0x9F, 0xE0-0xFC
       * •¶š—ñ‚ÌÅIƒIƒNƒeƒbƒg‚ª2ƒIƒNƒeƒbƒgƒR[ƒh‚Ì‘æ1ƒIƒNƒeƒbƒg‚Æ“¯‚¶ê‡
 
- ‚±‚Ì "ShiftJIS" ‚Í Informix Ascii 'INFORMIX V6 ALS' ‚Ì3ƒIƒNƒeƒbƒgƒR[ƒh‚ğ
-œ‚¯‚ÎA‚Ç‚ÌƒVƒtƒgJISƒx[ƒX‚Ì•¶šƒR[ƒh‚Å‚àˆµ‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚·B
-(Informix Ascii ƒ†[ƒU‚Ì•ûA\‚µ–ó‚È‚¢B)
+ ‚±‚Ì "ShiftJIS" ‚Í Hewlett-Packard HP-15 ‚Æ Informix Ascii 'INFORMIX V6 ALS' ‚Ì
+3ƒIƒNƒeƒbƒgƒR[ƒh‚ğœ‚¯‚ÎA‚Ç‚ÌƒVƒtƒgJISƒx[ƒX‚Ì•¶šƒR[ƒh‚Å‚àˆµ‚¤‚±‚Æ‚ª‚Å‚«‚Ü‚·B
+(‚±‚ê‚ç‚Ìƒ†[ƒU‚Ì•ûA\‚µ–ó‚È‚¢B)
 
 ˆÈ‰º‚ÉƒR[ƒh•\‚ğŒfÚ‚µ‚Ü‚·B
 
@@ -698,6 +745,10 @@ http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html
  Informix ASCII INFORMIX V6 ALS 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC), (0xFD)(0xA1-0xFE)(0xA1-0xFE)
  Oracle Oracle7 (Release 7.1.3) 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x00-0xFF)
  Sybase SQL Server, Open Server 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+
+“ú–{Œêî•ñˆ—(ISBN 4-89052-708-7)‚æ‚è
+
+ Hewlett-Packard HP-15          0x00-0x7F, 0xA1-0xDF, (0x80-0xA0, 0xE0-0xFE)(0x21-0x7E, 0x80-0xFF)
 
   * ƒAƒ‹ƒSƒŠƒYƒ€ 2
 
@@ -889,9 +940,9 @@ Programming Perl, 3rd ed. (–M–ó ƒvƒƒOƒ‰ƒ~ƒ“ƒOPerl ‘æ3”Å) ‚Ì402ƒy[ƒW‚ğˆø—p‚µ‚Ü
     ‚ ‚è‘±‚¯‚é‚×‚«‚Å‚ ‚éB
 
     ƒoƒCƒgwŒü‚Ì Perl ‚Í‚·‚Å‚ÉƒoƒCƒiƒŠƒf[ƒ^‚ğˆµ‚¤‚±‚Æ‚ª‚Å‚«‚é‚½‚ßA•¶šwŒü‚Ì
-    Perl ‚ğ•Ê—§‚Ä‚Åì¬‚·‚é•K—v‚Í‚ ‚è‚Ü‚¹‚ñB‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚Í’P‚É Perl ‚ÌƒAƒvƒŠ
-    ƒP[ƒVƒ‡ƒ“ƒvƒƒOƒ‰ƒ€‚Å‚ ‚èAƒtƒBƒ‹ƒ^ƒvƒƒOƒ‰ƒ€‚Æ‚µ‚Äì¬‚³‚ê‚Ä‚¢‚Ü‚·BŠî–{“I
-    ‚É‚Í perl ‚ªÀs‚Å‚«‚éŠÂ‹«‚Å“®ì‚·‚é‚Å‚µ‚å‚¤B
+    Perl ‚ğ•Ê—§‚Ä‚Åì¬‚·‚é•K—v‚Í‚ ‚è‚Ü‚¹‚ñB‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚Í’P‚È‚é Perl ‚ÌƒAƒv
+    ƒŠƒP[ƒVƒ‡ƒ“ƒvƒƒOƒ‰ƒ€‚Å‚ ‚èAƒtƒBƒ‹ƒ^ƒvƒƒOƒ‰ƒ€‚Æ‚µ‚Äì¬‚³‚ê‚Ä‚¢‚Ü‚·B
+    Šî–{“I‚É‚Í perl ‚ªÀs‚Å‚«‚éŠÂ‹«‚È‚ç‚Î“®ì‚·‚é‚Å‚µ‚å‚¤B
 
   * ƒS[ƒ‹5
 
@@ -904,6 +955,13 @@ Programming Perl, 3rd ed. ‚ª‘‚©‚ê‚½ ‚É‚ÍAUTF-8 ƒtƒ‰ƒO‚Í¶‚Ü‚ê‚Ä‚¨‚ç‚¸APerl ‚
 ƒvƒƒOƒ‰ƒ~ƒ“ƒOŠÂ‹«‚ğ’ñ‹Ÿ‚µ‚Ü‚·B
 
 Ql•¶Œ£
+
+ ƒvƒƒOƒ‰ƒ~ƒ“ƒOPerl ‰ü’ù”Å
+ By Larry Wall, Tom Christiansen, Randal L. Schwartz, ‹ß“¡ ‰Ãá –ó
+ 1997”N12Œ ”­s
+ 759ƒy[ƒW
+ ISBN 4-900900-48-6
+ http://www.oreilly.co.jp/out/pperl/index.htm
 
  ƒvƒƒOƒ‰ƒ~ƒ“ƒOPerl ‘æ3”Å VOLUME 1
  By Larry Wall, Tom Christiansen, Jon Orwant, ‹ß“¡ ‰Ãá –ó
@@ -946,6 +1004,20 @@ Programming Perl, 3rd ed. ‚ª‘‚©‚ê‚½ ‚É‚ÍAUTF-8 ƒtƒ‰ƒO‚Í¶‚Ü‚ê‚Ä‚¨‚ç‚¸APerl ‚
  440ƒy[ƒW
  ISBN 4-87311-008-4
  http://www.oreilly.co.jp/books/4873110084/
+
+ ‰‚ß‚Ä‚ÌPerl Win32ƒVƒXƒeƒ€
+ Randal L. Schwartz, Erik Olson, Tom Christiansen ’˜, —L”n O˜Y ŠÄ–ó, ÎŒ´ ’q_ –ó
+ 1998”N11Œ ”­s
+ 348ƒy[ƒW
+ ISBN 4-900900-79-6
+ http://www.oreilly.co.jp/books/4900900796/
+
+ “ú–{Œêî•ñˆ—
+ Understanding Japanese Information Processing
+ By Ken Lunde, t•Õ˜Ò, —é–Ø•¶ –ó
+ 1995”N8Œ ”­s
+ 496ƒy[ƒW
+ ISBN 4-89052-708-7
 
  CJKV“ú’†ŠØ‰zî•ñˆ—
  Chinese, Japanese, Korean & Vietnamese Computing
@@ -1026,6 +1098,12 @@ Programming Perl, 3rd ed. ‚ª‘‚©‚ê‚½ ‚É‚ÍAUTF-8 ƒtƒ‰ƒO‚Í¶‚Ü‚ê‚Ä‚¨‚ç‚¸APerl ‚
 
  chaichanPaPa‚³‚ñ, ƒVƒtƒgJISŠ¿š‚Ìƒtƒ@ƒCƒ‹–¼‚Éƒ}ƒbƒ`‚µ‚Ä‚İ‚é
  http://d.hatena.ne.jp/chaichanPaPa/20080802/1217660826
+
+ ƒn[ƒh‚Èƒ\ƒtƒg‚Ì˜b‚³‚ñ, Perl/Tk‚Å“ú–{Œê‚ÌƒtƒHƒ‹ƒ_–¼‚ğg‚¤(Win32)
+ http://hardsoft.at.webry.info/200802/article_5.html
+
+ ‚µ‚é‚Ğ‚Æ‚¨‚ç‚¸ 2.0 ‚³‚ñ, Windowsã‚ÅPerl/Tk‚Ìƒƒjƒ…[ƒo[‚ğ“ú–{Œê‰»‚·‚é•û–@(1•”–¢‰ğŒˆ) 
+ http://home.hiroshima-u.ac.jp/m072848/blog/blosxom.cgi/perl/tk/japanese/menu.htm
 
  —é–Ø ‹I•v‚³‚ñ, Jperl
  http://homepage2.nifty.com/kipp/perl/jperl/

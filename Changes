@@ -1,5 +1,15 @@
 Revision history for Perl extension Sjis.
 
+0.35  2009/05/06 00:00:00
+	- support do, require and use for user library.
+	- upper compatible function ord and reverse functions only when demanded.
+	- support p modifier of m//, s/// and qr// of perl5.10.
+	- support !~~ operator.
+	- change to secure code, open() to sysopen().
+	- change to secure code, undef %ENV before system().
+	- add make-hp15.pl(HP-15 Hewlett-Packard developed).
+	; created by INABA Hitoshi
+
 0.34  2009/04/01 00:00:00
 	- memorial version on birth day.
 	- Sjis::Tk::* modules pre alpha support.
