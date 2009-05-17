@@ -12,7 +12,7 @@ use 5.00503;
 use Esjis;
 use vars qw($VERSION);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.35 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.36 $ =~ m/(\d+)/oxmsg;
 
 use Fcntl;
 use Symbol;
@@ -483,6 +483,7 @@ END
 
             # demand ord and reverse
             if ($list !~ m/\A \s* \z/oxms) {
+                local $@;
                 my @list = eval $list;
                 for (@list) {
                     $function_ord     = 'Esjis::ord'     if m/\A ord \z/oxms;
@@ -503,6 +504,7 @@ END
         Frame
         Label
         Listbox
+        MainWindow
         Message
         Menu
         Menubutton
@@ -524,13 +526,15 @@ $tkmodule
     }
     else {
         eval qq{ use Sjis::Tk::Entry55; };
+        eval qq{ use Sjis::Tk::MainWindow; };
     }
 }
-sub MainWindow::title { \$_[0]->wm('title', Sjis::Encode::utf8(\$_[1])); }
 USE_TK
-    s/^ (\s* use \s+ Tk [^:;]* ; \s*? \n) /$1$use_tk/oxmsg;
-    s/^ (\s* use \s+ )(Tk::(?:Ballon|BrowseEntry|ColorEditor|Dialog|DialogBox|DirTree|FileSelect|HList|ROText|Table|TixGrid|TList|Tree) [^:;]* ; \s*? ) \n /BEGIN { eval qq{ $1$2 ${1}Sjis::${2} }};\n/oxmsg;
-    s/^ (\s* use \s+ )(Tk::(?:LabFrame) [^:;]*) ; \s*? \n /BEGIN { eval qq{ $1$2; ${1}Sjis::${2}55; }};\n/oxmsg;
+    if (s/^ (\s* use \s+ Tk [^:;]* ; \s*? \n) /$1$use_tk/oxmsg) {
+        s/ \b (MainWindow \s* -> \s* new) \b /Sjis::Tk::$1/oxmsg;
+        s/^ (\s* use \s+ )(Tk::(?:Ballon|BrowseEntry|ColorEditor|Dialog|DialogBox|DirTree|FileSelect|HList|ROText|Table|TixGrid|TList|Tree) [^:;]* ; \s*? ) \n /BEGIN { eval qq{ $1$2 ${1}Sjis::${2} }};\n/oxmsg;
+        s/^ (\s* use \s+ )(Tk::(?:LabFrame) [^:;]*) ; \s*? \n /BEGIN { eval qq{ $1$2; ${1}Sjis::${2}55; }};\n/oxmsg;
+    }
 
     $slash = 'm//';
 
@@ -4538,7 +4542,7 @@ are made. To maintain backward compatibility is an effective solution still now.
 
 Shall we escape from the encode problem?
 
-=head1 THE FUTURE OF JPERL
+=head1 Yet Another Future Of
 
 JPerl is very useful software. -- Oops, note, this "JPerl" means Japanized or
 Japanese Perl, so is unrelated to Java and JVM. Therefore, I named this software
@@ -4569,17 +4573,15 @@ What's this software good for ...
 
 =item * Handling raw ShiftJIS values
 
-=item * Handling real length of ShiftJIS string
-
 =item * No UTF8 flag
 
 =item * No C programming
 
-=item * Making GUI program of Japanese version
+=item * Making Perl/Tk application of Japanese version on Microsoft Windows
 
 =back
 
-Let's make the future of JPerl.
+Let's make yet another future of.
 
 =head1 SOFTWARE COMPOSITION
 
@@ -4844,11 +4846,15 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See chapter 15: Unicode
 of ISBN 0-596-00027-8 Programming Perl Third Edition.
 
-Before the introduction of utf8 support in perl, The eq operator
+Before the introduction of Unicode support in perl, The eq operator
 just compared the strings represented by two scalars. Beginning
 with perl 5.8, eq compares two strings with simultaneous consideration
-of the utf8 flag. To explain why I made back it so, I will quote
-page 402 of Programming Perl, 3rd ed.
+of the UTF8 flag.
+
+The biggest problem is that the UTF8 flag can't synchronize to real
+encode of string. Thus you must debug about UTF8 flag, before your
+script. How to solve it by returning to a past method, I will quote
+page 402 of Programming Perl, 3rd ed. again.
 
 Ideally, I'd like to achieve these five Goals:
 
@@ -4943,7 +4949,7 @@ JPerl users will be able to maintain JPerl by Perl.
 
 =back
 
-Back when Programming Perl, 3rd ed. was written, UTF-8 flag was not born
+Back when Programming Perl, 3rd ed. was written, UTF8 flag was not born
 and Perl is designed to make the easy jobs easy. This software provide
 programming environment like at that time.
 

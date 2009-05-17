@@ -42,7 +42,7 @@ ShiftJIS はもともと過去の規格との互換性を考慮して開発されました。一般的にオペ
 
 あなたもエンコードの問題からエスケープしませんか？
 
-JPerl の未来
+もうひとつの未来
 
 JPerl はとても優れたソフトウェアです。おっと、ここでいう JPerl は日本語対応版の
 Perl のことで、Java や JVM とは関係がありません。そんなわけで、このソフトウェアの
@@ -71,17 +71,15 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
   * ShiftJIS そのままの値を扱う
 
-  * ShiftJIS 文字列の長さを扱う
-
   * UTF8 フラグを扱わないですむ
 
   * C プログラミングを行わないですむ
 
-  * 日本語版の GUI プログラムを作成する
+  * Microsoft Windows 上で日本語版の Perl/Tk アプリケーションを作成する
 
 ことができます。
 
-さあ、JPerl の未来を作りましょう。
+さあ、もうひとつの未来を作りましょう。
 
 ソフトウェアの一覧
 
@@ -147,7 +145,7 @@ JPerl 互換の機能
   * require は Esjis::require に書き換わります
 
   * use Perl::Module @list; は
-    BEGIN { Esjis::require 'Perl/Module.pm'; import Perl::Module @list; } に書き
+    BEGIN { Esjis::require 'Perl/Module.pm'; Perl::Module->import(@list); } に書き
     換わります
 
   * use Perl::Module (); は
@@ -849,11 +847,14 @@ http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html
 プログラミング Perl 第3版 VOLUME 1 (ISBN 4-87311-096-3)
 15章 Unicode 参照
 
-utf8 サポートが perl に導入される以前は、eq 演算子は、2つのスカラー変数によって
-表された文字列をただ比べていました。perl5.8 以降、eq は、2つの文字列を比べると
-同時に utf8 フラグを考慮します。なぜ私が元に戻したのかを説明するために、
-Programming Perl, 3rd ed. (邦訳 プログラミングPerl 第3版) の402ページを引用しま
-しょう。
+Unicode サポートが perl に導入される以前は、eq 演算子は、2つのスカラー変数によっ
+て表された文字列をただ比べていました。perl5.8 以降、eq は、2つの文字列を比べると
+同時に UTF8 フラグを考慮します。
+
+最大の問題は UTF8 フラグは実際の文字列の符号化と一致しないことです。だから自分で
+作ったスクリプトのデバッグの前に UTF8 フラグについてデバッグすることになります。
+昔の方法に戻すことにって、どのように解決されるのか、再び Programming Perl, 3rd ed.
+(邦訳 プログラミングPerl 第3版) の402ページを引用しましょう。
 
 理想的には、以下の5つのゴールを実現しようと考えています。
 

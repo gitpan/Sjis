@@ -13,6 +13,7 @@ Sjis/Tk/Frame.pm
 Sjis/Tk/Label.pm
 Sjis/Tk/LabFrame55.pm
 Sjis/Tk/Listbox.pm
+Sjis/Tk/MainWindow.pm
 Sjis/Tk/Message.pm
 Sjis/Tk/Radiobutton.pm
 Sjis/Tk/ROText.pm

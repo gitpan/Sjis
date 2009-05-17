@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name: Sjis
-abstract: "Yet Another JPerl with Tk" Source code filter to escape ShiftJIS
-version: 0.35
+abstract: Yet Another JPerl with Tk (Source code filter to escape ShiftJIS)
+version: 0.36
 author:
   - INABA Hitoshi <ina@cpan.org>
 license: perl
@@ -22,9 +22,7 @@ requires:
   Test::Harness: 1.1602
   perl: 5.005_03
   Win32: 0.151
-  Win32::Registry: 0.061
 recommends:
-  Win32API::File: 0.07
   Tk: 800.022
 build_requires:
   Test: 1.122

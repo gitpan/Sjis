@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.35 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.36 $ =~ m/(\d+)/xmsg;
 
 use Fcntl;
 use Symbol;
@@ -173,6 +173,7 @@ sub Esjis::split(;$$$) {
                 # is included in the resulting list, interspersed with the fields that are ordinarily returned
                 # (and so on)
 
+                local $@;
                 for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                     push @split, eval '$' . $digit;
                 }
@@ -187,6 +188,7 @@ sub Esjis::split(;$$$) {
         elsif ('' =~ m/ \A $pattern \z /xms) {
             #                                                                               v--- Look
             while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])+?)$pattern//m) {
+                local $@;
                 for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                     push @split, eval '$' . $digit;
                 }
@@ -196,6 +198,7 @@ sub Esjis::split(;$$$) {
         else {
             #                                                                               v--- Look
             while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)$pattern//m) {
+                local $@;
                 for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                     push @split, eval '$' . $digit;
                 }
@@ -208,6 +211,7 @@ sub Esjis::split(;$$$) {
             $string =~ s/ \A \s+ //oxms;
             while ((--$limit > 0) and (length($string) > 0)) {
                 if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)\s+//m) {
+                    local $@;
                     for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                         push @split, eval '$' . $digit;
                     }
@@ -218,6 +222,7 @@ sub Esjis::split(;$$$) {
             while ((--$limit > 0) and (length($string) > 0)) {
                 #                                                                            v--- Look
                 if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])+?)$pattern//m) {
+                    local $@;
                     for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                         push @split, eval '$' . $digit;
                     }
@@ -228,6 +233,7 @@ sub Esjis::split(;$$$) {
             while ((--$limit > 0) and (length($string) > 0)) {
                 #                                                                            v--- Look
                 if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)$pattern//m) {
+                    local $@;
                     for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                         push @split, eval '$' . $digit;
                     }
@@ -487,6 +493,7 @@ sub Esjis::shift_matched_var() {
     # $4 --> $3
     my $dollar1 = $1;
 
+    local $@;
     for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
         eval sprintf '*%d = *%d', $digit, $digit+1;
     }
@@ -3460,6 +3467,7 @@ ITER_DO:
 
                 no strict;
                 local $^W = $_warning;
+                local $@;
                 $result = eval $script;
 
                 last ITER_DO;

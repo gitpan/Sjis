@@ -1,153 +1,143 @@
-@rem = '--*-Perl-*--
 @echo off
-if "%PERL56BIN%" == "" set PERL56BIN=perl
+rem version 1.0.4
+rem ======================================================================
+rem 
+rem  perl56 -  execute perlscript on the perl5.6 without %PATH% settings
+rem 
+rem  Copyright (c) 2008, 2009 INABA Hitoshi (ina@cpan.org)
+rem 
+rem ======================================================================
+
 if "%OS%" == "Windows_NT" goto WinNT
-%PERL56BIN% -x -S "%0" %1 %2 %3 %4 %5 %6 %7 %8 %9
-goto endofperl
+
+:Win95
+  if "%PERL56BIN%" == "" goto SetWin95
+  %PERL56BIN% %1 %2 %3 %4 %5 %6 %7 %8 %9
+goto END
+
+:SetWin95
+  if not exist C:\AUTOEXEC.BAT goto L1
+  type C:\AUTOEXEC.BAT | find "SET PERL56BIN=" > nul
+  if not %ERRORLEVEL% == 0 goto L1
+  echo -----------------------------------------------------------
+  echo Description "SET PERL56BIN=" already exists in C:\AUTOEXEC.BAT.
+  echo Reboot computer to enable PERL56BIN, and try again.
+  echo -----------------------------------------------------------
+goto END
+
+:L1
+  if exist Z:\Perl56\bin\perl.exe echo SET PERL56BIN=Z:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist Y:\Perl56\bin\perl.exe echo SET PERL56BIN=Y:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist X:\Perl56\bin\perl.exe echo SET PERL56BIN=X:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist W:\Perl56\bin\perl.exe echo SET PERL56BIN=W:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist V:\Perl56\bin\perl.exe echo SET PERL56BIN=V:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist U:\Perl56\bin\perl.exe echo SET PERL56BIN=U:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist T:\Perl56\bin\perl.exe echo SET PERL56BIN=T:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist S:\Perl56\bin\perl.exe echo SET PERL56BIN=S:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist R:\Perl56\bin\perl.exe echo SET PERL56BIN=R:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist Q:\Perl56\bin\perl.exe echo SET PERL56BIN=Q:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist P:\Perl56\bin\perl.exe echo SET PERL56BIN=P:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist O:\Perl56\bin\perl.exe echo SET PERL56BIN=O:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist N:\Perl56\bin\perl.exe echo SET PERL56BIN=N:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist M:\Perl56\bin\perl.exe echo SET PERL56BIN=M:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist L:\Perl56\bin\perl.exe echo SET PERL56BIN=L:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist K:\Perl56\bin\perl.exe echo SET PERL56BIN=K:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist J:\Perl56\bin\perl.exe echo SET PERL56BIN=J:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist I:\Perl56\bin\perl.exe echo SET PERL56BIN=I:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist H:\Perl56\bin\perl.exe echo SET PERL56BIN=H:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist G:\Perl56\bin\perl.exe echo SET PERL56BIN=G:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist F:\Perl56\bin\perl.exe echo SET PERL56BIN=F:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist E:\Perl56\bin\perl.exe echo SET PERL56BIN=E:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist D:\Perl56\bin\perl.exe echo SET PERL56BIN=D:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist C:\Perl56\bin\perl.exe echo SET PERL56BIN=C:\Perl56\bin\perl.exe>PERL56BIN.$$$
+  if exist PERL56BIN.$$$ goto L2
+
+  echo ***********************************************************
+  echo "\Perl56\bin\perl.exe" not found in C: to Z: drives.
+  echo ***********************************************************
+goto END
+
+:L2
+  echo ***********************************************************
+  echo Environment variable PERL56BIN not set.
+  echo Do you add following description to C:\AUTOEXEC.BAT?
+  echo 
+  type PERL56BIN.$$$
+  echo 
+  echo Press [Enter] to Yes continue, or [Ctrl]+[C] to No, quit.
+  echo ***********************************************************
+  pause
+  type PERL56BIN.$$$ >> C:\AUTOEXEC.BAT
+  del PERL56BIN.$$$
+  echo -----------------------------------------------------------
+  echo Reboot computer to enable PERL56BIN, and try again.
+  echo -----------------------------------------------------------
+goto END
+
 :WinNT
-%PERL56BIN% -x -S "%0" %*
-if NOT "%COMSPEC%" == "%SystemRoot%\system32\cmd.exe" goto endofperl
-if %errorlevel% == 9009 echo You do not have Perl in your PATH.
-exit /b %errorlevel%
-goto endofperl
-@rem ';
-#!perl
-#line 16
-my $VERSION = "1.0.3"; undef @rem;
-######################################################################
-#
-# perl56 -  execute perlscript on the perl5.6 without %PATH% settings
-#
-# Copyright (c) 2008, 2009 INABA Hitoshi <ina@cpan.org>
-#
-######################################################################
+  if "%PERL56BIN%" == "" goto SetWinNT
+  %PERL56BIN% %*
+  exit /b %ERRORLEVEL%
+goto END
 
-use strict;
-use Fcntl;
-use Symbol;
-use Win32;
-use Win32::Registry;
+:SetWinNT
+  if exist Z:\Perl56\bin\perl.exe echo "PERL56BIN"="Z:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist Y:\Perl56\bin\perl.exe echo "PERL56BIN"="Y:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist X:\Perl56\bin\perl.exe echo "PERL56BIN"="X:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist W:\Perl56\bin\perl.exe echo "PERL56BIN"="W:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist V:\Perl56\bin\perl.exe echo "PERL56BIN"="V:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist U:\Perl56\bin\perl.exe echo "PERL56BIN"="U:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist T:\Perl56\bin\perl.exe echo "PERL56BIN"="T:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist S:\Perl56\bin\perl.exe echo "PERL56BIN"="S:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist R:\Perl56\bin\perl.exe echo "PERL56BIN"="R:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist Q:\Perl56\bin\perl.exe echo "PERL56BIN"="Q:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist P:\Perl56\bin\perl.exe echo "PERL56BIN"="P:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist O:\Perl56\bin\perl.exe echo "PERL56BIN"="O:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist N:\Perl56\bin\perl.exe echo "PERL56BIN"="N:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist M:\Perl56\bin\perl.exe echo "PERL56BIN"="M:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist L:\Perl56\bin\perl.exe echo "PERL56BIN"="L:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist K:\Perl56\bin\perl.exe echo "PERL56BIN"="K:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist J:\Perl56\bin\perl.exe echo "PERL56BIN"="J:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist I:\Perl56\bin\perl.exe echo "PERL56BIN"="I:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist H:\Perl56\bin\perl.exe echo "PERL56BIN"="H:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist G:\Perl56\bin\perl.exe echo "PERL56BIN"="G:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist F:\Perl56\bin\perl.exe echo "PERL56BIN"="F:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist E:\Perl56\bin\perl.exe echo "PERL56BIN"="E:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist D:\Perl56\bin\perl.exe echo "PERL56BIN"="D:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist C:\Perl56\bin\perl.exe echo "PERL56BIN"="C:\\Perl56\\bin\\perl.exe">PERL56BIN.$$$
+  if exist PERL56BIN.$$$ goto L3
 
-# print usage
-unless (@ARGV) {
-    die <<END;
+  echo ***********************************************************
+  echo "\Perl56\bin\perl.exe" not found in C: to Z: drives.
+  echo ***********************************************************
+goto END
 
-$0 ver.$VERSION
+:L3
+  echo ***********************************************************
+  echo Environment variable PERL56BIN not set.
+  echo Do you set following registry?
+  echo.
+  echo [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment]
+  type PERL56BIN.$$$
+  echo.
+  echo Press [Enter] to Yes continue, or [Ctrl]+[C] to No, quit.
+  echo ***********************************************************
+  pause
+  ver | find "Windows NT" > nul
+  if     %ERRORLEVEL% == 0 echo REGEDIT4>PERL56BIN.REG
+  if not %ERRORLEVEL% == 0 echo Windows Registry Editor Version 5.00>PERL56BIN.REG
+  echo.>>PERL56BIN.REG
+  echo [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment]>>PERL56BIN.REG
+  type PERL56BIN.$$$ >> PERL56BIN.REG
+  PERL56BIN.REG
+  del PERL56BIN.REG
+  del PERL56BIN.$$$
+  echo -----------------------------------------------------------
+  echo Reboot computer to enable PERL56BIN, and try again.
+  echo -----------------------------------------------------------
+goto END
 
-usage:
-
-C:\\>$0 perlscript.pl ...
-
-Find perl5.6 order by,
-  1st, C:\\Perl56\\bin\\perl.exe
-  2nd, D:\\Perl56\\bin\\perl.exe
-  3rd, E:\\Perl56\\bin\\perl.exe
-                :
-                :
-
-When found it, then execute perlscript on the its perl.exe.
-
-END
-}
-
-# quote by "" if include space
-@ARGV = map { / / ? qq{"$_"} : $_ } @ARGV;
-
-# if this script running under perl5.6
-if ($] =~ /^5\.006/) {
-    exit system $^X, @ARGV;
-}
-
-# execute by environment variable PERL56BIN
-if (defined $ENV{'PERL56BIN'} and -e $ENV{'PERL56BIN'}) {
-    exit system $ENV{'PERL56BIN'}, @ARGV;
-}
-
-# find perl5.6 in the computer
-my @perlbin = ();
-eval <<'END';
-use Win32API::File qw(:DRIVE_);
-
-Win32API::File::GetLogicalDriveStrings(4*26+1, my $LogicalDriveStrings);
-for my $driveroot (split /\0/, $LogicalDriveStrings) {
-    my $type = Win32API::File::GetDriveType($driveroot);
-    # 0 DRIVE_UNKNOWN
-    # 1 DRIVE_NO_ROOT_DIR
-    # 2 DRIVE_REMOVABLE
-    # 3 DRIVE_FIXED
-    # 4 DRIVE_REMOTE
-    # 5 DRIVE_CDROM
-    # 6 DRIVE_RAMDISK
-    if (($type == DRIVE_FIXED)  or
-        ($type == DRIVE_REMOTE) or
-        ($type == DRIVE_RAMDISK)
-    ) {
-        if (-e "${driveroot}perl56\\bin\\perl.exe") {
-            push @perlbin, "${driveroot}perl56\\bin\\perl.exe";
-        }
-    }
-}
-END
-
-# get drive list by 'net share' command
-# Windows NT, Windows 2000, Windows XP, Windows Server 2003, Windows Vista
-# maybe also Windows Server 2008
-if ($@) {
-    while (`net share 2>NUL` =~ /\b([A-Z])\$ +\1:\\ +Default share\b/ig) {
-        if (-e "$1:\\perl56\\bin\\perl.exe") {
-            push @perlbin, "$1:\\perl56\\bin\\perl.exe";
-        }
-    }
-}
-
-my $perlbin;
-
-# perl5.6 not found
-if (@perlbin == 0) {
-    die "$0: nothing \\Perl56\\bin\\perl.exe nowhere.\n";
-}
-
-# only one perl5.6 found
-elsif (@perlbin == 1) {
-    $perlbin = $perlbin[0];
-}
-
-# if many perl5.6 found
-elsif (@perlbin > 1) {
-
-    # select one perl.exe
-    print STDERR "This computer has many perl.exe.\n";
-    print STDERR map {"$_\n"} @perlbin;
-    print STDERR "Which perl.exe do you use? (exit by [Ctrl]+[C])";
-    while (1) {
-        print STDERR "drive = ";
-        my $drive = <STDIN>;
-        $drive = substr($drive,0,1);
-        if (($perlbin) = grep /^$drive/i, @perlbin) {
-            last;
-        }
-    }
-}
-
-# register environment variable PERL56BIN
-if (Win32::IsWinNT) {
-    my $ENVIRONMENT_KEY = 'SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment';
-    my $Environment = 0;
-    if ($main::HKEY_LOCAL_MACHINE->Open($ENVIRONMENT_KEY, $Environment)) {
-        $Environment->SetValueEx('PERL56BIN', 0, REG_SZ, $perlbin);
-    }
-}
-else {
-    my $fh = Symbol::gensym();
-    if (sysopen($fh, substr($ENV{'WINDIR'},0,2) . '\\AUTOEXEC.BAT', O_WRONLY | O_APPEND | O_CREAT)) {
-        print {$fh} "SET PERL56BIN=$perlbin\n";
-        close $fh;
-    }
-}
-
-exit system $perlbin, @ARGV;
-
-__END__
+The world wants practical solutions anytime.
 
 =pod
 
@@ -161,21 +151,21 @@ B<perl56> [perlscript.pl]
 
 =head1 DESCRIPTION
 
-This program is useful when perl5.6 and perl5.6 are on the one computer.
-Set perl5.6's bin directory to environment variable %PATH%, do not set perl5.6's
-bin directory to %PATH%.
+This software is useful when perl5.6 and other version of perl are on the one
+computer. Do not set perl5.6's bin directory to %PATH%.
 
 It is necessary to install perl5.6 in "\Perl56\bin" directory of the drive of
-either. This program is executed by perl5.6, and find the perl5.6 and execute it.
+either. This software is executed by perl5.6, and find the perl5.6 and execute it.
 
  Find perl5.6 order by,
-   1st, C:\Perl56\bin\perl.exe
-   2nd, D:\Perl56\bin\perl.exe
-   3rd, E:\Perl56\bin\perl.exe
+     Z:\Perl56\bin\perl.exe
+     Y:\Perl56\bin\perl.exe
+     X:\Perl56\bin\perl.exe
                  :
                  :
+     C:\Perl56\bin\perl.exe
 
-When found it, then execute perlscript on the its perl.exe.
+When found it at last, set its path to environment variable PERL56BIN.
 
 =head1 EXAMPLES
 
@@ -209,4 +199,4 @@ perl
 
 =cut
 
-:endofperl
+:END

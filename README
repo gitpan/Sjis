@@ -84,8 +84,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 TODO
 
-   Tk::getOpenFile
-   Tk::getSaveFile
    Tk::Menu
    Tk::MenuButton
    Tk::HList

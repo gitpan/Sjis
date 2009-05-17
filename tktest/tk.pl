@@ -6,7 +6,12 @@ use Tk;
 $mw = MainWindow->new;
 $mw->title("“ú–{Œêƒ\‡@ûü±²³´µ");
 
-$mw->Button(@font, '-text' => '“ú–{Œêƒ\‡@ûü±²³´µ')->pack;
+$mw->Button(@font, '-text' => '“ú–{Œêƒ\‡@ûü±²³´µ', '-command' => sub {
+    my $openfile = $mw->getOpenFile();
+    print "openfile=($openfile)\n";
+    my $savefile = $mw->getSaveFile();
+    print "savefile=($savefile)\n";
+})->pack;
 $mw->Label(@font, '-text' => '“ú–{Œêƒ\‡@ûü±²³´µ')->pack;
 $mw->Checkbutton(@font, '-text' => '“ú–{Œêƒ\‡@ûü±²³´µ')->pack;
 $mw->Radiobutton(@font, '-text' => '“ú–{Œêƒ\‡@ûü±²³´µ')->pack;

@@ -138,15 +138,36 @@ for my $target (@ARGV) {
         my $tar = Archive::Tar->new;
         for my $file (@file) {
             if (-e $file) {
-                mkpath(dirname("$tardir/$file"),0,0777);
+                mkpath(dirname("$tardir/$file"), 0, 0777);
                 print STDERR "copy $file $tardir/$file\n";
                 copy($file, "$tardir/$file");
-                $tar->add_files("$tardir/$file");
+
+#-----------------------------------------------------------------------------
+# Sunday December 21, 2008 07:38 PM 
+# Fixing world writable files in tarball before upload to CPAN [ #38127 ]
+# http://use.perl.org/~bart/journal/38127
+#-----------------------------------------------------------------------------
+#               $tar->add_files("$tardir/$file");
+#-----------------------------------------------------------------------------
+                my $fh = Symbol::gensym();
+                sysopen($fh, $file, O_RDONLY) || die "Can't open file: $file\n";
+                binmode $fh;
+                local $/ = undef; # slurp mode
+                my $data = <$fh>;
+                close $fh;
+                if ($file =~ m/\. (com|exe|bat|pl) \z/oxmsi) {
+                    $tar->add_data("$tardir/$file", $data, {'mode' => 0775});
+                }
+                else {
+                    $tar->add_data("$tardir/$file", $data, {'mode' => 0664});
+                }
+#-----------------------------------------------------------------------------
             }
             else {
                 die "file: $file is not exists.\n";
             }
         }
+
         my $tarfile = "$tardir.tar";
         $tar->write($tarfile);
         rmtree($tardir,0,0);

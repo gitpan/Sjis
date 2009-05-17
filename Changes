@@ -1,5 +1,12 @@
 Revision history for Perl extension Sjis.
 
+0.36  2009/05/17 00:00:00
+	- do local $@ before eval.
+	- support Tk::getOpenFile and Tk::getSaveFile.
+	- rewrite in pure batch file perl55.bat, perl56.bat, perl58.bat and perl510.bat.
+	- fixing world writable files in tarball before upload to CPAN [ #38127 ].
+	; created by INABA Hitoshi
+
 0.35  2009/05/06 00:00:00
 	- support do, require and use for user library.
 	- upper compatible function ord and reverse functions only when demanded.
