@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.36 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.37 $ =~ m/(\d+)/xmsg;
 
 use Fcntl;
 use Symbol;
@@ -716,8 +716,8 @@ sub _charlist_tr {
 
             # range of double octet code
             elsif (
-                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms) and
-                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms)
+                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x00-\xFF] \z/oxms)
             ) {
                 my($begin1,$begin2) = unpack 'CC', $char[$i-1];
                 my($end1,$end2)     = unpack 'CC', $char[$i+1];
@@ -871,8 +871,8 @@ sub _charlist_qr {
 
             # range of double octet code
             elsif (
-                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms) and
-                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms)
+                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x00-\xFF] \z/oxms)
             ) {
                 my($begin1,$begin2) = unpack 'CC', $char[$i-1];
                 my($end1,  $end2)   = unpack 'CC', $char[$i+1];
@@ -1111,8 +1111,8 @@ sub _charlist_not_qr {
 
             # range of double octet code
             elsif (
-                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms) and
-                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms)
+                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x00-\xFF] \z/oxms)
             ) {
                 my($begin1,$begin2) = unpack 'CC', $char[$i-1];
                 my($end1,  $end2)   = unpack 'CC', $char[$i+1];

@@ -1,39 +1,40 @@
 NAME
 
-      Sjis - "Yet Another JPerl with Tk" Source code filter for ShiftJIS script
+      Sjis - "Yet Another JPerl" Source code filter for ShiftJIS script
 
 SYNOPSIS
 
-    In yourscript.pl:
+  Usage: A
 
-      use Sjis version qw(ord reverse);
+    In ShiftJIS_script.pl:
+      use Sjis;
       use Sjis version;
       use Sjis qw(ord reverse);
-      use Sjis;
+      use Sjis version qw(ord reverse);
 
-    At command prompt:
+    And on command prompt:
+      perl     ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl510  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
 
-      perl     yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl55   yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl56   yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl58   yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl510  yourscript.pl  wild*  *card  and  '*quote*'  are  ok  ...
+  Usage: B
 
-    Or command prompt:
-
+    On command prompt:
       C:\>perl  Sjis.pm  ShiftJIS_script.pl  >  Escaped_script.pl.e
+
+    And
       C:\>perl  Escaped_script.pl.e
 
 DESCRIPTION
 
-      This software is "Yet Another JPerl with Tk" written by Perl.
-      We can write the Perl/Tk script in ShiftJIS again.
+      This software is "Yet Another JPerl" written by Perl.
+      We can write Perl scripts in ShiftJIS, without UTF8 flag, again.
 
-      This "JPerl" is Japanized or Japanese Perl.
+      This "JPerl" means "Japanized Perl" or "Japanese Perl".
       So is unrelated to Mr. Patrick E. Martin's JPerl -- Perl 5 implemented in Java.
       And is unrelated to Mr. Ben Evans's jPerl -- Perl on the JVM, too.
 
-      This software is a beta2 version for the public comment.
+      This software is a beta3 version for final public comment.
 
 INSTALLATION
 
@@ -44,14 +45,8 @@ To install this software, type the following:
    make.bat test
 
    make.bat install          --- install to current using Perl
-   perl55 make.bat instal    --- install to Perl5.5
-   perl56 make.bat instal    --- install to Perl5.6
    perl58 make.bat instal    --- install to Perl5.8
    perl510 make.bat install  --- install to Perl5.10
-   perl make-hp15.pl         --- make HP15.pm     and Ehp15.pm
-   perl make-big5plus.pl     --- make Big5Plus.pm and Ebig5plus.pm
-   perl make-gbk.pl          --- make GBK.pm      and Egbk.pm
-   perl make-uhc.pl          --- make UHC.pm      and Euhc.pm
 
 MAKE OTHER
 
@@ -62,12 +57,8 @@ PROGRAM COMPOSITION
 
    Sjis.pm         --- source code filter to escape ShiftJIS
    Esjis.pm        --- run-time routines for Sjis.pm
-   perl55.bat      --- find and run perl5.5  without %PATH% settings
-   perl56.bat      --- find and run perl5.6  without %PATH% settings
    perl58.bat      --- find and run perl5.8  without %PATH% settings
    perl510.bat     --- find and run perl5.10 without %PATH% settings
-   Sjis::Encode.pm --- UTF-8 encoder/decoder for ShiftJIS script
-   Sjis::Tk::*     --- Tk modules on Sjis software
 
 DEPENDENCIES
 
@@ -81,20 +72,6 @@ modify it under the same terms as Perl itself. See perlartistic.
 This software is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-TODO
-
-   Tk::Menu
-   Tk::MenuButton
-   Tk::HList
-   Tk::Tree
-   Tk::DirTree
-   Tk::Balloon
-   Tk::BrowseEntry
-   Tk::FileSelect
-   Tk::LabFrame
-   Tk::TixGrid
-   Tk::TList
 
 MAINTAINER
 

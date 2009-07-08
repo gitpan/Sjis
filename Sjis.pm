@@ -1,7 +1,7 @@
 package Sjis;
 ######################################################################
 #
-# Sjis - "Yet Another JPerl with Tk" Source code filter to escape ShiftJIS
+# Sjis - "Yet Another JPerl" Source code filter to escape ShiftJIS
 #
 # Copyright (c) 2008, 2009 INABA Hitoshi <ina@cpan.org>
 #
@@ -12,7 +12,7 @@ use 5.00503;
 use Esjis;
 use vars qw($VERSION);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.36 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.37 $ =~ m/(\d+)/oxmsg;
 
 use Fcntl;
 use Symbol;
@@ -1949,7 +1949,7 @@ E_STRING_LOOP:
         elsif ($string =~ /\G (\`) ((?:$qq_char)*?) (\`) /oxgc)                              { $e_string .= e_qq('',$1,$3,$2); }
 
 # <<= <=> <= < operator
-        elsif ($string =~ /\G (<<=|<=>|<=|<) (?= \s* [A-Za-z_0-9'"`\$\@\&\*\(\+\-] )/oxgc)   { $e_string .= $1; }
+        elsif ($string =~ /\G (<<=|<=>|<=|<) (?= \s* [A-Za-z_0-9'"`\$\@\&\*\(\+\-] )/oxgc)   { $e_string .= $1;                }
 
 # <FILEHANDLE>
         elsif ($string =~ /\G (<[\$]?[A-Za-z_][A-Za-z_0-9]*>) /oxgc)                         { $e_string .= $1;                }
@@ -4126,8 +4126,8 @@ sub charlist_qr {
 
             # range of double octet code
             elsif (
-                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms) and
-                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms)
+                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x00-\xFF] \z/oxms)
             ) {
                 my($begin1,$begin2) = unpack 'CC', $char[$i-1];
                 my($end1,  $end2)   = unpack 'CC', $char[$i+1];
@@ -4360,8 +4360,8 @@ sub charlist_not_qr {
 
             # range of double octet code
             elsif (
-                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms) and
-                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC] [\x00-\xFF] \z/oxms)
+                ($char[$i-1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x00-\xFF] \z/oxms) and
+                ($char[$i+1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x00-\xFF] \z/oxms)
             ) {
                 my($begin1,$begin2) = unpack 'CC', $char[$i-1];
                 my($end1,  $end2)   = unpack 'CC', $char[$i+1];
@@ -4505,14 +4505,14 @@ __END__
 
 =head1 NAME
 
-Sjis - "Yet Another JPerl with Tk" Source code filter to escape ShiftJIS
+Sjis - "Yet Another JPerl" Source code filter to escape ShiftJIS
 
 =head1 SYNOPSIS
 
-  use Sjis version qw(ord reverse);
+  use Sjis;
   use Sjis version;         --- require version
   use Sjis qw(ord reverse); --- demand enhanced feature of ord and reverse
-  use Sjis;
+  use Sjis version qw(ord reverse);
 
   # "no Sjis;" not supported
 
@@ -4571,32 +4571,24 @@ What's this software good for ...
 
 =over 2
 
-=item * Handling raw ShiftJIS values
+=item * Can handling raw ShiftJIS values
+
+=item * Can re-use past code and how to
 
 =item * No UTF8 flag
 
-=item * No C programming
-
-=item * Making Perl/Tk application of Japanese version on Microsoft Windows
+=item * No C programming (for maintain JPerl)
 
 =back
 
-Let's make yet another future of.
+Let's make yet another future by JPerl's future.
 
 =head1 SOFTWARE COMPOSITION
 
    Sjis.pm          --- source code filter to escape ShiftJIS
    Esjis.pm         --- run-time routines for Sjis.pm
-   perl55.com       --- find and run perl5.5  without %PATH% settings
-   perl56.com       --- find and run perl5.6  without %PATH% settings
-   perl58.com       --- find and run perl5.8  without %PATH% settings
-   perl510.com      --- find and run perl5.10 without %PATH% settings
-   make-hp15.pl     --- make HP15.pm and Ehp15.pm
-   make-big5plus.pl --- make Big5Plus.pm and Ebig5plus.pm
-   make-gbk.pl      --- make GBK.pm and Egbk.pm
-   make-uhc.pl      --- make UHC.pm and Euhc.pm
-   Sjis::Encode.pm  --- UTF-8 encoder/decoder for ShiftJIS script
-   Sjis::Tk::*      --- Tk modules on Sjis software
+   perl58.bat       --- find and run perl5.8  without %PATH% settings
+   perl510.bat      --- find and run perl5.10 without %PATH% settings
 
 =head1 JPerl COMPATIBLE FUNCTIONS
 
@@ -4841,6 +4833,360 @@ This software is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+=head1 ShiftJIS Encoding
+
+ShiftJIS encoding is the most common encoding method used on Japanese
+computers, developed by Microsoft Corporation.
+
+ShiftJIS is sometimes referred to as MS Kanji (Microsoft Kanji) or SJIS
+(an abbreviation for ShiftJIS).
+
+Historically, ShiftJIS was so named because of the way the code positions
+for two-octet characters shifted around the code positions for half-width
+katakana -- Japanese computer users originally used only half-width katakana,
+so ShiftJIS was developed in order to maintain backword compatibility.
+
+A two-octet-per-character mode in ShiftJIS is initiated with a octet having
+a hexadecimal value ranging between 0x81-0x9F or 0xE0-0xEF. This octet is
+subsequently treated as the first octet of an expected two-octet sequence.
+The following (second) octet must have a hexadecimal value ranging between
+0x40-0x7E or 0x80-0xFC. Note that the first octet's range falls entirely in
+the extended ASCII character set -- in the eight-bit character set with the
+high-order bit on. Note that ShiftJIS also encodes half-width katakana and
+ASCII/JIS-Roman.
+
+Some definitions (in particular, corporate definitions) of ShiftJIS also
+contain encoding blocks for user-defined characters or even an encoded position
+for a half-width katakana space character. Such encoding blocks and encoded
+positions are not useful if true information interchange is desired, because
+they are encoded in such a way that they do not convert to encoded positions
+in other Japanese encoding methods (that is, JIS and EUC).
+
+=head1 ShiftJIS IN WIKIPEDIA
+
+Shift JIS (2008.02.15 15:02:00 JST). In Wikipedia: The Free Encyclopedia.
+Retrieved from
+L<http://en.wikipedia.org/wiki/Shift_JIS>
+
+Shift JIS (also SJIS, MIME name Shift_JIS) is a character encoding
+for the Japanese language originally developed by a Japanese company
+called ASCII Corporation in conjunction with Microsoft and standardized
+as JIS X 0208 Appendix 1. It is based on character sets defined within
+JIS standards JIS X 0201:1997 (for the single-byte characters) and
+JIS X 0208:1997 (for the double byte characters). The lead bytes for
+the double byte characters are "shifted" around the 64 halfwidth katakana
+characters in the single-byte range 0xA1 to 0xDF. The single-byte
+characters 0x00 to 0x7F match the ASCII encoding, except for a yen sign
+at 0x5C and an overline at 0x7E in place of the ASCII character set's
+backslash and tilde respectively. On the web, 0x5C is still used as the
+Perl Script escape character. The single-byte characters from 0xA1 to 0xDF
+map to the half-width katakana characters found in JIS X 0201. 
+
+Shift JIS requires an 8-bit medium for transmission. It is fully backwards
+compatible with the legacy JIS X 0201 single-byte encoding, meaning it
+supports half-width katakana and that any valid JIS X 0201 string is also
+a valid Shift JIS string. However Shift JIS only guarantees that the first
+byte will be in the upper ASCII range; the value of the second byte can be
+either high or low. This makes reliable Shift JIS detection difficult.
+On the other hand, the competing 8-bit format EUC-JP, which does not
+support single-byte halfwidth katakana, allows for a much cleaner and
+direct conversion to and from JIS X 0208 codepoints, as all upper-ASCII
+bytes are part of a double-byte character and all lower-ASCII bytes are
+part of a single-byte character.
+
+Many different versions of Shift JIS exist. There are two areas for
+expansion: Firstly, JIS X 0208 does not fill the whole 94x94 space encoded
+for it in Shift JIS, therefore there is room for more characters here ?
+these are really extensions to JIS X 0208 rather than to Shift JIS itself.
+The most popular extension here is to the Windows-31J (otherwise known as
+Code page 932) encoding popularized by Microsoft, although Microsoft
+itself does not recognize the Windows-31J name and instead calls that
+variation "shift_jis". Secondly, Shift JIS has more encoding space than is
+needed for JIS X 0201 and JIS X 0208, and this space can and is used for
+yet more characters. The space with lead bytes 0xF5 to 0xF9 is used by
+Japanese mobile phone operators for pictographs for use in E-mail, for
+example (KDDI goes further and defines hundreds more in the space with
+lead bytes 0xF3 and 0xF4).
+
+Beyond even this there have been numerous minor variations made on Shift
+JIS, with individual characters here and there altered. Most of these
+extensions and variants have no IANA registration, so there is much scope
+for confusion if the extensions are used. Microsoft Code Page 932 is
+registered separately from Shift JIS.
+IBM CCSID 943 has the same extensions as Code Page 932.
+As with most code pages and encodings it is recommended that Unicode be
+used instead.
+
+=head1 "ShiftJIS" IN THIS SOFTWARE
+
+ The "ShiftJIS" in this software means widely codeset than general
+ShiftJIS. This software use two algorithms to handle ShiftJIS.
+
+=over 2
+
+=item * ALGORITHM #1
+
+ When the character is taken out of the octet string, it is necessary to
+distinguish a single octet character and the double octet character.
+The distinction is done only by first octet.
+
+    Single octet code is:
+      0x00-0x80, 0xA0-0xDF and 0xFD-0xFF
+
+    Double octet code is:
+      First octet   0x81-0x9F, 0xE0-0xEF and 0xF0-0xFC
+      Second octet  0x00-0xFF (All octet)
+
+    MALFORMED single octet code is:
+      0x81-0x9F and 0xE0-0xFC
+      * Final octet of string like first octet of double octet code
+
+ So this "ShiftJIS" can handle any code of ShiftJIS based code without
+Hewlett-Packard HP-15 and Informix Ascii 'INFORMIX V6 ALS' is triple octet
+code. (I'm sorry, these users.)
+
+See also code table:
+
+         Single octet code
+
+   0 1 2 3 4 5 6 7 8 9 A B C D E F 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x00-0x80
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 1|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 2|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 3|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 8|*| | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 9| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xA0-0xDF
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ E| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ F| | | | | | | | | | | | | |*|*|*| 0xFD-0xFF
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+                                 Double octet code
+            First octet                                     Second octet
+
+   0 1 2 3 4 5 6 7 8 9 A B C D E F                 0 1 2 3 4 5 6 7 8 9 A B C D E F 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0| | | | | | | | | | | | | | | | |              0|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x00-0xFF
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 1| | | | | | | | | | | | | | | | |              1|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 2| | | | | | | | | | | | | | | | |              2|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 3| | | | | | | | | | | | | | | | |              3|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 4| | | | | | | | | | | | | | | | |              4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 5| | | | | | | | | | | | | | | | |              5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 6| | | | | | | | | | | | | | | | |              6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 7| | | | | | | | | | | | | | | | |              7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 8| |*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x81-0x9F    8|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|              9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ A| | | | | | | | | | | | | | | | |              A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ B| | | | | | | | | | | | | | | | |              B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ C| | | | | | | | | | | | | | | | |              C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ D| | | | | | | | | | | | | | | | |              D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xE0-0xFC    E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ F|*|*|*|*|*|*|*|*|*|*|*|*|*| | | |              F|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+    *MALFORMED* Single octet code
+
+Final octet of string like first octet of double octet code
+
+Even if malformed, it is not ignored and not deleted automatically.
+For example, Esjis::chop function returns this octet.
+
+   0 1 2 3 4 5 6 7 8 9 A B C D E F 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 1| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 2| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 3| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 4| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 5| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 6| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 7| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 8| |M|M|M|M|M|M|M|M|M|M|M|M|M|M|M| 0x81-0x9F
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 9|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ A| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ B| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ C| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ D| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ E|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|M|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ F|M|M|M|M|M|M|M|M|M|M|M|M|M| | | |  0xE0-0xFC
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+The ShiftJIS list via vendors:
+L<http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html>
+
+ DEC PC                         0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ DEC WS                         0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Fujitsu TrueType font (PC)     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Fujitsu FontCity font (PC)     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Hitachi PC                     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Hitachi WS                     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ IBM                            0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ NEC Windows (PC)               0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ NEC DOS (PC)                   0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ SONY NEWS-OS                   0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Sun Wabi                       0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Unisys PC                      0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ HP Japan Japanese HP-15        0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ AT&T Japan                     0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Mitsubishi Electric FONTRUNNER 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Concurrent Japan               0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+ Informix ASCII INFORMIX V6 ALS 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC), (0xFD)(0xA1-0xFE)(0xA1-0xFE)
+ Oracle Oracle7 (Release 7.1.3) 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x00-0xFF)
+ Sybase SQL Server, Open Server 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
+
+Understanding Japanese Information Processing(ISBN 10: 1-56592-043-0 | ISBN 13: 9781565920439)
+
+ Hewlett-Packard HP-15          0x00-0x7F, 0xA1-0xDF, (0x80-0xA0, 0xE0-0xFE)(0x21-0x7E, 0x80-0xFF)
+
+=item * ALGORITHM #2
+
+Against algorithm.1, when the range of the character by tr/// is specified, only the
+following character codes are effective.
+
+    Single octet code is:
+      0x00-0x80, 0xA0-0xDF and 0xFD-0xFF
+
+    Double octet code is:
+      First octet   0x81-0x9F, 0xE0-0xEF and 0xF0-0xFC
+      Second octet  0x40-0x7E and 0x80-0xFC
+
+For instance, [\x81\x00-\x82\xFF] in script means [\x81\x82][\x40-\x7E\x80-\xFC].
+
+See also code table:
+
+         Single octet code
+
+   0 1 2 3 4 5 6 7 8 9 A B C D E F 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x00-0x80
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 1|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 2|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 3|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 8|*| | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 9| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xA0-0xDF
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ E| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ F| | | | | | | | | | | | | |*|*|*| 0xFD-0xFF
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+                                 Double octet code
+            First octet                                     Second octet
+
+   0 1 2 3 4 5 6 7 8 9 A B C D E F                 0 1 2 3 4 5 6 7 8 9 A B C D E F 
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0| | | | | | | | | | | | | | | | |              0| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 1| | | | | | | | | | | | | | | | |              1| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 2| | | | | | | | | | | | | | | | |              2| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 3| | | | | | | | | | | | | | | | |              3| | | | | | | | | | | | | | | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 4| | | | | | | | | | | | | | | | |              4|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x40-0x7E
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 5| | | | | | | | | | | | | | | | |              5|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 6| | | | | | | | | | | | | | | | |              6|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 7| | | | | | | | | | | | | | | | |              7|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 8| |*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x81-0x9F    8|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0x80-0xFC
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|              9|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ A| | | | | | | | | | | | | | | | |              A|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ B| | | | | | | | | | | | | | | | |              B|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ C| | | | | | | | | | | | | | | | |              C|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ D| | | | | | | | | | | | | | | | |              D|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*| 0xE0-0xFC    E|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|*|
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ F|*|*|*|*|*|*|*|*|*|*|*|*|*| | | |              F|*|*|*|*|*|*|*|*|*|*|*|*|*| | | |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
 =head1 MY GOAL
 
 See chapter 15: Unicode
@@ -4851,9 +5197,14 @@ just compared the strings represented by two scalars. Beginning
 with perl 5.8, eq compares two strings with simultaneous consideration
 of the UTF8 flag.
 
-The biggest problem is that the UTF8 flag can't synchronize to real
-encode of string. Thus you must debug about UTF8 flag, before your
-script. How to solve it by returning to a past method, I will quote
+This change consequentially made a big gap between a past script and
+present script. Both scripts cannot re-use the code mutually any longer.
+Because a new method puts a strain in the programmer, it will still take
+time to replace all the in existence scripts.
+
+The biggest problem of new method is that the UTF8 flag can't synchronize
+to real encode of string. Thus you must debug about UTF8 flag, before
+your script. How to solve it by returning to a past method, I will quote
 page 402 of Programming Perl, 3rd ed. again.
 
 Ideally, I'd like to achieve these five Goals:
@@ -4984,13 +5335,6 @@ programming environment like at that time.
  ISBN 10: 0-596-00241-6 | ISBN 13: 9780596002411
  L<http://oreilly.com/catalog/9780596002411/index.html>
 
- C<Mastering Perl/Tk>
- By Stephen Lidie, Nancy Walsh
- January 2002
- Pages: 768
- ISBN 10: 1-56592-716-8 | ISBN 13: 9781565927162
- L<http://oreilly.com/catalog/9781565927162/index.html>
-
  C<Learning Perl on Win32 Systems>
  By Randal L. Schwartz, Erik Olson, Tom Christiansen
  August 1997
@@ -5090,12 +5434,6 @@ I am thankful to all persons.
 
  chaichanPaPa, Matching ShiftJIS file name
  L<http://d.hatena.ne.jp/chaichanPaPa/20080802/1217660826>
-
- Hardsoft, Japanese folder name on Perl/Tk(Win32)
- L<http://hardsoft.at.webry.info/200802/article_5.html>
-
- Nobody knows 2.0, Japanizing Menu widget of Perl/Tk on Windows
- L<http://home.hiroshima-u.ac.jp/m072848/blog/blosxom.cgi/perl/tk/japanese/menu.htm>
 
  SUZUKI Norio, Jperl
  L<http://homepage2.nifty.com/kipp/perl/jperl/>

@@ -1,5 +1,10 @@
 Revision history for Perl extension Sjis.
 
+0.37  2009/07/09 00:00:00
+	- separate Tk modules, make-*.pl and test scripts.
+	- remove perl55.bat and perl56.bat.
+	; created by INABA Hitoshi
+
 0.36  2009/05/17 00:00:00
 	- do local $@ before eval.
 	- support Tk::getOpenFile and Tk::getSaveFile.

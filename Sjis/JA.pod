@@ -4,23 +4,32 @@ __END__
 
 ƒ\ƒtƒgƒEƒFƒA–¼Ì
 
-Sjis-JA - "Yet Another JPerl with Tk" Source code filter to escape ShiftJIS (Japanese document)
+Sjis-JA - "Yet Another JPerl" Source code filter to escape ShiftJIS (Japanese document)
 
 ŠT—v
 
-  use Sjis version qw(ord reverse);
-  use Sjis version;          --- Sjis.pm ‚Ìƒo[ƒWƒ‡ƒ“ƒ`ƒFƒbƒN‚ğs‚¤ê‡
-  use Sjis qw(ord reverse);  --- ord, reverse ‚ÌŠg’£‹@”\‚ğg‚¤ê‡
-  use Sjis;
+  œ g‚¢•û: A
 
-  # "no Sjis;" ‚Ì‹@”\‚Í‚ ‚è‚Ü‚¹‚ñB
+    ƒXƒNƒŠƒvƒg ShiftJIS_script.pl ‚Ì’†‚ÉˆÈ‰º‚ğ‹Lq‚µ‚Ä...
+      use Sjis;
+      use Sjis version;          --- Sjis.pm ‚Ìƒo[ƒWƒ‡ƒ“ƒ`ƒFƒbƒN‚ğs‚¤ê‡
+      use Sjis qw(ord reverse);  --- ord, reverse ‚ÌŠg’£‹@”\‚ğg‚¤ê‡
+      use Sjis version qw(ord reverse);
 
-  ‚ ‚é‚¢‚ÍAƒtƒBƒ‹ƒ^‚Æ‚µ‚Ä
+    ƒRƒ}ƒ“ƒhƒvƒƒ“ƒvƒg‚ÅˆÈ‰º‚Ì‚æ‚¤‚ÉÀs‚·‚é
+      perl     ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl510  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
 
-  C:\>perl Sjis.pm ShiftJIS_script.pl > Escaped_script.pl.e
+  œ g‚¢•û: B
 
-  ShiftJIS_script.pl  --- ShiftJIS ‚Å‘‚©‚ê‚½ƒXƒNƒŠƒvƒg
-  Escaped_script.pl.e --- ƒGƒXƒP[ƒv‚³‚ê‚½ƒXƒNƒŠƒvƒg
+    ƒRƒ}ƒ“ƒhƒvƒƒ“ƒvƒg‚ÅˆÈ‰º‚Ì‚æ‚¤‚ÉÀs‚·‚é
+
+      C:\>perl  Sjis.pm  ShiftJIS_script.pl  >  Escaped_script.pl.e
+      C:\>perl  Escaped_script.pl.e
+
+      ShiftJIS_script.pl  --- ShiftJIS ‚Å‘‚©‚ê‚½ƒXƒNƒŠƒvƒg
+      Escaped_script.pl.e --- ƒGƒXƒP[ƒv‚³‚ê‚½ƒXƒNƒŠƒvƒg
 
 —v–ñ
 
@@ -45,8 +54,8 @@ ShiftJIS ‚Í‚à‚Æ‚à‚Æ‰ß‹‚Ì‹KŠi‚Æ‚ÌŒİŠ·«‚ğl—¶‚µ‚ÄŠJ”­‚³‚ê‚Ü‚µ‚½Bˆê”Ê“I‚ÉƒIƒy
 ‚à‚¤‚Ğ‚Æ‚Â‚Ì–¢—ˆ
 
 JPerl ‚Í‚Æ‚Ä‚à—D‚ê‚½ƒ\ƒtƒgƒEƒFƒA‚Å‚·B‚¨‚Á‚ÆA‚±‚±‚Å‚¢‚¤ JPerl ‚Í“ú–{Œê‘Î‰”Å‚Ì
-Perl ‚Ì‚±‚Æ‚ÅAJava ‚â JVM ‚Æ‚ÍŠÖŒW‚ª‚ ‚è‚Ü‚¹‚ñB‚»‚ñ‚È‚í‚¯‚ÅA‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚Ì
-–¼‘O‚ÍÕ“Ë‰ñ”ğ‚Ì‚½‚ß‚É Sjis ‚Æ‚µ‚Ü‚µ‚½B
+Perl ‚Ì‚±‚Æ‚ÅAJava ‚â JVM ‚Æ‚ÍŠÖŒW‚ª‚ ‚è‚Ü‚¹‚ñB‚»‚ñ‚È‚í‚¯‚ÅA‚±‚Ìƒ\ƒtƒgƒEƒFƒA
+‚ÍÕ“Ë‰ñ”ğ‚Ì‚½‚ß‚É Sjis ‚Æ‚¢‚¤–¼‘O‚É‚µ‚Ü‚µ‚½B
 
 ‚Æ‚±‚ë‚ÅA‚»‚Ì JPerl ‚Íƒo[ƒWƒ‡ƒ“ 5.005_4 ˆÈ~Aƒƒ“ƒeƒiƒ“ƒX‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB
 
@@ -71,30 +80,22 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
   * ShiftJIS ‚»‚Ì‚Ü‚Ü‚Ì’l‚ğˆµ‚¤
 
+  * ‰ß‹‚ÆŒ»İ‚ÌƒXƒNƒŠƒvƒgŠÔ‚ÅƒR[ƒhAƒmƒEƒnƒE‚ğ‹¤—L‚Å‚«‚é
+
   * UTF8 ƒtƒ‰ƒO‚ğˆµ‚í‚È‚¢‚Å‚·‚Ş
 
-  * C ƒvƒƒOƒ‰ƒ~ƒ“ƒO‚ğs‚í‚È‚¢‚Å‚·‚Ş
-
-  * Microsoft Windows ã‚Å“ú–{Œê”Å‚Ì Perl/Tk ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğì¬‚·‚é
+  * (JPerl‚ğ•Ûç‚·‚é‚½‚ß‚É) C ƒvƒƒOƒ‰ƒ~ƒ“ƒO‚ğs‚í‚È‚¢‚Å‚·‚Ş
 
 ‚±‚Æ‚ª‚Å‚«‚Ü‚·B
 
-‚³‚ A‚à‚¤‚Ğ‚Æ‚Â‚Ì–¢—ˆ‚ğì‚è‚Ü‚µ‚å‚¤B
+‚³‚ AJPerl ‚Ì–¢—ˆ‚É‚æ‚Á‚Ä‚à‚¤‚Ğ‚Æ‚Â‚Ì–¢—ˆ‚ğì‚è‚Ü‚µ‚å‚¤B
 
 ƒ\ƒtƒgƒEƒFƒA‚Ìˆê——
 
    Sjis.pm          --- ShiftJIS ƒ\[ƒXƒR[ƒhƒtƒBƒ‹ƒ^ƒ‚ƒWƒ…[ƒ‹
    Esjis.pm         --- Sjis.pm ‚Ìƒ‰ƒ“ƒ^ƒCƒ€ƒ‹[ƒ`ƒ“
-   perl55.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.5 ‚ğ’T‚µ‚ÄÀs‚·‚é
-   perl56.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.6 ‚ğ’T‚µ‚ÄÀs‚·‚é
    perl58.bat       --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.8 ‚ğ’T‚µ‚ÄÀs‚·‚é
    perl510.bat      --- ŠÂ‹«•Ï” PATH ‚Ìİ’è‚È‚µ‚É perl5.10 ‚ğ’T‚µ‚ÄÀs‚·‚é
-   make-hp15.pl     --- HP15.pm, Ehp15.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-   make-big5plus.pl --- Big5Plus.pm, Ebig5plus.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-   make-gbk.pl      --- GBK.pm, Egbk.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-   make-uhc.pl      --- UHC.pm, Euhc.pm ‚ğì‚éƒXƒNƒŠƒvƒg
-   Sjis::Encode.pm  --- ShiftJIS Ì UTF-8 ƒGƒ“ƒR[ƒ_/ƒfƒR[ƒ_
-   Sjis::Tk::*      --- Sjis.pm —p Tk ƒ‚ƒWƒ…[ƒ‹
 
 JPerl ŒİŠ·‚Ì‹@”\
 
@@ -851,10 +852,17 @@ Unicode ƒTƒ|[ƒg‚ª perl ‚É“±“ü‚³‚ê‚éˆÈ‘O‚ÍAeq ‰‰Zq‚ÍA2‚Â‚ÌƒXƒJƒ‰[•Ï”‚É‚æ‚Á
 ‚Ä•\‚³‚ê‚½•¶š—ñ‚ğ‚½‚¾”ä‚×‚Ä‚¢‚Ü‚µ‚½Bperl5.8 ˆÈ~Aeq ‚ÍA2‚Â‚Ì•¶š—ñ‚ğ”ä‚×‚é‚Æ
 “¯‚É UTF8 ƒtƒ‰ƒO‚ğl—¶‚µ‚Ü‚·B
 
-Å‘å‚Ì–â‘è‚Í UTF8 ƒtƒ‰ƒO‚ÍÀÛ‚Ì•¶š—ñ‚Ì•„†‰»‚Æˆê’v‚µ‚È‚¢‚±‚Æ‚Å‚·B‚¾‚©‚ç©•ª‚Å
-ì‚Á‚½ƒXƒNƒŠƒvƒg‚ÌƒfƒoƒbƒO‚Ì‘O‚É UTF8 ƒtƒ‰ƒO‚É‚Â‚¢‚ÄƒfƒoƒbƒO‚·‚é‚±‚Æ‚É‚È‚è‚Ü‚·B
-Ì‚Ì•û–@‚É–ß‚·‚±‚Æ‚É‚Á‚ÄA‚Ç‚Ì‚æ‚¤‚É‰ğŒˆ‚³‚ê‚é‚Ì‚©AÄ‚Ñ Programming Perl, 3rd ed.
-(–M–ó ƒvƒƒOƒ‰ƒ~ƒ“ƒOPerl ‘æ3”Å) ‚Ì402ƒy[ƒW‚ğˆø—p‚µ‚Ü‚µ‚å‚¤B
+Œ‹‰Ê“I‚É‚±‚Ì•ÏX‚ÍA‰ß‹‚ÌƒXƒNƒŠƒvƒg‚ÆŒ»İ‚ÌƒXƒNƒŠƒvƒg‚ÌŠÔ‚É‘å‚«‚Èa‚ğì‚è‚Ü‚µ‚½B
+‚à‚Í‚â—¼Ò‚ÌƒXƒNƒŠƒvƒg‚ÍƒR[ƒh‚ğŒİ‚¢‚ÉÄ—˜—p‚·‚é‚±‚Æ‚ª‚Å‚«‚Ü‚¹‚ñB‚Ü‚½V‚µ‚¢•û–@‚Í
+ƒvƒƒOƒ‰ƒ}‚É•‰’S‚ğ‚©‚¯‚é‚½‚ßAŒ»‘¶‚·‚éƒXƒNƒŠƒvƒg‚ª‚·‚×‚Ä’u‚«Š·‚í‚é‚Ì‚Í‚Ü‚¾‚Ü‚¾ŠÔ
+‚ª‚©‚©‚é‚Æv‚í‚ê‚Ü‚·B
+
+V‚µ‚¢•û–@‚Å–â‘è‚Æ‚È‚Á‚Ä‚¢‚é‚±‚Æ‚Í UTF8 ƒtƒ‰ƒO‚ÍÀÛ‚Ì•¶š—ñ‚Ì•„†‰»‚Æˆê’v‚µ‚È‚¢‚±‚Æ
+‚Å‚·B©•ª‚Åì‚Á‚½ƒXƒNƒŠƒvƒg‚Í‚»‚ÌƒfƒoƒbƒO‚Ì‘O‚É UTF8 ƒtƒ‰ƒO‚É‚Â‚¢‚ÄƒfƒoƒbƒO‚µ‚È‚¯
+‚ê‚Î‚È‚è‚Ü‚¹‚ñB
+
+‚»‚±‚ÅÌ‚Ì•û–@‚É–ß‚·‚±‚Æ‚É‚æ‚Á‚ÄA‚Ç‚Ì‚æ‚¤‚É‰ğŒˆ‚³‚ê‚é‚Ì‚© Programming Perl, 3rd ed.
+(–M–ó ƒvƒƒOƒ‰ƒ~ƒ“ƒOPerl ‘æ3”Å) ‚Ì402ƒy[ƒW‚ğÄ‚Ñˆø—p‚µ‚Ü‚µ‚å‚¤B
 
 —‘z“I‚É‚ÍAˆÈ‰º‚Ì5‚Â‚ÌƒS[ƒ‹‚ğÀŒ»‚µ‚æ‚¤‚Æl‚¦‚Ä‚¢‚Ü‚·B
 
@@ -999,13 +1007,6 @@ Programming Perl, 3rd ed. ‚ª‘‚©‚ê‚½ ‚É‚ÍAUTF-8 ƒtƒ‰ƒO‚Í¶‚Ü‚ê‚Ä‚¨‚ç‚¸APerl ‚
  ISBN 4-900900-72-9
  http://www.oreilly.co.jp/books/4900900729/
 
- “ü–åPerl/Tk
- By Nancy Walsh ’˜AÎ‘]ª M, ¼’† –FK –ó
- 1999”N12Œ ”­s
- 440ƒy[ƒW
- ISBN 4-87311-008-4
- http://www.oreilly.co.jp/books/4873110084/
-
  ‰‚ß‚Ä‚ÌPerl Win32ƒVƒXƒeƒ€
  Randal L. Schwartz, Erik Olson, Tom Christiansen ’˜, —L”n O˜Y ŠÄ–ó, ÎŒ´ ’q_ –ó
  1998”N11Œ ”­s
@@ -1099,12 +1100,6 @@ Programming Perl, 3rd ed. ‚ª‘‚©‚ê‚½ ‚É‚ÍAUTF-8 ƒtƒ‰ƒO‚Í¶‚Ü‚ê‚Ä‚¨‚ç‚¸APerl ‚
 
  chaichanPaPa‚³‚ñ, ƒVƒtƒgJISŠ¿š‚Ìƒtƒ@ƒCƒ‹–¼‚Éƒ}ƒbƒ`‚µ‚Ä‚İ‚é
  http://d.hatena.ne.jp/chaichanPaPa/20080802/1217660826
-
- ƒn[ƒh‚Èƒ\ƒtƒg‚Ì˜b‚³‚ñ, Perl/Tk‚Å“ú–{Œê‚ÌƒtƒHƒ‹ƒ_–¼‚ğg‚¤(Win32)
- http://hardsoft.at.webry.info/200802/article_5.html
-
- ‚µ‚é‚Ğ‚Æ‚¨‚ç‚¸ 2.0 ‚³‚ñ, Windowsã‚ÅPerl/Tk‚Ìƒƒjƒ…[ƒo[‚ğ“ú–{Œê‰»‚·‚é•û–@(1•”–¢‰ğŒˆ) 
- http://home.hiroshima-u.ac.jp/m072848/blog/blosxom.cgi/perl/tk/japanese/menu.htm
 
  —é–Ø ‹I•v‚³‚ñ, Jperl
  http://homepage2.nifty.com/kipp/perl/jperl/
