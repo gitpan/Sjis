@@ -76,7 +76,7 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 ƒ\[ƒXƒR[ƒhƒtƒBƒ‹ƒ^‚Å‚·BƒGƒXƒP[ƒvˆ—‚É‚æ‚Á‚Ä•¶šƒR[ƒh‚ª•Ï‰»‚·‚é‚±‚Æ‚Í‚ ‚è
 ‚Ü‚¹‚ñB
 
-‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚É‚æ‚Á‚Ä
+‚±‚Ìƒ\ƒtƒgƒEƒFƒA‚ÍˆÈ‰º‚Ì“Á’¥‚ª‚ ‚è‚Ü‚·B
 
   * ShiftJIS ‚»‚Ì‚Ü‚Ü‚Ì’l‚ğˆµ‚¤
 
@@ -84,9 +84,11 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
   * UTF8 ƒtƒ‰ƒO‚ğˆµ‚í‚È‚¢‚Å‚·‚Ş
 
+  * ‚Å‚à Perl5 ‚Æ‚ÍŒİŠ·‚ª‚ ‚é (‚Í‚¸‚¾)
+
   * (JPerl‚ğ•Ûç‚·‚é‚½‚ß‚É) C ƒvƒƒOƒ‰ƒ~ƒ“ƒO‚ğs‚í‚È‚¢‚Å‚·‚Ş
 
-‚±‚Æ‚ª‚Å‚«‚Ü‚·B
+  * ‚È‚Ì‚É JPerl ŒİŠ·
 
 ‚³‚ AJPerl ‚Ì–¢—ˆ‚É‚æ‚Á‚Ä‚à‚¤‚Ğ‚Æ‚Â‚Ì–¢—ˆ‚ğì‚è‚Ü‚µ‚å‚¤B
 
@@ -1088,6 +1090,9 @@ Programming Perl, 3rd ed. ‚ª‘‚©‚ê‚½ ‚É‚ÍAUTF-8 ƒtƒ‰ƒO‚Í¶‚Ü‚ê‚Ä‚¨‚ç‚¸APerl ‚
 
  ’åœA ’ms‚³‚ñ, Shift-JISƒeƒLƒXƒg‚ğ³‚µ‚­ˆµ‚¤
  http://homepage1.nifty.com/nomenclator/perl/shiftjis.htm
+
+ ‚Ü‚Â‚à‚Æ ‚ä‚«‚Ğ‚ë‚³‚ñ, Ruby on Perl(s)
+ http://www.rubyist.net/~matz/slides/yapc2006/
 
  “¡‰ª ˜a•v‚³‚ñ, jperlƒ†[ƒU[‚Ì‚½‚ß‚É
  http://homepage1.nifty.com/kazuf/jperl.html

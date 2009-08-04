@@ -117,12 +117,17 @@ sub Esjis::chdir(;$);
 sub Esjis::do($);
 sub Esjis::require(;$);
 
+sub Sjis::length;
+sub Sjis::substr($$;$$);
+sub Sjis::index($$;$);
+sub Sjis::rindex($$;$);
+
 # @ARGV wildcard globbing
 if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
     if ($ENV{'ComSpec'} =~ / (?: COMMAND\.COM | CMD\.EXE ) \z /oxmsi) {
         my @argv = ();
         for (@ARGV) {
-            if (m/\A ' ((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])*) ' \z/oxms) {
+            if (m/\A ' ((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])*) ' \z/oxms) {
                 push @argv, $1;
             }
             elsif (my @glob = Esjis::glob($_)) {
@@ -167,7 +172,7 @@ sub Esjis::split(;$$$) {
             # the //m modifier is assumed when you split on the pattern /^/
             # (and so on)
 
-            while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)\s+//m) {
+            while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])*?)\s+//m) {
 
                 # if the $pattern contains parentheses, then the substring matched by each pair of parentheses
                 # is included in the resulting list, interspersed with the fields that are ordinarily returned
@@ -186,8 +191,8 @@ sub Esjis::split(;$$$) {
         # (and so on)
 
         elsif ('' =~ m/ \A $pattern \z /xms) {
-            #                                                                               v--- Look
-            while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])+?)$pattern//m) {
+            #                                                                     v--- Look
+            while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])+?)$pattern//m) {
                 local $@;
                 for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                     push @split, eval '$' . $digit;
@@ -196,8 +201,8 @@ sub Esjis::split(;$$$) {
         }
 
         else {
-            #                                                                               v--- Look
-            while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)$pattern//m) {
+            #                                                                     v--- Look
+            while ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])*?)$pattern//m) {
                 local $@;
                 for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                     push @split, eval '$' . $digit;
@@ -210,7 +215,7 @@ sub Esjis::split(;$$$) {
         if ((not defined $pattern) or ($pattern eq ' ')) {
             $string =~ s/ \A \s+ //oxms;
             while ((--$limit > 0) and (length($string) > 0)) {
-                if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)\s+//m) {
+                if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])*?)\s+//m) {
                     local $@;
                     for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                         push @split, eval '$' . $digit;
@@ -220,8 +225,8 @@ sub Esjis::split(;$$$) {
         }
         elsif ('' =~ m/ \A $pattern \z /xms) {
             while ((--$limit > 0) and (length($string) > 0)) {
-                #                                                                            v--- Look
-                if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])+?)$pattern//m) {
+                #                                                                  v--- Look
+                if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])+?)$pattern//m) {
                     local $@;
                     for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                         push @split, eval '$' . $digit;
@@ -231,8 +236,8 @@ sub Esjis::split(;$$$) {
         }
         else {
             while ((--$limit > 0) and (length($string) > 0)) {
-                #                                                                            v--- Look
-                if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?)$pattern//m) {
+                #                                                                  v--- Look
+                if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])*?)$pattern//m) {
                     local $@;
                     for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
                         push @split, eval '$' . $digit;
@@ -273,25 +278,9 @@ sub Esjis::tr($$$;$) {
     my $replacementlist = $_[2];
     my $modifier        = $_[3] || '';
 
-    my @char            = ();
-    my @searchlist      = ();
-    my @replacementlist = ();
-
-    @char = $_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
-    @searchlist = _charlist_tr($searchlist =~ m{\G(
-        \\     [0-7]{2,3}          |
-        \\x    [0-9A-Fa-f]{2}      |
-        \\c    [\x40-\x5F]         |
-        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) |
-            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])
-    )}oxmsg);
-    @replacementlist = _charlist_tr($replacementlist =~ m{\G(
-        \\     [0-7]{2,3}          |
-        \\x    [0-9A-Fa-f]{2}      |
-        \\c    [\x40-\x5F]         |
-        \\  (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) |
-            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])
-    )}oxmsg);
+    my @char            = $_[0] =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
+    my @searchlist      = _charlist_tr($searchlist);
+    my @replacementlist = _charlist_tr($replacementlist);
 
     my %tr = ();
     for (my $i=0; $i <= $#searchlist; $i++) {
@@ -359,13 +348,13 @@ sub Esjis::chop(@) {
 
     my $chop;
     if (@_ == 0) {
-        my @char = m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg;
+        my @char = m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])/oxmsg;
         $chop = pop @char;
         $_ = join '', @char;
     }
     else {
         for (@_) {
-            my @char = m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
+            my @char = m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
             $chop = pop @char;
             $_ = join '', @char;
         }
@@ -374,7 +363,7 @@ sub Esjis::chop(@) {
 }
 
 #
-# ShiftJIS index
+# ShiftJIS index by octet
 #
 sub Esjis::index($$;$) {
 
@@ -435,7 +424,7 @@ sub Esjis::lc($) {
 
     local $^W = 0;
 
-    return join('', map {$lc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg);
+    return join('', map {$lc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])/oxmsg);
 }
 
 #
@@ -449,7 +438,7 @@ sub Esjis::lc_() {
 
     local $^W = 0;
 
-    return join('', map {$lc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])/oxmsg);
+    return join('', map {$lc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])/oxmsg);
 }
 
 #
@@ -465,7 +454,7 @@ sub Esjis::uc($) {
 
     local $^W = 0;
 
-    return join('', map {$uc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg);
+    return join('', map {$uc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg);
 }
 
 #
@@ -479,7 +468,7 @@ sub Esjis::uc_() {
 
     local $^W = 0;
 
-    return join('', map {$uc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg);
+    return join('', map {$uc{$_}||$_} m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg);
 }
 
 #
@@ -515,7 +504,7 @@ sub Esjis::ignorecase(@) {
         # split regexp
         my @char = $string =~ m{\G(
             \[\^ |
-                (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF] | [\x00-\xFF])
+                (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF])
         )}oxmsg;
 
         # unescape character
@@ -538,7 +527,7 @@ sub Esjis::ignorecase(@) {
 
                             # do not use quotemeta here
                             if ($char =~ m/\A ([\x81-\x9F\xE0-\xFC]) ($metachar) \z/oxms) {
-                               $char = $1.'\\'.$2;
+                               $char = $1 . '\\' . $2;
                             }
                             elsif ($char =~ m/\A [.|)] \z/oxms) {
                                 $char = '\\' . $char;
@@ -578,7 +567,7 @@ sub Esjis::ignorecase(@) {
                         }
 
                         # [^...]
-                        splice @char, $left, $right-$left+1, '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF])';
+                        splice @char, $left, $right-$left+1, '(?!' . join('|', @charlist) . ')(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])';
 
                         $i = $left;
                         last;
@@ -644,29 +633,22 @@ sub Esjis::ignorecase(@) {
 #
 sub _charlist_tr {
 
-    my @char = @_;
+    local $_ = shift @_;
 
     # unescape character
-    for (my $i=0; $i <= $#char; $i++) {
-        next if not defined $char[$i];
-
-        # escape - to ...
-        if ($char[$i] eq '-') {
-            if ((0 < $i) and ($i < $#char)) {
-                $char[$i] = '...';
-            }
+    my @char = ();
+    while (not m/\G \z/oxmsgc) {
+        if (m/\G \\ ([0-7]{2,3}) /oxmsgc) {
+            push @char, CORE::chr(oct $1);
         }
-        elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
-            $char[$i] = CORE::chr(oct $1);
+        elsif (m/\G \\x ([0-9A-Fa-f]{1,2}) /oxmsgc) {
+            push @char, CORE::chr(hex $1);
         }
-        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
-            $char[$i] = CORE::chr(hex $1);
+        elsif (m/\G \\c ([\x40-\x5F]) /oxmsgc) {
+            push @char, CORE::chr(CORE::ord($1) & 0x1F);
         }
-        elsif ($char[$i] =~ m/\A \\c ([\x40-\x5F]) \z/oxms) {
-            $char[$i] = CORE::chr(CORE::ord($1) & 0x1F);
-        }
-        elsif ($char[$i] =~ m/\A (\\ [0nrtfbae]) \z/oxms) {
-            $char[$i] = {
+        elsif (m/\G (\\ [0nrtfbae]) /oxmsgc) {
+            push @char, {
                 '\0' => "\0",
                 '\n' => "\n",
                 '\r' => "\r",
@@ -677,24 +659,22 @@ sub _charlist_tr {
                 '\e' => "\e",
             }->{$1};
         }
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) \z/oxms) {
-            $char[$i] = $1;
+        elsif (m/\G \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsgc) {
+            push @char, $1;
+        }
+        elsif (m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsgc) {
+            push @char, $1;
         }
     }
 
     # join separated double octet
-    for (my $i=0; $i <= $#char-1; $i++) {
-        if ($char[$i] =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
-            $char[$i] .= $char[$i+1];
-            splice @char, $i+1, 1;
-        }
-    }
+    @char = join('',@char) =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
 
     # open character list
     for (my $i=$#char-1; $i >= 1; ) {
 
         # escaped -
-        if ($char[$i] eq '...') {
+        if (($char[$i] eq '-') and (0 < $i) and ($i < $#char-1)) {
             my @range = ();
 
             # range of single octet code
@@ -772,7 +752,7 @@ sub _charlist_qr {
         elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
             $char[$i] = CORE::chr oct $1;
         }
-        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
+        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{1,2}) \z/oxms) {
             $char[$i] = CORE::chr hex $1;
         }
         elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/oxms) {
@@ -806,7 +786,7 @@ sub _charlist_qr {
                 '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$1};
         }
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) \z/oxms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) \z/oxms) {
             $char[$i] = $1;
         }
     }
@@ -962,8 +942,8 @@ sub _charlist_qr {
         elsif (m/\A ([\x00-\x21\x7F-\xA0\xE0-\xFF]) \z/oxms) {
             $_ = sprintf(q{\\x%02X}, CORE::ord $1);
         }
-        elsif (m/\A ([\x00-\xFF]) \z/oxms) {
-            $_ = quotemeta $1;
+        elsif (m/\A [\x00-\xFF] \z/oxms) {
+            $_ = quotemeta $_;
         }
     }
     for (@charlist) {
@@ -1012,7 +992,7 @@ sub _charlist_not_qr {
         elsif ($char[$i] =~ m/\A \\ ([0-7]{2,3}) \z/oxms) {
             $char[$i] = CORE::chr oct $1;
         }
-        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{2}) \z/oxms) {
+        elsif ($char[$i] =~ m/\A \\x ([0-9A-Fa-f]{1,2}) \z/oxms) {
             $char[$i] = CORE::chr hex $1;
         }
         elsif ($char[$i] =~ m/\A \\x \{ ([0-9A-Fa-f]{1,2}) \} \z/oxms) {
@@ -1046,7 +1026,7 @@ sub _charlist_not_qr {
                 '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
             }->{$1};
         }
-        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) \z/oxms) {
+        elsif ($char[$i] =~ m/\A \\ ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) \z/oxms) {
             $char[$i] = $1;
         }
     }
@@ -1202,7 +1182,7 @@ sub _charlist_not_qr {
         elsif (m/\A ([\x00-\x21\x7F-\xA0\xE0-\xFF]) \z/oxms) {
             $_ = sprintf(q{\\x%02X}, CORE::ord $1);
         }
-        elsif (m/\A ([\x00-\xFF]) \z/oxms) {
+        elsif (m/\A [\x00-\xFF] \z/oxms) {
             $_ = quotemeta $_;
         }
     }
@@ -1298,7 +1278,7 @@ sub Esjis::reverse(@) {
         return CORE::reverse @_;
     }
     else {
-        return join '', CORE::reverse(join('',@_) =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg);
+        return join '', CORE::reverse(join('',@_) =~ m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg);
     }
 }
 
@@ -3030,7 +3010,7 @@ OUTER:
         my $tail;
 
         # if argument is within quotes strip em and do no globbing
-        if ($expr =~ m/\A " ((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^\x81-\x9F\xE0-\xFC])*) " \z/oxms) {
+        if ($expr =~ m/\A " ((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])*) " \z/oxms) {
             $expr = $1;
             if ($cond eq 'd') {
                 if (Esjis::d $expr) {
@@ -3099,7 +3079,7 @@ OUTER:
         }
 
         my $pattern = '';
-        while ($expr =~ m/ \G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxgc) {
+        while ($expr =~ m/ \G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxgc) {
             $pattern .= {
                 '*' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])*',
             ### '?' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])',   # UNIX style
@@ -3183,8 +3163,8 @@ sub _parse_line {
     $line .= ' ';
     my @piece = ();
     while ($line =~ m{
-        " ( (?: [\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^"]   )*  ) " \s+ |
-          ( (?: [\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^"\s] )*  )   \s+
+        " ( (?: [\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^"]   )*  ) " \s+ |
+          ( (?: [\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^"\s] )*  )   \s+
         }oxmsg
     ) {
         push @piece, defined($1) ? $1 : $2;
@@ -3202,7 +3182,7 @@ sub _parse_path {
     $path .= '/';
     my @subpath = ();
     while ($path =~ m{
-        ((?: [\x81-\x9F\xE0-\xFC][\x00-\xFF] | [^/\\] )+?) [/\\] }oxmsg
+        ((?: [\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^/\\] )+?) [/\\] }oxmsg
     ) {
         push @subpath, $1;
     }
@@ -3341,9 +3321,9 @@ sub Esjis::unlink(@) {
             $unlink++;
         }
         elsif (_MSWin32_5Cended_path($_)) {
-            my @char = /\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
+            my @char = /\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
             my $file = join '', map {{'/' => '\\'}->{$_} || $_} @char;
-            if ($file =~ m/ \A (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*? [ ] /oxms) {
+            if ($file =~ m/ \A (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])*? [ ] /oxms) {
                 $file = qq{"$file"};
             }
 
@@ -3413,7 +3393,7 @@ sub _MSWin32_5Cended_path {
 
     if ((@_ >= 1) and ($_[0] ne '')) {
         if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
-            my @char = $_[0] =~ /\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x00-\xFF]) /oxmsg;
+            my @char = $_[0] =~ /\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
             if ($char[-1] =~ m/\A [\x81-\x9F\xE0-\xFC][\x5C] \z/oxms) {
                 return 1;
             }
@@ -3542,6 +3522,87 @@ ITER_REQUIRE:
     return $result;
 }
 
+#
+# ShiftJIS length by character
+#
+sub Sjis::length {
+
+    local $_ = shift if @_;
+
+    return scalar m/\G ([\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
+}
+
+#
+# ShiftJIS substr by character
+#
+sub Sjis::substr ($$;$$) {
+
+    if (defined $_[3]) {
+        if (defined $_[4]) {
+            my(undef,$offset,$length,$replacement) = @_;
+            if ($_[0] =~ s/\A ((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]){$offset}) ((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]){0,$length}) \z/$1$replacement/xms) {
+                return $2;
+            }
+        }
+        else {
+            my($expr,$offset,$length) = @_;
+            if ($expr =~ m/\A (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]){$offset} ((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]){0,$length}) \z/xms) {
+                return $1;
+            }
+        }
+    }
+    else {
+        my($expr,$offset) = @_;
+        if ($expr =~ m/\A (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]){$offset} (.*) \z/xms) {
+            return $1;
+        }
+    }
+
+    confess "$0: Sjis::substr outside of string";
+}
+
+#
+# ShiftJIS index by character
+#
+sub Sjis::index($$;$) {
+
+    my $index;
+    if (@_ == 3) {
+        $index = Esjis::index($_[0],$_[1],$_[2]);
+    }
+    else {
+        $index = Esjis::index($_[0],$_[1]);
+    }
+
+    if ($index == -1) {
+        return -1;
+    }
+    else {
+        return Sjis::length(CORE::substr $_[0], 0, $index);
+    }
+}
+
+#
+# ShiftJIS rindex by character
+#
+sub Sjis::rindex($$;$) {
+
+    my $rindex;
+    if (@_ == 3) {
+        $rindex = Esjis::rindex($_[0],$_[1],$_[2]);
+    }
+    else {
+        $rindex = Esjis::rindex($_[0],$_[1]);
+    }
+
+    if ($rindex == -1) {
+        return -1;
+    }
+    else {
+        return Sjis::length(CORE::substr $_[0], 0, $rindex);
+    }
+}
+
 # pop warning
 $^W = $_warning;
 
@@ -3588,6 +3649,11 @@ Esjis - Run-time routines for Sjis.pm
     Esjis::chdir(...);
     Esjis::do(...);
     Esjis::require(...);
+
+    Sjis::length(...);
+    Sjis::substr(...);
+    Sjis::index(...);
+    Sjis::rindex(...);
 
   # "no Esjis;" not supported
 
@@ -4019,6 +4085,100 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   it'll return true otherwise.
 
   See also do file.
+
+=item length by ShiftJIS character
+
+  $length = Sjis::length($string);
+  $length = Sjis::length();
+
+  This function returns the length in characters of the scalar value $string. If $string
+  is omitted, it returns the Sjis::length of $_.
+
+  Do not try to use length to find the size of an array or hash. Use scalar @array for
+  the size of an array, and scalar keys %hash for the number of key/value pairs in a
+  hash. (The scalar is typically omitted when redundant.)
+
+  To find the length of a string in bytes rather than characters, say:
+
+  $blen = length $string;
+
+  or
+
+  $blen = CORE::length $string;
+
+=item substr by ShiftJIS character
+
+  $substr = Sjis::substr($string,$offset,$length,$replacement);
+  $substr = Sjis::substr($string,$offset,$length);
+  $substr = Sjis::substr($string,$offset);
+
+  This function extracts a substring out of the string given by $string and returns
+  it. The substring is extracted starting at $offset characters from the front of
+  the string.
+  If $offset is negative, the substring starts that far from the end of the string
+  instead. If $length is omitted, everything to the end of the string is returned.
+  If $length is negative, the length is calculated to leave that many characters off
+  the end of the string. Otherwise, $length indicates the length of the substring to
+  extract, which is sort of what you'd expect.
+
+  An alternative to using Sjis::substr as an lvalue is to specify the $replacement
+  string as the fourth argument. This allows you to replace parts of the $string and
+  return what was there before in one operation, just as you can with splice. The next
+  example also replaces the last character of $var with "Curly" and puts that replaced
+  character into $oldstr: 
+
+  $oldstr = Sjis::substr($var, -1, 1, "Curly");
+
+  If you assign something shorter than the length of your substring, the string will
+  shrink, and if you assign something longer than the length, the string will grow to
+  accommodate it. To keep the string the same length, you may need to pad or chop your
+  value using sprintf or the x operator. If you attempt to assign to an unallocated
+  area past the end of the string, Sjis::substr raises an exception.
+
+  To prepend the string "Larry" to the current value of $_, use:
+
+  Sjis::substr($var, 0, 0, "Larry");
+
+  To instead replace the first character of $_ with "Moe", use:
+
+  Sjis::substr($var, 0, 1, "Moe");
+
+  And finally, to replace the last character of $var with "Curly", use:
+
+  Sjis::substr($var, -1, 0, "Curly");
+
+=item index by ShiftJIS character
+
+  $index = Sjis::index($string,$substring,$offset);
+  $index = Sjis::index($string,$substring);
+
+  This function searches for one string within another. It returns the position of
+  the first occurrence of $substring in $string. The $offset, if specified, says how
+  many characters from the start to skip before beginning to look. Positions are
+  based at 0. If the substring is not found, the function returns one less than the
+  base, ordinarily -1. To work your way through a string, you might say:
+
+  $pos = -1;
+  while (($pos = Sjis::index($string, $lookfor, $pos)) > -1) {
+      print "Found at $pos\n";
+      $pos++;
+  }
+
+=item rindex by ShiftJIS character
+
+  $rindex = Sjis::rindex($string,$substring,$position);
+  $rindex = Sjis::rindex($string,$substring);
+
+  This function works just like Sjis::index except that it returns the position of
+  the last occurrence of $substring in $string (a reverse index). The function
+  returns -1 if not $substring is found. $position, if specified, is the rightmost
+  position that may be returned. To work your way through a string backward, say:
+
+  $pos = Sjis::length($string);
+  while (($pos = Sjis::rindex($string, $lookfor, $pos)) >= 0) {
+      print "Found at $pos\n";
+      $pos--;
+  }
 
 =back
 

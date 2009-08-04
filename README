@@ -28,7 +28,8 @@ SYNOPSIS
 DESCRIPTION
 
       This software is "Yet Another JPerl" written by Perl.
-      We can write Perl scripts in ShiftJIS, without UTF8 flag, again.
+      We can treat ShiftJIS by the CSI(Character Set Independent) method.
+      So we can write Perl scripts in ShiftJIS, without UTF8 flag, again.
 
       This "JPerl" means "Japanized Perl" or "Japanese Perl".
       So is unrelated to Mr. Patrick E. Martin's JPerl -- Perl 5 implemented in Java.
