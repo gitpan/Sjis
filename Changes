@@ -1,5 +1,9 @@
 Revision history for Perl extension Sjis.
 
+0.39  2009/08/06 00:00:00
+	- support Sjis::length, Sjis::substr, Sjis::index and Sjis::rindex.
+	; created by INABA Hitoshi
+
 0.38  2009/08/05 00:00:00
 	- improve qw.
 	- filetest operator before parenthesis '-X ('.

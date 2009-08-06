@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.37 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.39 $ =~ m/(\d+)/xmsg;
 
 use Fcntl;
 use Symbol;
@@ -214,7 +214,7 @@ sub Esjis::split(;$$$) {
     else {
         if ((not defined $pattern) or ($pattern eq ' ')) {
             $string =~ s/ \A \s+ //oxms;
-            while ((--$limit > 0) and (length($string) > 0)) {
+            while ((--$limit > 0) and (CORE::length($string) > 0)) {
                 if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])*?)\s+//m) {
                     local $@;
                     for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
@@ -224,7 +224,7 @@ sub Esjis::split(;$$$) {
             }
         }
         elsif ('' =~ m/ \A $pattern \z /xms) {
-            while ((--$limit > 0) and (length($string) > 0)) {
+            while ((--$limit > 0) and (CORE::length($string) > 0)) {
                 #                                                                  v--- Look
                 if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])+?)$pattern//m) {
                     local $@;
@@ -235,7 +235,7 @@ sub Esjis::split(;$$$) {
             }
         }
         else {
-            while ((--$limit > 0) and (length($string) > 0)) {
+            while ((--$limit > 0) and (CORE::length($string) > 0)) {
                 #                                                                  v--- Look
                 if ($string =~ s/\A((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])*?)$pattern//m) {
                     local $@;
@@ -371,13 +371,13 @@ sub Esjis::index($$;$) {
     $position ||= 0;
     my $pos = 0;
 
-    while ($pos < length($str)) {
-        if (substr($str,$pos,length($substr)) eq $substr) {
+    while ($pos < CORE::length($str)) {
+        if (CORE::substr($str,$pos,CORE::length($substr)) eq $substr) {
             if ($pos >= $position) {
                 return $pos;
             }
         }
-        if (substr($str,$pos,1) =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
+        if (CORE::substr($str,$pos,1) =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
             $pos += 2;
         }
         else {
@@ -393,15 +393,15 @@ sub Esjis::index($$;$) {
 sub Esjis::rindex($$;$) {
 
     my($str,$substr,$position) = @_;
-    $position ||= length($str) - 1;
+    $position ||= CORE::length($str) - 1;
     my $pos = 0;
     my $rindex = -1;
 
-    while (($pos < length($str)) and ($pos <= $position)) {
-        if (substr($str,$pos,length($substr)) eq $substr) {
+    while (($pos < CORE::length($str)) and ($pos <= $position)) {
+        if (CORE::substr($str,$pos,CORE::length($substr)) eq $substr) {
             $rindex = $pos;
         }
-        if (substr($str,$pos,1) =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
+        if (CORE::substr($str,$pos,1) =~ m/\A [\x81-\x9F\xE0-\xFC] \z/oxms) {
             $pos += 2;
         }
         else {
@@ -504,7 +504,7 @@ sub Esjis::ignorecase(@) {
         # split regexp
         my @char = $string =~ m{\G(
             \[\^ |
-                (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF])
+                \\? (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])
         )}oxmsg;
 
         # unescape character
@@ -2055,7 +2055,7 @@ sub Esjis::T(;*@) {
             if ($block =~ /[\000\377]/oxms) {
                 $T = '';
             }
-            elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > length $block) {
+            elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > CORE::length $block) {
                 $T = '';
             }
         }
@@ -2080,7 +2080,7 @@ sub Esjis::T(;*@) {
             if ($block =~ /[\000\377]/oxms) {
                 $T = '';
             }
-            elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > length $block) {
+            elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > CORE::length $block) {
                 $T = '';
             }
         }
@@ -2121,7 +2121,7 @@ sub Esjis::B(;*@) {
             if ($block =~ /[\000\377]/oxms) {
                 $B = 1;
             }
-            elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > length $block) {
+            elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > CORE::length $block) {
                 $B = 1;
             }
         }
@@ -2146,7 +2146,7 @@ sub Esjis::B(;*@) {
             if ($block =~ /[\000\377]/oxms) {
                 $B = 1;
             }
-            elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > length $block) {
+            elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > CORE::length $block) {
                 $B = 1;
             }
         }
@@ -2789,7 +2789,7 @@ sub Esjis::T_() {
         if ($block =~ /[\000\377]/oxms) {
             $T = '';
         }
-        elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > length $block) {
+        elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > CORE::length $block) {
             $T = '';
         }
     }
@@ -2823,7 +2823,7 @@ sub Esjis::B_() {
         if ($block =~ /[\000\377]/oxms) {
             $B = 1;
         }
-        elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > length $block) {
+        elsif (($block =~ tr/\000-\007\013\016-\032\034-\037\377//) * 10 > CORE::length $block) {
             $B = 1;
         }
     }
@@ -3137,7 +3137,7 @@ INNER:
             # Failed, add a trailing dot and try again, but only...
 
             if (Esjis::index($leaf,'.') == -1 and   # if name does not have a dot in it *and*
-                length($leaf) <= 8 and              # name is shorter than or equal to 8 chars *and*
+                CORE::length($leaf) <= 8 and        # name is shorter than or equal to 8 chars *and*
                 Esjis::index($pattern,'\\.') != -1  # pattern has a dot.
             ) {
                 if (&$matchsub("$leaf.")) {

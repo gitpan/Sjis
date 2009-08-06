@@ -12,7 +12,7 @@ use 5.00503;
 use Esjis;
 use vars qw($VERSION);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.38 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.39 $ =~ m/(\d+)/oxmsg;
 
 use Fcntl;
 use Symbol;
@@ -35,7 +35,7 @@ sub unimport() {}
 sub Sjis::escape_script;
 
 # regexp of character
-my $qq_char   = qr/\\c[\x40-\x5F]|\\[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]/oxms;
+my $qq_char   = qr/\\c[\x40-\x5F]|\\?(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])/oxms;
 my  $q_char   = qr/[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]/oxms;
 my $your_char = q {[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]};
 
@@ -52,25 +52,25 @@ use vars qw($nest);
 # of ISBN 0-596-00289-0 Mastering Regular Expressions, Second edition
 
 my $qq_paren   = qr{(?{local $nest=0}) (?>(?:
-                    \\c[\x40-\x5F] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x81-\x9F\xE0-\xFC\\][\x00-\xFF] |
+                    \\c[\x40-\x5F] | \\? [\x81-\x9F\xE0-\xFC][\x00-\xFF] | \\ [\x00-\xFF] |
                     [^()] |
                              \(  (?{$nest++}) |
                              \)  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 my $qq_brace   = qr{(?{local $nest=0}) (?>(?:
-                    \\c[\x40-\x5F] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x81-\x9F\xE0-\xFC\\][\x00-\xFF] |
+                    \\c[\x40-\x5F] | \\? [\x81-\x9F\xE0-\xFC][\x00-\xFF] | \\ [\x00-\xFF] |
                     [^{}] |
                              \{  (?{$nest++}) |
                              \}  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 my $qq_bracket = qr{(?{local $nest=0}) (?>(?:
-                    \\c[\x40-\x5F] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x81-\x9F\xE0-\xFC\\][\x00-\xFF] |
+                    \\c[\x40-\x5F] | \\? [\x81-\x9F\xE0-\xFC][\x00-\xFF] | \\ [\x00-\xFF] |
                     [^[\]] |
                              \[  (?{$nest++}) |
                              \]  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
                  }xms;
 my $qq_angle   = qr{(?{local $nest=0}) (?>(?:
-                    \\c[\x40-\x5F] | \\[\x81-\x9F\xE0-\xFC][\x00-\xFF] | [\x81-\x9F\xE0-\xFC\\][\x00-\xFF] |
+                    \\c[\x40-\x5F] | \\? [\x81-\x9F\xE0-\xFC][\x00-\xFF] | \\ [\x00-\xFF] |
                     [^<>] |
                              \<  (?{$nest++}) |
                              \>  (?(?{$nest>0})(?{$nest--})|(?!)))*) (?(?{$nest!=0})(?!))
@@ -573,7 +573,7 @@ sub escape {
         my $heredoc = '';
         if (scalar(keys %heredoc) >= 1) {
             $slash = 'm//';
-            my($longest_heredoc_delimiter) = sort { length($heredoc{$b}) <=> length($heredoc{$a}) } keys %heredoc;
+            my($longest_heredoc_delimiter) = sort { CORE::length($heredoc{$b}) <=> CORE::length($heredoc{$a}) } keys %heredoc;
             if ($heredoc_qq >= 1) {
                 $heredoc = e_heredoc($heredoc{$longest_heredoc_delimiter});
             }
@@ -1488,7 +1488,7 @@ sub escape {
         my $delimiter  = $2;
 
         # get here document
-        my $script = substr $_, pos $_;
+        my $script = CORE::substr $_, pos $_;
         $script =~ s/.*?\n//oxm;
         if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
             $heredoc{$delimiter} = $1;
@@ -1511,7 +1511,7 @@ sub escape {
         my $delimiter  = $2;
 
         # get here document
-        my $script = substr $_, pos $_;
+        my $script = CORE::substr $_, pos $_;
         $script =~ s/.*?\n//oxm;
         if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
             $heredoc{$delimiter} = $1;
@@ -1530,7 +1530,7 @@ sub escape {
         $heredoc_qq++;
 
         # get here document
-        my $script = substr $_, pos $_;
+        my $script = CORE::substr $_, pos $_;
         $script =~ s/.*?\n//oxm;
         if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
             $heredoc{$delimiter} = $1;
@@ -1549,7 +1549,7 @@ sub escape {
         $heredoc_qq++;
 
         # get here document
-        my $script = substr $_, pos $_;
+        my $script = CORE::substr $_, pos $_;
         $script =~ s/.*?\n//oxm;
         if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
             $heredoc{$delimiter} = $1;
@@ -1568,7 +1568,7 @@ sub escape {
         $heredoc_qq++;
 
         # get here document
-        my $script = substr $_, pos $_;
+        my $script = CORE::substr $_, pos $_;
         $script =~ s/.*?\n//oxm;
         if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
             $heredoc{$delimiter} = $1;
@@ -1670,7 +1670,7 @@ sub e_string {
     # of ISBN 1-56592-224-7 CJKV Information Processing
     # (and so on)
 
-    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
+    my @char = $string =~ m/ \G (\\?(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])) /oxmsg;
 
     # without { ... }
     if (not (grep(m/\A \{ \z/xms, @char) and grep(m/\A \} \z/xms, @char))) {
@@ -1980,7 +1980,7 @@ E_STRING_LOOP:
             my $delimiter  = $2;
 
             # get here document
-            my $script = substr $_, pos $_;
+            my $script = CORE::substr $_, pos $_;
             $script =~ s/.*?\n//oxm;
             if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
                 $heredoc{$delimiter} = $1;
@@ -1998,7 +1998,7 @@ E_STRING_LOOP:
             my $delimiter  = $2;
 
             # get here document
-            my $script = substr $_, pos $_;
+            my $script = CORE::substr $_, pos $_;
             $script =~ s/.*?\n//oxm;
             if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
                 $heredoc{$delimiter} = $1;
@@ -2017,7 +2017,7 @@ E_STRING_LOOP:
             $heredoc_qq++;
 
             # get here document
-            my $script = substr $_, pos $_;
+            my $script = CORE::substr $_, pos $_;
             $script =~ s/.*?\n//oxm;
             if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
                 $heredoc{$delimiter} = $1;
@@ -2036,7 +2036,7 @@ E_STRING_LOOP:
             $heredoc_qq++;
 
             # get here document
-            my $script = substr $_, pos $_;
+            my $script = CORE::substr $_, pos $_;
             $script =~ s/.*?\n//oxm;
             if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
                 $heredoc{$delimiter} = $1;
@@ -2055,7 +2055,7 @@ E_STRING_LOOP:
             $heredoc_qq++;
 
             # get here document
-            my $script = substr $_, pos $_;
+            my $script = CORE::substr $_, pos $_;
             $script =~ s/.*?\n//oxm;
             if ($script =~ /\A (.*? \n $delimiter \n) /xms) {
                 $heredoc{$delimiter} = $1;
@@ -2232,7 +2232,7 @@ sub e_qq {
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
+    my @char = $string =~ m/ \G (\\?(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape second octet of double octet
@@ -2349,7 +2349,7 @@ sub e_heredoc {
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G ([\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF]) /oxmsg;
+    my @char = $string =~ m/ \G (\\?(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape character
@@ -2589,7 +2589,7 @@ sub e_m_q {
         \[\:\^ [a-z]+ \:\] |
         \[\:   [a-z]+ \:\] |
         \[\^               |
-            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF])
+        \\?    (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])
     )}oxmsg;
 
     # unescape character
@@ -3087,7 +3087,7 @@ sub e_s1_q {
         \[\:\^ [a-z]+ \:\] |
         \[\:   [a-z]+ \:\] |
         \[\^               |
-            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF])
+        \\?    (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])
     )}oxmsg;
 
     # unescape character
@@ -3200,7 +3200,7 @@ sub e_s2 {
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G (\$\d+|\\\d+|[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|->|=>|[\x00-\xFF]) /oxmsg;
+    my @char = $string =~ m/ \G (\$\d+|\\\d+|->|=>|\\?(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape second octet of double octet
@@ -3294,7 +3294,7 @@ sub e_s2_dol {
     # escape character
     my $left_e  = 0;
     my $right_e = 0;
-    my @char = $string =~ m/ \G (\$\d+|\\\d+|[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|->|=>|[\x00-\xFF]) /oxmsg;
+    my @char = $string =~ m/ \G (\$\d+|\\\d+|->|=>|\\?(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])) /oxmsg;
     for (my $i=0; $i <= $#char; $i++) {
 
         # escape second octet of double octet
@@ -3600,7 +3600,7 @@ sub e_qr_q {
         \[\:\^ [a-z]+ \:\] |
         \[\:   [a-z]+ \:\] |
         \[\^               |
-            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF])
+        \\?    (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])
     )}oxmsg;
 
     # unescape character
@@ -3880,7 +3880,7 @@ sub e_split_q {
         \[\:\^ [a-z]+ \:\] |
         \[\:   [a-z]+ \:\] |
         \[\^               |
-            (?:[\x81-\x9F\xE0-\xFC\\][\x00-\xFF]|[\x00-\xFF])
+        \\?    (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF])
     )}oxmsg;
 
     # unescape character
