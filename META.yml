@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name: Sjis
 abstract: Yet Another JPerl (Source code filter to escape ShiftJIS)
-version: 0.39
+version: 0.40
 author:
   - INABA Hitoshi <ina@cpan.org>
 license: perl
