@@ -28,14 +28,12 @@ SYNOPSIS
 DESCRIPTION
 
       This software is "Yet Another JPerl" written by Perl.
-      We can treat ShiftJIS by the CSI(Character Set Independent) method.
-      So we can write Perl scripts in ShiftJIS, without UTF8 flag, again.
 
       This "JPerl" means "Japanized Perl" or "Japanese Perl".
       So is unrelated to Mr. Patrick E. Martin's JPerl -- Perl 5 implemented in Java.
       And is unrelated to Mr. Ben Evans's jPerl -- Perl on the JVM, too.
 
-      This software is a beta3 version for final public comment.
+      This software treats ShiftJIS directly. Therefore, there is not UTF8 flag.
 
 INSTALLATION
 
@@ -183,10 +181,6 @@ The distinction is done only by first octet.
     MALFORMED single octet code is:
       0x81-0x9F and 0xE0-0xFC
       * Final octet of string like first octet of double octet code
-
- So this "ShiftJIS" can handle any code of ShiftJIS based code without
-Hewlett-Packard HP-15 and Informix Ascii 'INFORMIX V6 ALS' is triple octet
-code. (I'm sorry, these users.)
 
 See also code table:
 

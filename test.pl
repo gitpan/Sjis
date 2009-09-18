@@ -10,15 +10,27 @@
 # use Sjis;
 # print "ok 1\n";
 
-for my $testdir (sort split(/\n/,`dir /ad /b 2>NUL`)) {
-    next if $testdir eq 't';
+use Cwd;
 
-    if (($testdir =~ m/\A [a-z] /oxms) and (-f "$testdir/test.pl")) {
-        print STDERR "Testing $testdir/test.pl...\n";
-        chdir $testdir;
-        system $^X, 'test.pl';
-        chdir '..';
-    }
+my $cwd = cwd();
+$cwd =~ s#/#\\#g;
+
+my @test = sort split(/\n/,`dir /s /b t\\test.pl 2>NUL`);
+for my $test (@test) {
+    print "Testing $test...\n";
+
+    my $testdir = $test;
+    $testdir =~ s#\\([^\\]*)$##;
+    chdir $testdir;
+
+    system $^X, 'test.pl';
+}
+
+chdir $cwd;
+
+my @unlink = sort split(/\n/,`dir /s /b t\\*.pl.e 2>NUL`);
+for my $unlink (@unlink) {
+    unlink $unlink;
 }
 
 ######################### End of black magic.

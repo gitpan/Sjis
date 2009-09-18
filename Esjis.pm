@@ -9,9 +9,9 @@ package Esjis;
 
 use strict;
 use 5.00503;
-use vars qw($VERSION $_warning);
+use vars qw($VERSION $_warning $last_s_matched);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.40 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.41 $ =~ m/(\d+)/xmsg;
 
 use Fcntl;
 use Symbol;
@@ -142,21 +142,18 @@ else {
 sub import() {}
 sub unimport() {}
 sub Esjis::split(;$$$);
-sub Esjis::tr($$$;$);
+sub Esjis::tr($$$$;$);
 sub Esjis::chop(@);
 sub Esjis::index($$;$);
 sub Esjis::rindex($$;$);
-sub Esjis::lc($);
+sub Esjis::lc(@);
 sub Esjis::lc_();
-sub Esjis::uc($);
+sub Esjis::uc(@);
 sub Esjis::uc_();
-sub Esjis::shift_matched_var();
+sub Esjis::capture($);
 sub Esjis::ignorecase(@);
-sub Esjis::chr($);
+sub Esjis::chr(;$);
 sub Esjis::chr_();
-sub Esjis::ord($);
-sub Esjis::ord_();
-sub Esjis::reverse(@);
 sub Esjis::r(;*@);
 sub Esjis::w(;*@);
 sub Esjis::x(;*@);
@@ -223,7 +220,10 @@ sub Esjis::chdir(;$);
 sub Esjis::do($);
 sub Esjis::require(;$);
 
-sub Sjis::length;
+sub Sjis::ord(;$);
+sub Sjis::ord_();
+sub Sjis::reverse(@);
+sub Sjis::length(;$);
 sub Sjis::substr($$;$$);
 sub Sjis::index($$;$);
 sub Sjis::rindex($$;$);
@@ -430,11 +430,12 @@ sub Esjis::split(;$$$) {
 #
 # ShiftJIS transliteration (tr///)
 #
-sub Esjis::tr($$$;$) {
+sub Esjis::tr($$$$;$) {
 
-    my $searchlist      = $_[1];
-    my $replacementlist = $_[2];
-    my $modifier        = $_[3] || '';
+    my $bind_operator   = $_[1];
+    my $searchlist      = $_[2];
+    my $replacementlist = $_[3];
+    my $modifier        = $_[4] || '';
 
     my @char            = $_[0] =~ m/\G ($q_char) /oxmsg;
     my @searchlist      = _charlist_tr($searchlist);
@@ -496,7 +497,13 @@ sub Esjis::tr($$$;$) {
             }
         }
     }
-    return $tr;
+
+    if ($bind_operator =~ m/ !~ /oxms) {
+        return not $tr;
+    }
+    else {
+        return $tr;
+    }
 }
 
 #
@@ -506,7 +513,7 @@ sub Esjis::chop(@) {
 
     my $chop;
     if (@_ == 0) {
-        my @char = m/\G ($q_char)/oxmsg;
+        my @char = m/\G ($q_char) /oxmsg;
         $chop = pop @char;
         $_ = join '', @char;
     }
@@ -572,7 +579,7 @@ sub Esjis::rindex($$;$) {
 #
 # ShiftJIS lower case (with parameter)
 #
-sub Esjis::lc($) {
+sub Esjis::lc(@) {
 
     local $_ = shift if @_;
 
@@ -582,7 +589,7 @@ sub Esjis::lc($) {
 
     local $^W = 0;
 
-    return join('', map {$lc{$_}||$_} m/\G ($q_char)/oxmsg);
+    return join('', map {$lc{$_}||$_} m/\G ($q_char) /oxmsg), @_;
 }
 
 #
@@ -596,13 +603,13 @@ sub Esjis::lc_() {
 
     local $^W = 0;
 
-    return join('', map {$lc{$_}||$_} m/\G ($q_char)/oxmsg);
+    return join('', map {$lc{$_}||$_} m/\G ($q_char) /oxmsg);
 }
 
 #
 # ShiftJIS upper case (with parameter)
 #
-sub Esjis::uc($) {
+sub Esjis::uc(@) {
 
     local $_ = shift if @_;
 
@@ -612,7 +619,7 @@ sub Esjis::uc($) {
 
     local $^W = 0;
 
-    return join('', map {$uc{$_}||$_} m/\G ($q_char) /oxmsg);
+    return join('', map {$uc{$_}||$_} m/\G ($q_char) /oxmsg), @_;
 }
 
 #
@@ -630,22 +637,16 @@ sub Esjis::uc_() {
 }
 
 #
-# ShiftJIS shift matched variables
+# ShiftJIS regexp capture
 #
-sub Esjis::shift_matched_var() {
+sub Esjis::capture($) {
 
-    # $1 --> return
-    # $2 --> $1
-    # $3 --> $2
-    # $4 --> $3
-    my $dollar1 = $1;
-
-    local $@;
-    for (my $digit=1; eval "defined(\$$digit)"; $digit++) {
-        eval sprintf '*%d = *%d', $digit, $digit+1;
+    if ($last_s_matched and ($_[0] =~ m/\A [1-9][0-9]* \z/oxms)) {
+        return $_[0] + 1;
     }
-
-    return $dollar1;
+    else {
+        return $_[0];
+    }
 }
 
 #
@@ -736,10 +737,15 @@ sub Esjis::ignorecase(@) {
             # rewrite character class or escape character
             elsif (my $char = {
                 '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
-                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
                 '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
-                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
                 '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
+
+                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x09\x20])',
+                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x0A\x0B\x0C\x0D])',
+
+                '\h' => '[\x09\x20]',         # not include \xA0
+                '\v' => '[\x0A\x0B\x0C\x0D]', # not include \x85
+
                 }->{$char[$i]}
             ) {
                 $char[$i] = $char;
@@ -1078,15 +1084,18 @@ sub _charlist {
                 '\a' => "\a",
                 '\e' => "\e",
                 '\d' => '\d',
-                '\h' => '\h',
                 '\s' => '\s',
-                '\v' => '\v',
                 '\w' => '\w',
                 '\D' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\d])',
-                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\h])',
                 '\S' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\s])',
-                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\v])',
                 '\W' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\w])',
+
+                '\H' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x09\x20])',
+                '\V' => '(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x0A\x0B\x0C\x0D])',
+
+                '\h' => '[\x09\x20]',         # not include \xA0
+                '\v' => '[\x0A\x0B\x0C\x0D]', # not include \x85
+
             }->{$1};
         }
         elsif ($char[$i] =~ m/\A \\ ($q_char) \z/oxms) {
@@ -1190,7 +1199,15 @@ sub _charlist {
         }
 
         # single character of single octet code
-        elsif ($char[$i] =~ m/\A (?: [\x00-\xFF] | \\d | \\h | \\s | \\v | \\w ) \z/oxms) {
+        elsif ($char[$i] =~ m/\A (?: \\h ) \z/oxms) {
+            push @singleoctet, "\x09", "\x20";
+            $i += 1;
+        }
+        elsif ($char[$i] =~ m/\A (?: \\v ) \z/oxms) {
+            push @singleoctet, "\x0A","\x0B","\x0C","\x0D";
+            $i += 1;
+        }
+        elsif ($char[$i] =~ m/\A (?: [\x00-\xFF] | \\d | \\s | \\w ) \z/oxms) {
             push @singleoctet, $char[$i];
             $i += 1;
         }
@@ -1301,7 +1318,7 @@ sub charlist_not_qr {
 #
 # ShiftJIS order to character (with parameter)
 #
-sub Esjis::chr($) {
+sub Esjis::chr(;$) {
 
     my $c = @_ ? $_[0] : $_;
 
@@ -1335,57 +1352,6 @@ sub Esjis::chr_() {
             $c = int($c / 0x100);
         }
         return pack 'C*', @chr;
-    }
-}
-
-#
-# ShiftJIS character to order (with parameter)
-#
-sub Esjis::ord($) {
-
-    local $_ = shift if @_;
-
-    if (m/\A ($q_char) /oxms) {
-        my @ord = unpack 'C*', $1;
-        my $ord = 0;
-        while (my $o = shift @ord) {
-            $ord = $ord * 0x100 + $o;
-        }
-        return $ord;
-    }
-    else {
-        return CORE::ord $_;
-    }
-}
-
-#
-# ShiftJIS character to order (without parameter)
-#
-sub Esjis::ord_() {
-
-    if (m/\A ($q_char) /oxms) {
-        my @ord = unpack 'C*', $1;
-        my $ord = 0;
-        while (my $o = shift @ord) {
-            $ord = $ord * 0x100 + $o;
-        }
-        return $ord;
-    }
-    else {
-        return CORE::ord $_;
-    }
-}
-
-#
-# ShiftJIS reverse
-#
-sub Esjis::reverse(@) {
-
-    if (wantarray) {
-        return CORE::reverse @_;
-    }
-    else {
-        return join '', CORE::reverse(join('',@_) =~ m/\G ($q_char) /oxmsg);
     }
 }
 
@@ -3513,6 +3479,7 @@ sub _MSWin32_5Cended_path {
 # do ShiftJIS file
 #
 sub Esjis::do($) {
+
     my($filename) = @_;
 
     my $realfilename;
@@ -3574,6 +3541,7 @@ ITER_DO:
 # of ISBN 1-56592-149-6 Programming Perl, Second Edition.
 
 sub Esjis::require(;$) {
+
     local $_ = shift if @_;
     return 1 if $INC{$_};
 
@@ -3630,13 +3598,65 @@ ITER_REQUIRE:
 }
 
 #
-# ShiftJIS length by character
+# ShiftJIS character to order (with parameter)
 #
-sub Sjis::length {
+sub Sjis::ord(;$) {
 
     local $_ = shift if @_;
 
-    return scalar m/\G ($q_char) /oxmsg;
+    if (m/\A ($q_char) /oxms) {
+        my @ord = unpack 'C*', $1;
+        my $ord = 0;
+        while (my $o = shift @ord) {
+            $ord = $ord * 0x100 + $o;
+        }
+        return $ord;
+    }
+    else {
+        return CORE::ord $_;
+    }
+}
+
+#
+# ShiftJIS character to order (without parameter)
+#
+sub Sjis::ord_() {
+
+    if (m/\A ($q_char) /oxms) {
+        my @ord = unpack 'C*', $1;
+        my $ord = 0;
+        while (my $o = shift @ord) {
+            $ord = $ord * 0x100 + $o;
+        }
+        return $ord;
+    }
+    else {
+        return CORE::ord $_;
+    }
+}
+
+#
+# ShiftJIS reverse
+#
+sub Sjis::reverse(@) {
+
+    if (wantarray) {
+        return CORE::reverse @_;
+    }
+    else {
+        return join '', CORE::reverse(join('',@_) =~ m/\G ($q_char) /oxmsg);
+    }
+}
+
+#
+# ShiftJIS length by character
+#
+sub Sjis::length(;$) {
+
+    local $_ = shift if @_;
+
+    local @_ = m/\G ($q_char) /oxmsg;
+    return scalar @_;
 }
 
 #
@@ -3644,24 +3664,30 @@ sub Sjis::length {
 #
 sub Sjis::substr ($$;$$) {
 
-    if (defined $_[3]) {
-        if (defined $_[4]) {
-            my(undef,$offset,$length,$replacement) = @_;
-            if ($_[0] =~ s/\A ((?:$q_char){$offset}) ((?:$q_char){0,$length}) \z/$1$replacement/xms) {
-                return $2;
-            }
+    my @char = $_[0] =~ m/\G ($q_char) /oxmsg;
+
+    # substr($string,$offset,$length,$replacement)
+    if (@_ == 4) {
+        my(undef,$offset,$length,$replacement) = @_;
+        my $substr = join '', splice(@char, $offset, $length, $replacement);
+        $_[0] = join '', @char;
+        return $substr;
+    }
+
+    # substr($string,$offset,$length)
+    elsif (@_ == 3) {
+        my(undef,$offset,$length) = @_;
+        return join '', (@char[$offset .. $#char])[0 .. $length-1];
+    }
+
+    # substr($string,$offset)
+    else {
+        my(undef,$offset) = @_;
+        if ($offset >= 0) {
+            return join '', @char[$offset .. $#char];
         }
         else {
-            my($expr,$offset,$length) = @_;
-            if ($expr =~ m/\A (?:$q_char){$offset} ((?:$q_char){0,$length}) \z/xms) {
-                return $1;
-            }
-        }
-    }
-    else {
-        my($expr,$offset) = @_;
-        if ($expr =~ m/\A (?:$q_char){$offset} (.*) \z/xms) {
-            return $1;
+            return join '', @char[($#char+$offset+1) .. $#char];
         }
     }
 
@@ -3675,10 +3701,10 @@ sub Sjis::index($$;$) {
 
     my $index;
     if (@_ == 3) {
-        $index = Esjis::index($_[0],$_[1],$_[2]);
+        $index = Esjis::index($_[0], $_[1], CORE::length(Sjis::substr($_[0], 0, $_[2])));
     }
     else {
-        $index = Esjis::index($_[0],$_[1]);
+        $index = Esjis::index($_[0], $_[1]);
     }
 
     if ($index == -1) {
@@ -3696,10 +3722,10 @@ sub Sjis::rindex($$;$) {
 
     my $rindex;
     if (@_ == 3) {
-        $rindex = Esjis::rindex($_[0],$_[1],$_[2]);
+        $rindex = Esjis::rindex($_[0], $_[1], CORE::length(Sjis::substr($_[0], 0, $_[2])));
     }
     else {
-        $rindex = Esjis::rindex($_[0],$_[1]);
+        $rindex = Esjis::rindex($_[0], $_[1]);
     }
 
     if ($rindex == -1) {
@@ -3736,13 +3762,10 @@ Esjis - Run-time routines for Sjis.pm
     Esjis::lc_;
     Esjis::uc(...);
     Esjis::uc_;
-    Esjis::shift_matched_var();
+    Esjis::capture(...);
     Esjis::ignorecase(...);
     Esjis::chr(...);
     Esjis::chr_;
-    Esjis::ord(...);
-    Esjis::ord_;
-    Esjis::reverse(...);
     Esjis::X ...;
     Esjis::X_;
     Esjis::glob(...);
@@ -3757,6 +3780,9 @@ Esjis - Run-time routines for Sjis.pm
     Esjis::do(...);
     Esjis::require(...);
 
+    Sjis::ord(...);
+    Sjis::ord_;
+    Sjis::reverse(...);
     Sjis::length(...);
     Sjis::substr(...);
     Sjis::index(...);
@@ -3831,13 +3857,13 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 =item Transliteration
 
-  $tr = Esjis::tr($string,$searchlist,$replacementlist,$modifier);
-  $tr = Esjis::tr($string,$searchlist,$replacementlist);
+  $tr = Esjis::tr($variable,$bind_operator,$searchlist,$replacementlist,$modifier);
+  $tr = Esjis::tr($variable,$bind_operator,$searchlist,$replacementlist);
 
   This function scans a ShiftJIS string character by character and replaces all
   occurrences of the characters found in $searchlist with the corresponding character
   in $replacementlist. It returns the number of characters replaced or deleted.
-  If no ShiftJIS string is specified via =~ operator, the $_ string is translated.
+  If no ShiftJIS string is specified via =~ operator, the $_ variable is translated.
   $modifier are:
 
   Modifier   Meaning
@@ -3896,17 +3922,17 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   This is the internal function implementing the \U escape in double-quoted
   strings.
 
-=item Shift matched variables
+=item Make capture number
 
-  $dollar1 = Esjis::shift_matched_var();
+  $capturenumber = Esjis::capture($string);
 
-  This function is internal use to s/ / /.
+  This function is internal use to m/ /i, s/ / /i, split and qr/ /i.
 
 =item Make ignore case string
 
   @ignorecase = Esjis::ignorecase(@string);
 
-  This function is internal use to m/ /i, s/ / /i and qr/ /i.
+  This function is internal use to m/ /i, s/ / /i, split and qr/ /i.
 
 =item Make character
 
@@ -3916,33 +3942,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   This function returns the character represented by that $code in the character
   set. For example, Esjis::chr(65) is "A" in either ASCII or ShiftJIS, and
   Esjis::chr(0x82a0) is a ShiftJIS HIRAGANA LETTER A. For the reverse of Esjis::chr,
-  use Esjis::ord.
-
-=item Order of Character
-
-  $ord = Esjis::ord($string);
-  $ord = Esjis::ord_;
-
-  This function returns the numeric value (ASCII or ShiftJIS) of the first character
-  of $string. The return value is always unsigned.
-
-=item Reverse list or string
-
-  @reverse = Esjis::reverse(@list);
-  $reverse = Esjis::reverse(@list);
-
-  In list context, this function returns a list value consisting of the elements of
-  @list in the opposite order. The function can be used to create descending sequences:
-
-  for (Esjis::reverse(1 .. 10)) { ... }
-
-  Because of the way hashes flatten into lists when passed as a @list, reverse can also
-  be used to invert a hash, presuming the values are unique:
-
-  %barfoo = Esjis::reverse(%foobar);
-
-  In scalar context, the function concatenates all the elements of LIST and then returns
-  the reverse of that resulting string, character by character.
+  use Sjis::ord.
 
 =item File test operator -X
 
@@ -4192,6 +4192,32 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   it'll return true otherwise.
 
   See also do file.
+
+=item Order of Character
+
+  $ord = Sjis::ord($string);
+  $ord = Sjis::ord_;
+
+  This function returns the numeric value (ASCII or ShiftJIS) of the first character
+  of $string. The return value is always unsigned.
+
+=item Reverse list or string
+
+  @reverse = Sjis::reverse(@list);
+  $reverse = Sjis::reverse(@list);
+
+  In list context, this function returns a list value consisting of the elements of
+  @list in the opposite order. The function can be used to create descending sequences:
+
+  for (Sjis::reverse(1 .. 10)) { ... }
+
+  Because of the way hashes flatten into lists when passed as a @list, reverse can also
+  be used to invert a hash, presuming the values are unique:
+
+  %barfoo = Sjis::reverse(%foobar);
+
+  In scalar context, the function concatenates all the elements of LIST and then returns
+  the reverse of that resulting string, character by character.
 
 =item length by ShiftJIS character
 
