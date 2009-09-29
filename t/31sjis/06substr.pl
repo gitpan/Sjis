@@ -59,60 +59,144 @@ else {
 }
 
 $_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
-if (Sjis::substr($_,5) eq '‚©‚«‚­‚¯‚±') {
-    print qq{ok - 7 Sjis::substr(\$_,5) eq '‚©‚«‚­‚¯‚±'\n};
+if (substr($_,10,0) eq '') {
+    print qq{ok - 7 substr(\$_,10,0) eq ''\n};
 }
 else {
-    print qq{not ok - 7 Sjis::substr(\$_,5) eq '‚©‚«‚­‚¯‚±'\n};
+    print qq{not ok - 7 substr(\$_,10,0) eq ''\n};
+}
+
+$_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
+if (substr($_,10,0,'‚â‚ä‚æ') eq '') {
+    if ($_ eq '‚ ‚¢‚¤‚¦‚¨‚â‚ä‚æ‚©‚«‚­‚¯‚±') {
+        print qq{ok - 8 substr(\$_,10,0,'‚â‚ä‚æ') eq ''\n};
+    }
+    else {
+        print qq{not ok - 8 substr(\$_,10,0,'‚â‚ä‚æ') eq ''\n};
+    }
+}
+else {
+    print qq{not ok - 8 substr(\$_,10,0,'‚â‚ä‚æ') eq ''\n};
+}
+
+$_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
+if (substr($_,-10,0) eq '') {
+    print qq{ok - 9 substr(\$_,-10,0) eq ''\n};
+}
+else {
+    print qq{not ok - 9 substr(\$_,-10,0) eq ''\n};
+}
+
+$_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
+if (substr($_,-10,0,'‚â‚ä‚æ') eq '') {
+    if ($_ eq '‚ ‚¢‚¤‚¦‚¨‚â‚ä‚æ‚©‚«‚­‚¯‚±') {
+        print qq{ok - 10 substr(\$_,-10,0,'‚â‚ä‚æ') eq ''\n};
+    }
+    else {
+        print qq{not ok - 10 substr(\$_,-10,0,'‚â‚ä‚æ') eq ''\n};
+    }
+}
+else {
+    print qq{not ok - 10 substr(\$_,-10,0,'‚â‚ä‚æ') eq ''\n};
+}
+
+$_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
+if (Sjis::substr($_,5) eq '‚©‚«‚­‚¯‚±') {
+    print qq{ok - 11 Sjis::substr(\$_,5) eq '‚©‚«‚­‚¯‚±'\n};
+}
+else {
+    print qq{not ok - 11 Sjis::substr(\$_,5) eq '‚©‚«‚­‚¯‚±'\n};
 }
 
 $_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
 if (Sjis::substr($_,2,3) eq '‚¤‚¦‚¨') {
-    print qq{ok - 8 Sjis::substr(\$_,2,3) eq '‚¤‚¦‚¨'\n};
+    print qq{ok - 12 Sjis::substr(\$_,2,3) eq '‚¤‚¦‚¨'\n};
 }
 else {
-    print qq{not ok - 8 Sjis::substr(\$_,2,3) eq '‚¤‚¦‚¨'\n};
+    print qq{not ok - 12 Sjis::substr(\$_,2,3) eq '‚¤‚¦‚¨'\n};
 }
 
 $_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
 if (Sjis::substr($_,2,3,'‚³‚µ‚·‚¹‚»') eq '‚¤‚¦‚¨') {
     if ($_ eq '‚ ‚¢‚³‚µ‚·‚¹‚»‚©‚«‚­‚¯‚±') {
-        print qq{ok - 9 Sjis::substr(\$_,2,3,'‚³‚µ‚·‚¹‚»') eq '‚¤‚¦‚¨'\n};
+        print qq{ok - 13 Sjis::substr(\$_,2,3,'‚³‚µ‚·‚¹‚»') eq '‚¤‚¦‚¨'\n};
     }
     else {
-        print qq{not ok - 9 Sjis::substr(\$_,2,3,'‚³‚µ‚·‚¹‚»') eq '‚¤‚¦‚¨'\n};
+        print qq{not ok - 13 Sjis::substr(\$_,2,3,'‚³‚µ‚·‚¹‚»') eq '‚¤‚¦‚¨'\n};
     }
 }
 else {
-    print qq{not ok - 9 Sjis::substr(\$_,2,3,'‚³‚µ‚·‚¹‚»') eq '‚¤‚¦‚¨'\n};
+    print qq{not ok - 13 Sjis::substr(\$_,2,3,'‚³‚µ‚·‚¹‚»') eq '‚¤‚¦‚¨'\n};
 }
 
 $_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
 if (Sjis::substr($_,-3) eq '‚­‚¯‚±') {
-    print qq{ok - 10 Sjis::substr(\$_,-3) eq '‚­‚¯‚±'\n};
+    print qq{ok - 14 Sjis::substr(\$_,-3) eq '‚­‚¯‚±'\n};
 }
 else {
-    print qq{not ok - 10 Sjis::substr(\$_,-3) eq '‚­‚¯‚±'\n};
+    print qq{not ok - 14 Sjis::substr(\$_,-3) eq '‚­‚¯‚±'\n};
 }
 
 $_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
 if (Sjis::substr($_,-5,3) eq '‚©‚«‚­') {
-    print qq{ok - 11 Sjis::substr(\$_,-5,3) eq '‚©‚«‚­'\n};
+    print qq{ok - 15 Sjis::substr(\$_,-5,3) eq '‚©‚«‚­'\n};
 }
 else {
-    print qq{not ok - 11 Sjis::substr(\$_,-5,3) eq '‚©‚«‚­'\n};
+    print qq{not ok - 15 Sjis::substr(\$_,-5,3) eq '‚©‚«‚­'\n};
 }
 
 $_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
 if (Sjis::substr($_,-5,3,'‚â‚ä‚æ') eq '‚©‚«‚­') {
     if ($_ eq '‚ ‚¢‚¤‚¦‚¨‚â‚ä‚æ‚¯‚±') {
-        print qq{ok - 12 Sjis::substr(\$_,-5,3,'‚â‚ä‚æ') eq '‚©‚«‚­'\n};
+        print qq{ok - 16 Sjis::substr(\$_,-5,3,'‚â‚ä‚æ') eq '‚©‚«‚­'\n};
     }
     else {
-        print qq{not ok - 12 Sjis::substr(\$_,-5,3,'‚â‚ä‚æ') eq '‚©‚«‚­'\n};
+        print qq{not ok - 16 Sjis::substr(\$_,-5,3,'‚â‚ä‚æ') eq '‚©‚«‚­'\n};
     }
 }
 else {
-    print qq{not ok - 12 Sjis::substr(\$_,-5,3,'‚â‚ä‚æ') eq '‚©‚«‚­'\n};
+    print qq{not ok - 16 Sjis::substr(\$_,-5,3,'‚â‚ä‚æ') eq '‚©‚«‚­'\n};
+}
+
+$_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
+if (Sjis::substr($_,5,0) eq '') {
+    print qq{ok - 17 Sjis::substr(\$_,5,0) eq ''\n};
+}
+else {
+    print qq{not ok - 17 Sjis::substr(\$_,5,0) eq ''\n};
+}
+
+$_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
+if (Sjis::substr($_,5,0,'‚â‚ä‚æ') eq '') {
+    if ($_ eq '‚ ‚¢‚¤‚¦‚¨‚â‚ä‚æ‚©‚«‚­‚¯‚±') {
+        print qq{ok - 18 Sjis::substr(\$_,5,0,'‚â‚ä‚æ') eq ''\n};
+    }
+    else {
+        print qq{not ok - 18 Sjis::substr(\$_,5,0,'‚â‚ä‚æ') eq ''\n};
+    }
+}
+else {
+    print qq{not ok - 18 Sjis::substr(\$_,5,0,'‚â‚ä‚æ') eq ''\n};
+}
+
+$_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
+if (Sjis::substr($_,-5,0) eq '') {
+    print qq{ok - 19 Sjis::substr(\$_,-5,0) eq ''\n};
+}
+else {
+    print qq{not ok - 19 Sjis::substr(\$_,-5,0) eq ''\n};
+}
+
+$_ = '‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±';
+if (Sjis::substr($_,-5,0,'‚â‚ä‚æ') eq '') {
+    if ($_ eq '‚ ‚¢‚¤‚¦‚¨‚â‚ä‚æ‚©‚«‚­‚¯‚±') {
+        print qq{ok - 20 Sjis::substr(\$_,-5,0,'‚â‚ä‚æ') eq ''\n};
+    }
+    else {
+        print qq{not ok - 20 Sjis::substr(\$_,-5,0,'‚â‚ä‚æ') eq ''\n};
+    }
+}
+else {
+    print qq{not ok - 20 Sjis::substr(\$_,-5,0,'‚â‚ä‚æ') eq ''\n};
 }
 

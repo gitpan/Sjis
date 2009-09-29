@@ -259,16 +259,10 @@ JPerl と上位互換の機能
     chdir does not work with chr(0x5C) at end of path
     http://bugs.activestate.com/show_bug.cgi?id=81839
 
-  * @_ = split(m/^/,$_)
-
-    perl5.008 にて @_ = split(m/^/,$_) が期待通りの動作をしませんでした。
-    この場合、修飾子 /m を付加し、@_ = split(m/^/m,$_) と記述する必要があり
-    ます。
-
   * m/$re/o, s/$re/foo/o, qr/$re/o の /o 修飾子
 
-    perl5.010 にて /o 修飾子が期待通りの動作をしませんでした。
-    変数 $re の値が変更されると次回の実行時にその変更が反映されます。
+    Microsoft Windows Vista SP1 上の perl5.010 にて /o 修飾子が期待通りの動作をし
+    ませんでした。変数 $re の値が変更されると次回の実行時にその変更が反映されます。
 
   * ヒアドキュメント
 
@@ -1024,7 +1018,7 @@ Unicode サポートが perl に導入される以前は、eq 演算子は、2つのスカラー変数によっ
 
     たぶん。
 
-Programming Perl, 3rd ed. が書かれた頃には、UTF-8 フラグは生まれておらず、Perl は
+Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
 簡単な仕事を簡単にできるように設計されていました。このソフトウェアは当時のような
 プログラミング環境を提供します。
 
