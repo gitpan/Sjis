@@ -109,7 +109,7 @@ ShiftJIS IN WIKIPEDIA
 
 Shift JIS (2008.02.15 15:02:00 JST). In Wikipedia: The Free Encyclopedia.
 Retrieved from
-L<http://en.wikipedia.org/wiki/Shift_JIS>
+http://en.wikipedia.org/wiki/Shift_JIS
 
 Shift JIS (also SJIS, MIME name Shift_JIS) is a character encoding
 for the Japanese language originally developed by a Japanese company
@@ -305,7 +305,7 @@ For example, Esjis::chop function returns this octet.
 
 
 The ShiftJIS list via vendors:
-L<http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html>
+http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html
 
  DEC PC                         0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
  DEC WS                         0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
