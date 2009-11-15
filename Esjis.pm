@@ -11,7 +11,7 @@ use strict;
 use 5.00503;
 use vars qw($VERSION $_warning);
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.43 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.44 $ =~ m/(\d+)/xmsg;
 
 use Fcntl;
 use Symbol;
@@ -173,6 +173,7 @@ sub Esjis::capture($);
 sub Esjis::ignorecase(@);
 sub Esjis::chr(;$);
 sub Esjis::chr_();
+sub Esjis::filetest(@);
 sub Esjis::r(;*@);
 sub Esjis::w(;*@);
 sub Esjis::x(;*@);
@@ -200,6 +201,7 @@ sub Esjis::B(;*@);
 sub Esjis::M(;*@);
 sub Esjis::A(;*@);
 sub Esjis::C(;*@);
+sub Esjis::filetest_(@);
 sub Esjis::r_();
 sub Esjis::w_();
 sub Esjis::x_();
@@ -1380,6 +1382,25 @@ sub Esjis::chr_() {
 }
 
 #
+# ShiftJIS stacked file test expr
+#
+sub Esjis::filetest (@) {
+
+    my $file     = pop @_;
+    my $filetest = substr(pop @_, 1);
+
+    unless (eval qq{Esjis::$filetest(\$file)}) {
+        return '';
+    }
+    for my $filetest (reverse @_) {
+        unless (eval qq{ $filetest _ }) {
+            return '';
+        }
+    }
+    return 1;
+}
+
+#
 # ShiftJIS file test -r expr
 #
 sub Esjis::r(;*@) {
@@ -2352,6 +2373,24 @@ sub Esjis::C(;*@) {
         }
     }
     return wantarray ? (undef,@_) : undef;
+}
+
+#
+# ShiftJIS stacked file test $_
+#
+sub Esjis::filetest_ (@) {
+
+    my $filetest = substr(pop @_, 1);
+
+    unless (eval qq{Esjis::${filetest}_}) {
+        return '';
+    }
+    for my $filetest (reverse @_) {
+        unless (eval qq{ $filetest _ }) {
+            return '';
+        }
+    }
+    return 1;
 }
 
 #

@@ -158,6 +158,8 @@ t/23filetest/smoke-filetest-05.pl
 t/23filetest/smoke-filetest-06.pl
 t/23filetest/smoke-filetest-07.pl
 t/23filetest/test.pl
+t/24stackfiletest/stackfiletest-01.pl
+t/24stackfiletest/test.pl
 t/31sjis/01ord.pl
 t/31sjis/02ord.pl
 t/31sjis/03reverse.pl
