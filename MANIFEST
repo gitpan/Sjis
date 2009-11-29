@@ -78,6 +78,7 @@ t/14option/05option_qr.pl
 t/14option/test.pl
 t/15split/01split.pl
 t/15split/02split.pl
+t/15split/03split.pl
 t/15split/test.pl
 t/16s/02option_s-01.pl
 t/16s/02option_s-02.pl
