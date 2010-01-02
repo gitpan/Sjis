@@ -16,10 +16,23 @@ Sjis-JA - "Yet Another JPerl" Source code filter to escape ShiftJIS (Japanese do
       use Sjis qw(ord reverse);  --- ord, reverse の拡張機能を使う場合
       use Sjis version qw(ord reverse);
 
+      ※ no Sjis; は利用できません。
+
+      使える関数
+        Sjis::ord(...);
+        Sjis::reverse(...);
+        Sjis::length(...);
+        Sjis::substr(...);
+        Sjis::index(...);
+        Sjis::rindex(...);
+
     コマンドプロンプトで以下のように実行する
       perl     ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
       perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
       perl510  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
+
+      ? * を使ってワイルドカードの指定ができます
+      ' ～ ' を使ってクォートすることができます
 
   ● 使い方: B
 
@@ -85,6 +98,19 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
   * (JPerlを保守するために) C プログラミングを行わないですむ
 
 さあ、JPerl の未来によってもうひとつの未来を作りましょう。
+
+インストール方法
+
+   perl Makefile.pl         --- Makefile.pl が make.bat を生成します
+   make.bat install
+   make.bat test
+
+   make.bat install         --- 現在使用中の perl 環境にインストールします
+   perl58 make.bat install  --- perl5.008 環境にインストールします
+   perl510 make.bat install --- perl5.010 環境にインストールします
+
+   make.bat dist            --- CPAN 配布用パッケージを作ります
+   make.bat tar.bat         --- tar.bat を作成します
 
 ソフトウェアの一覧
 
@@ -169,7 +195,17 @@ JPerl と上位互換の機能
     @glob = Esjis::glob($string);
     @glob = Esjis::glob_;
 
-    OS 間で可搬性のある拡張されたDOS風グロブ(ワイルドカード)機能を提供します。
+    Esjis::glob は、OS間で可搬性のある拡張されたDOS風グロブ(ワイルドカード)
+    機能を提供します。ディレクトリパスにもワイルドカードが使用でき、大文字か
+    小文字の区別がなく、逆スラッシュとスラッシュが両方使用できます(ただし
+    逆スラッシュは2重にしなければなりません)。
+
+    実行方法は、
+
+    use Sjis;
+    @perlfiles = glob  "..\pe?l/*.p?";
+    print <..\pe?l/*.p?>;
+
     "~" は現在のユーザのホームディレクトリに展開されます。
     MSWin32 環境にて文字コード(0x5C)で終わるパスを扱うことができます。
 
@@ -189,57 +225,139 @@ JPerl と上位互換の機能
 
     MSWin32 環境にて文字コード(0x5C)で終わるパスを扱うことができます。
 
+文字指向の関数
+
   * ord は Sjis::ord または Sjis::ord_ に書き換わります
 
-    "use Sjis qw(ord);" によって2オクテットコードに対応します。
-    この動作は JPerl と非互換です。
+    "use Sjis qw(ord);" によって ord は Sjis::ord に書き換わるようになります。
+
+    $ord = Sjis::ord($string);
 
     Sjis::ord($string) は $string の先頭の文字の ShiftJIS コード値を返します。
     $string が省略された場合は $_ が対象となります。この関数は常に符号なしの
     値を返します。
 
+    この動作は JPerl と非互換なので明示的にインポートした場合のみ機能するように
+    なっています。
+
   * reverse は Sjis::reverse に書き換わります
 
-    "use Sjis qw(reverse);" によってスカラコンテキストでも2オクテット
-    コードに対応します。
-    この動作は JPerl と非互換です。
+    "use Sjis qw(reverse);" によって reverse は Sjis::reverse に書き換わるよう
+    になります。
+
+    @reverse = Sjis::reverse(@list);
+    $reverse = Sjis::reverse(@list);
 
     Sjis::reverse(@list) はリストコンテキストでは @list の要素を逆順に並べた
     リスト値を返します。
+    これを利用して、降順の数列を発生させることもできます。
+
+    for (Sjis::reverse(1 .. 10)) { ... }
+
+    @list としてハッシュを渡した場合、そのハッシュはフラットなリストに変換されま
+    す。このことを利用すれば、reverse を使ってハッシュを逆向きにする(値からキーを
+    ひけるようにする)ことができます(ただし、すべての値がユニークであることが前提
+    です)。
+
+    %barfoo = Sjis::reverse(%foobar);
+
     スカラーコンテキストでは @list のすべての要素を連結した上で、ShiftJIS の
     文字単位で逆順にしたものを返します。
 
-  * Sjis::length($string)
+    この動作は JPerl と非互換なので明示的にインポートした場合のみ機能するように
+    なっています。
+
+  * Sjis::length
+
+    $length = Sjis::length($string);
+    $length = Sjis::length();
 
     Sjis::length($string) はスカラー値 $string の長さを ShiftJIS の文字数で返
     します。$string を省略した場合は $_ の文字数を返します。
 
-  * Sjis::substr($string, $pos [, $n [, $replacement]])
+    文字列の長さを、文字単位ではなく、バイト単位で数えるには
 
-    ShiftJIS 文字列 $string から部分文字列を取り出して返します。この部分文字列は、
-    文字列の先頭から数えて $pos 文字目から始まり、文字数は $n 文字です。$pos に
-    負の値を指定した場合には、文字列の末尾から $pos 文字だけ戻った場所が部分文字列
-    の先頭となります。$n を省略すると、文字列の終わりまですべてが返されます。$n に
-    負の値を指定した場合には、文字列の末尾から $n 文字が残るように文字数が計算され
-    ます。Sjis::substr は左辺値として使うことはできません。第4引数として、文字列
-    $replacement を指定すると、部分文字列は $replacement によって置き換えられます。
-    この場合も、元の部分文字列が値として返されます。
+    $blen = length $string;
 
-  * Sjis::index($string, $substr [, $start])
+    あるいは
 
-    ShiftJIS 文字列 $string の中で部分文字列 $substr が最初に出現する位置を文字
-    単位で数えて返します。$start を指定すると、その文字位置から探し始めます。
-    位置は最初の文字を 0 とする整数値で指定します。$substr が見つからなかった場合
-    は、Sjis::index 関数は -1 を返します。
+    $blen = CORE::length $string;
 
-  * Sjis::rindex($string, $substr [, $position])
+    とします。
 
-    この関数は Sjis::index と似ていますが、ShiftJIS 文字列 $string の中で、部分
-    文字列 $substr が最後に出現する位置を文字単位で数えて返します。$substr が見つ
-    からなければ -1 を返します。$position を指定すれば、値として返すことが許され
-    る、最も右よりの位置を指定することができます。
+  * Sjis::substr
 
-バグと制限事項ないし JPerl と互換性のない機能
+    $substr = Sjis::substr($string,$offset,$length,$replacement);
+    $substr = Sjis::substr($string,$offset,$length);
+    $substr = Sjis::substr($string,$offset);
+
+    Sjis::substr は、ShiftJIS 文字列 $string で指定された文字列から部分文字列を取り
+    出して返します。部分文字列は、文字列の先頭から数えて $offset 文字目から始まる、
+    $length 文字分です。$offset が負ならば、文字列の末尾から -$offset 文字分戻った
+    ところから部分文字列が開始します。$length を省略すると、文字列の末尾まですべてが
+    返されます。$length が負ならば、文字列の末尾から -$length 文字が残るように、長さ
+    が決められます。そうでなければ、$length は、あなたが期待するように、取り出す部分
+    文字列の長さを表しています。
+
+    Sjis::substr を左辺値(代入の対象となるもの)として使うことはできません。その代わ
+    りに、第4引数 $replacement に置き換え用の文字列を指定します。この場合、
+    Sjis::substr は $string の一部を文字列 $replacement で置き換えるとともに、
+    (splice のように)置き換えられた部分を値として返します。次の例は、$var の最後の
+    文字を "Curly" で置き換えるとともに、置き換えられた文字を $oldstr にセットしま
+    す:
+
+    $oldstr = Sjis::substr($var, -1, 1, "Curly");
+
+    $var の先頭に文字列 "Larry" を付けるには、次のようにします:
+
+    Sjis::substr($var, 0, 0, "Larry");
+
+    $var の最初の1文字を "Moe" で置き換えるには、次のようにします:
+
+    Sjis::substr($var, 0, 1, "Moe");
+
+    $var の最後の1文字を "Curly" で置き換えるには次のようにします:
+
+    Sjis::substr($var, -1, 1, "Curly");
+
+  * Sjis::index
+
+    $index = Sjis::index($string,$substring,$start);
+    $index = Sjis::index($string,$substring);
+
+    Sjis::index は、ShiftJIS 文字列 $string の中に含まれる、もう1つの ShiftJIS 文
+    字列 $substr を探します。$string の中で、$substr が最初に出現する位置を文字単位
+    で数えて返します。$start が指定されている場合、$string の先頭から $start 個の
+    文字をスキップした位置から、$substr を探し始めます。位置は 0 をベースにとして
+    数えます。$substr が見つからなければ、Sjis::index 関数はベースより 1 だけ小さい
+    値 -1 を返します。Sjis::index を使って、文字列全体を調べるには、次のようにし
+    ます。
+
+    $pos = -1;
+    while (($pos = Sjis::index($string, $lookfor, $pos)) > -1) {
+        print "Found at $pos\n";
+        $pos++;
+    }
+
+  * Sjis::rindex
+
+    $rindex = Sjis::rindex($string,$substring,$position);
+    $rindex = Sjis::rindex($string,$substring);
+
+    Sjis::rindex は Sjis::index と似ていますが、ShiftJIS 文字列 $string の中で、
+    部分文字列 $substr が最後に出現する位置を文字単位で数えて返します(つまり
+    reverse Sjis::index です)。$substr が見つからなければ、-1 を返します。$position
+    によって、値として返すことが許される、最も右よりの位置を指定することができます。
+    Sjis::rindex を使って、文字列全体を末尾から先頭に向かって調べるには、次のよう
+    にします。
+
+    $pos = Sjis::length($string);
+    while (($pos = Sjis::rindex($string, $lookfor, $pos)) >= 0) {
+        print "Found at $pos\n";
+        $pos--;
+    }
+
+バグと制限事項
 
 バグ報告、パッチを歓迎します。
 
@@ -1133,13 +1251,6 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  T1008901080816 雑誌08901-8
  http://ascii.asciimw.jp/books/magazines/unix.shtml
 
- Perlデバッグ明快技法
- Martin Brown, 岡田 長治 監訳
- 2001年5月発行
- 512 項
- ISBN 4-274-06420-4
- http://ssl.ohmsha.co.jp/cgi-bin/menu.cgi?ISBN=4-274-06420-4
-
 謝辞
 
 このソフトウェアは、以下の方々の作成したソフトウェアおよび文書のおかげにより作成
@@ -1153,7 +1264,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  http://www.perl.org/
 
  歌代 和正さん, jcode.pl
- http://www.srekcah.org/jcode/
+ ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/
 
  Jeffrey E. F. Friedl, Mastering Regular Expressions
  http://www.oreilly.com/catalog/regex/index.html
