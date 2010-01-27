@@ -170,3 +170,5 @@ t/31sjis/06substr.pl
 t/31sjis/07index.pl
 t/31sjis/08rindex.pl
 t/31sjis/test.pl
+t/41heredoc/01heredoc.pl
+t/41heredoc/test.pl

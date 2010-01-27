@@ -17,7 +17,7 @@ $cwd =~ s#/#\\#g;
 
 my @test = sort split(/\n/,`dir /s /b t\\test.pl 2>NUL`);
 for my $test (@test) {
-    print "Testing $test...\n";
+    print STDERR "Testing $test...\n";
 
     my $testdir = $test;
     $testdir =~ s#\\([^\\]*)$##;
