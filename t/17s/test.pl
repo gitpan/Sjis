@@ -1,5 +1,6 @@
 use strict;
 use Sjis;
+$| = 1;
 
 my @script = grep(/^[0-9]/, split(/\n/,`dir /b *.pl 2>NUL`));
 

@@ -3,6 +3,7 @@ die "This file is not encoded in ShiftJIS.\n" if q{‚ } ne "\x82\xa0";
 
 use strict;
 use Sjis;
+$| = 1;
 
 chomp(my @script = <DATA>);
 

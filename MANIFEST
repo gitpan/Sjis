@@ -2,13 +2,14 @@ Sjis.pm
 Esjis.pm
 perl58.bat
 perl510.bat
+perl512.bat
 Changes
 Makefile.PL
 MANIFEST
 test.pl
 README
 META.yml
-Sjis/JA.pod
+Sjis/JA.pm
 t/01shiftjis.htm/shiftjis.htm-01.pl
 t/01shiftjis.htm/shiftjis.htm-02.pl
 t/01shiftjis.htm/shiftjis.htm-03.pl
@@ -172,3 +173,5 @@ t/31sjis/08rindex.pl
 t/31sjis/test.pl
 t/41heredoc/01heredoc.pl
 t/41heredoc/test.pl
+t/51cclass/01cclass.pl
+t/51cclass/test.pl

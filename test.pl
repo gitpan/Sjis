@@ -10,6 +10,7 @@
 # use Sjis;
 # print "ok 1\n";
 
+$| = 1;
 use Cwd;
 
 my $cwd = cwd();

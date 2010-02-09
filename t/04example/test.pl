@@ -2,6 +2,7 @@
 die "This file is not encoded in ShiftJIS.\n" if q{‚ } ne "\x82\xa0";
 
 use Sjis;
+$| = 1;
 
 mkdir('dt',0777);
 mkdir('dt\\alphabet',0777);

@@ -1,5 +1,6 @@
 use strict;
 use Sjis;
+$| = 1;
 
 chomp(my @script = <DATA>);
 
