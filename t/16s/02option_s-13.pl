@@ -1,6 +1,8 @@
 use Sjis;
 $| = 1;
 
+my $__FILE__ = __FILE__;
+
 # s///o
 
 for $i (1 .. 3) {
@@ -18,14 +20,14 @@ for $i (1 .. 3) {
 
     if ($a =~ s/$re/‚ /o) {
         if ($a eq "ABCDEFGHI‚ KLMNOPQRSTUVWXYZ") {
-            print qq{ok - 13 \$a =~ s/\$re/‚ /o (\$re=$re)(\$a=$a)\n};
+            print qq{ok - 13 \$a =~ s/\$re/‚ /o (\$re=$re)(\$a=$a) $^X $__FILE__\n};
         }
         else {
-            print qq{not ok - 13a \$a =~ s/\$re/‚ /o (\$re=$re)(\$a=$a)\n};
+            print qq{not ok - 13a \$a =~ s/\$re/‚ /o (\$re=$re)(\$a=$a) $^X $__FILE__\n};
         }
     }
     else {
-        print qq{not ok - 13b \$a =~ s/\$re/‚ /o (\$re=$re)(\$a=$a)\n};
+        print qq{not ok - 13b \$a =~ s/\$re/‚ /o (\$re=$re)(\$a=$a) $^X $__FILE__\n};
     }
 }
 

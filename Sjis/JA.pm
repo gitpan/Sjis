@@ -1,26 +1,27 @@
-# This file is encoded in ShiftJIS.
 1;
 __END__
 
 =pod
 
-=head1 г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўеђЌз§°
+=encoding Shift_JIS
+
+=head1 ѓ\ѓtѓgѓEѓFѓA–јЏМ
 
 Sjis-JA - "Yet Another JPerl" Source code filter to escape ShiftJIS (Japanese document)
 
-=head1 ж¦‚и¦Ѓ
+=head1 ЉT—v
 
-  в—Џ дЅїгЃ„ж–№: A
+  Ѓњ Ћg‚ў•ы: A
 
-    г‚№г‚ЇгѓЄгѓ—гѓ€ ShiftJIS_script.pl гЃ®дё­гЃ«д»Ґдё‹г‚’иЁиї°гЃ—гЃ¦...
+    ѓXѓNѓЉѓvѓg ShiftJIS_script.pl ‚М’†‚Й€И‰є‚р‹LЏq‚µ‚Д...
       use Sjis;
-      use Sjis version;          --- Sjis.pm гЃ®гѓђгѓјг‚ёгѓ§гѓігѓЃг‚§гѓѓг‚Їг‚’иЎЊгЃ†е ґеђ€
-      use Sjis qw(ord reverse);  --- ord, reverse гЃ®ж‹Ўејµж©џиѓЅг‚’дЅїгЃ†е ґеђ€
+      use Sjis version;          --- Sjis.pm ‚МѓoЃ[ѓWѓ‡ѓ“ѓ`ѓFѓbѓN‚рЌs‚¤ЏкЌ‡
+      use Sjis qw(ord reverse);  --- ord, reverse ‚МЉg’Ј‹@”\‚рЋg‚¤ЏкЌ‡
       use Sjis version qw(ord reverse);
 
-      вЂ» no Sjis; гЃЇе€©з”ЁгЃ§гЃЌгЃѕгЃ›г‚“гЂ‚
+      Ѓ¦ no Sjis; ‚Н——p‚Е‚«‚Ь‚№‚сЃB
 
-      дЅїгЃ€г‚‹й–ўж•°
+      Ћg‚¦‚йЉЦђ”
         Sjis::ord(...);
         Sjis::reverse(...);
         Sjis::length(...);
@@ -28,91 +29,91 @@ Sjis-JA - "Yet Another JPerl" Source code filter to escape ShiftJIS (Japanese do
         Sjis::index(...);
         Sjis::rindex(...);
 
-    г‚ігѓћгѓігѓ‰гѓ—гѓ­гѓігѓ—гѓ€гЃ§д»Ґдё‹гЃ®г‚€гЃ†гЃ«е®џиЎЊгЃ™г‚‹
+    ѓRѓ}ѓ“ѓhѓvѓЌѓ“ѓvѓg‚Е€И‰є‚М‚ж‚¤‚ЙЋАЌs‚·‚й
       perl     ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
       perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
       perl510  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
       perl512  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
 
-      ? * г‚’дЅїгЃЈгЃ¦гѓЇг‚¤гѓ«гѓ‰г‚«гѓјгѓ‰гЃ®жЊ‡е®љгЃЊгЃ§гЃЌгЃѕгЃ™
-      ' пЅћ ' г‚’дЅїгЃЈгЃ¦г‚Їг‚©гѓјгѓ€гЃ™г‚‹гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ™
+      ? * ‚рЋg‚Б‚ДѓЏѓCѓ‹ѓhѓJЃ[ѓh‚МЋw’и‚Є‚Е‚«‚Ь‚·
+      ' Ѓ` ' ‚рЋg‚Б‚ДѓNѓHЃ[ѓg‚·‚й‚±‚Ж‚Є‚Е‚«‚Ь‚·
 
-  в—Џ дЅїгЃ„ж–№: B
+  Ѓњ Ћg‚ў•ы: B
 
-    г‚ігѓћгѓігѓ‰гѓ—гѓ­гѓігѓ—гѓ€гЃ§д»Ґдё‹гЃ®г‚€гЃ†гЃ«е®џиЎЊгЃ™г‚‹
+    ѓRѓ}ѓ“ѓhѓvѓЌѓ“ѓvѓg‚Е€И‰є‚М‚ж‚¤‚ЙЋАЌs‚·‚й
 
       C:\>perl  Sjis.pm  ShiftJIS_script.pl  >  Escaped_script.pl.e
       C:\>perl  Escaped_script.pl.e
 
-      ShiftJIS_script.pl  --- ShiftJIS гЃ§ж›ёгЃ‹г‚ЊгЃџг‚№г‚ЇгѓЄгѓ—гѓ€
-      Escaped_script.pl.e --- г‚Ёг‚№г‚±гѓјгѓ—гЃ•г‚ЊгЃџг‚№г‚ЇгѓЄгѓ—гѓ€
+      ShiftJIS_script.pl  --- ShiftJIS ‚ЕЏ‘‚©‚к‚ЅѓXѓNѓЉѓvѓg
+      Escaped_script.pl.e --- ѓGѓXѓPЃ[ѓv‚і‚к‚ЅѓXѓNѓЉѓvѓg
 
-=head1 и¦Ѓзґ„
+=head1 —v–с
 
-гЃ“г‚ЊгЃѕгЃ§гЃ®ж­ґеЏІгЃ‹г‚‰гЃЇгЃг‚ЃгЃѕгЃ—г‚‡гЃ†гЂ‚ShiftJIS гЃ®г‚µгѓќгѓјгѓ€гЃЇ jperl 4.019+1.3 гЃ‹г‚‰е§‹
-гЃѕг‚ЉгЃѕгЃ—гЃџгЂ‚гЃ“г‚ЊгЃ«г‚€гЃЈгЃ¦ chop() гЃЄгЃ©гЃ®й–ўж•°г‚„ж­Ји¦ЏиЎЁзЏѕг‚’и¤‡й›‘гЃЄж—Ґжњ¬гЃ®ж–‡е­—гЃ«еЇѕгЃ—гЃ¦
-йЃ©з”ЁгЃ§гЃЌг‚‹г‚€гЃ†гЃ«гЃЄг‚ЉгЃѕгЃ—гЃџгЂ‚
+‚±‚к‚Ь‚Е‚М—рЋj‚©‚з‚Н‚¶‚Я‚Ь‚µ‚е‚¤ЃBShiftJIS ‚МѓTѓ|Ѓ[ѓg‚Н jperl 4.019+1.3 ‚©‚зЋn
+‚Ь‚и‚Ь‚µ‚ЅЃB‚±‚к‚Й‚ж‚Б‚Д chop() ‚И‚З‚МЉЦђ”‚вђі‹K•\Њ»‚р•ЎЋG‚И“ъ–{‚М•¶Ћљ‚Й‘О‚µ‚Д
+“K—p‚Е‚«‚й‚ж‚¤‚Й‚И‚и‚Ь‚µ‚ЅЃB
 
-Perl5.8 д»Ґй™ЌгЃЇ Encode гѓўг‚ёгѓҐгѓјгѓ«гЃ«г‚€гЃЈгЃ¦гѓћгѓ«гѓЃгѓЄгѓіг‚¬гѓ«е‡¦зђ†гЃЊг‚µгѓќгѓјгѓ€гЃ•г‚ЊгЃџгЃџг‚ЃгЂЃ
-jperl гЃЇдёЌи¦ЃгЃ«гЃЄгЃЈгЃџгЃЁиЁЂг‚Џг‚ЊгЃ¦гЃ„гЃѕгЃ™гЂ‚гЃ§гЃ™гЃЊгЂЃгЃќг‚ЊгЃЇжњ¬еЅ“гЃЄгЃ®гЃ§гЃ—г‚‡гЃ†гЃ‹пјџ
+Perl5.8 €ИЌ~‚Н Encode ѓ‚ѓWѓ…Ѓ[ѓ‹‚Й‚ж‚Б‚Дѓ}ѓ‹ѓ`ѓЉѓ“ѓKѓ‹Џ€—ќ‚ЄѓTѓ|Ѓ[ѓg‚і‚к‚Ѕ‚Ѕ‚ЯЃA
+jperl ‚Н•s—v‚Й‚И‚Б‚Ѕ‚ЖЊѕ‚н‚к‚Д‚ў‚Ь‚·ЃB‚Е‚·‚ЄЃA‚»‚к‚Н–{“–‚И‚М‚Е‚µ‚е‚¤‚©ЃH
 
-ж—Ґжњ¬е›Ѕе†…гЃ«гЃЉгЃ„гЃ¦гЂЃж±Ћз”Ёе¤§ећ‹г‚ігѓігѓ”гѓҐгѓјг‚їгЃ®е…Ґе‡єеЉ›гЂЃгѓ‘гѓјг‚ЅгѓЉгѓ«г‚ігѓігѓ”гѓҐгѓјг‚їгЃ®е†…йѓЁг‚ігѓј
-гѓ‰гЃЉг‚€гЃіе…Ґе‡єеЉ›гЂЃгЃ•г‚‰гЃ«гЃЇжђєеёЇй›»и©±гЃ«и‡іг‚‹гЃѕгЃ§гЂЃShiftJIS г‚’еџєжњ¬гЃЁгЃ—гЃџж–‡е­—г‚ігѓјгѓ‰
-гЃЊеєѓгЃЏдЅїг‚Џг‚ЊгЃ¦гЃ„гЃѕгЃ™гЂ‚гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЇгЃќгЃ® ShiftJIS г‚’з›ґжЋҐж‰±гЃ„гЃѕгЃ™гЂ‚гЃќгЃ®гЃџг‚Ѓ
-UTF8 гѓ•гѓ©г‚°гЃЇгЃ‚г‚ЉгЃѕгЃ›г‚“гЂ‚
+“ъ–{Ќ‘“а‚Й‚Ё‚ў‚ДЃA”Д—p‘еЊ^ѓRѓ“ѓsѓ…Ѓ[ѓ^‚М“ьЏo—НЃAѓpЃ[ѓ\ѓiѓ‹ѓRѓ“ѓsѓ…Ѓ[ѓ^‚М“а•”ѓRЃ[
+ѓh‚Ё‚ж‚С“ьЏo—НЃA‚і‚з‚Й‚НЊg‘С“db‚ЙЋЉ‚й‚Ь‚ЕЃAShiftJIS ‚рЉо–{‚Ж‚µ‚Ѕ•¶ЋљѓRЃ[ѓh
+‚ЄЌL‚­Ћg‚н‚к‚Д‚ў‚Ь‚·ЃB‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Н‚»‚М ShiftJIS ‚р’јђЪ€µ‚ў‚Ь‚·ЃB‚»‚М‚Ѕ‚Я
+UTF8 ѓtѓ‰ѓO‚Н‚ ‚и‚Ь‚№‚сЃB
 
-гЃ‚гЃЄгЃџг‚‚г‚Ёгѓіг‚ігѓјгѓ‰гЃ®е•ЏйЎЊгЃ‹г‚‰г‚Ёг‚№г‚±гѓјгѓ—гЃ—гЃѕгЃ›г‚“гЃ‹пјџ
+‚ ‚И‚Ѕ‚аѓGѓ“ѓRЃ[ѓh‚М–в‘и‚©‚зѓGѓXѓPЃ[ѓv‚µ‚Ь‚№‚с‚©ЃH
 
-=head1 г‚‚гЃ†гЃІгЃЁгЃ¤гЃ®жњЄжќҐ
+=head1 ‚а‚¤‚Р‚Ж‚В‚М–ў—€
 
-JPerl гЃЇгЃЁгЃ¦г‚‚е„Єг‚ЊгЃџг‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃ§гЃ™гЂ‚гЃЉгЃЈгЃЁгЂЃгЃ“гЃ“гЃ§гЃ„гЃ† JPerl гЃЇж—Ґжњ¬иЄћеЇѕеїњз‰€гЃ®
-Perl гЃ®гЃ“гЃЁгЃ§гЂЃJava г‚„ JVM гЃЁгЃЇй–ўдї‚гЃЊгЃ‚г‚ЉгЃѕгЃ›г‚“гЂ‚гЃќг‚“гЃЄг‚ЏгЃ‘гЃ§гЂЃгЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ў
-гЃЇиЎќзЄЃе›ћйЃїгЃ®гЃџг‚ЃгЃ« Sjis гЃЁгЃ„гЃ†еђЌе‰ЌгЃ«гЃ—гЃѕгЃ—гЃџгЂ‚
+JPerl ‚Н‚Ж‚Д‚а—D‚к‚Ѕѓ\ѓtѓgѓEѓFѓA‚Е‚·ЃB‚Ё‚Б‚ЖЃA‚±‚±‚Е‚ў‚¤ JPerl ‚Н“ъ–{Њк‘О‰ћ”Е‚М
+Perl ‚М‚±‚Ж‚ЕЃAJava ‚в JVM ‚Ж‚НЉЦЊW‚Є‚ ‚и‚Ь‚№‚сЃB‚»‚с‚И‚н‚Ї‚ЕЃA‚±‚Мѓ\ѓtѓgѓEѓFѓA
+‚НЏХ“Л‰с”р‚М‚Ѕ‚Я‚Й Sjis ‚Ж‚ў‚¤–ј‘O‚Й‚µ‚Ь‚µ‚ЅЃB
 
-гЃЁгЃ“г‚ЌгЃ§гЂЃгЃќгЃ® JPerl гЃЇгѓђгѓјг‚ёгѓ§гѓі 5.005_4 д»Ґй™ЌгЂЃгѓЎгѓігѓ†гѓЉгѓіг‚№гЃ•г‚ЊгЃ¦гЃ„гЃѕгЃ›г‚“гЂ‚
+‚Ж‚±‚л‚ЕЃA‚»‚М JPerl ‚НѓoЃ[ѓWѓ‡ѓ“ 5.005_4 €ИЌ~ЃAѓЃѓ“ѓeѓiѓ“ѓX‚і‚к‚Д‚ў‚Ь‚№‚сЃB
 
-е¤§е¤‰ж®‹еїµгЃЄгЃ“гЃЁгЃ«гЂЃJPerlгЃ®й–‹з™єг‚’иЎЊгЃЈгЃџжёЎиѕє еЌљж–‡гЃ•г‚“гЃЇ The Perl Confernce Japan
-1998 гЃ«гЃ¦
+‘е•ПЋc”O‚И‚±‚Ж‚ЙЃAJPerl‚МЉJ”­‚рЌs‚Б‚Ѕ“n•У ”Ћ•¶‚і‚с‚Н The Perl Confernce Japan
+1998 ‚Й‚Д
 
-  "г‚ЏгЃџгЃЄгЃ№гЃЇз–Іг‚ЊгЃџгЃ‹г‚‰ж¬ЎгЃ®дєєг‚€г‚ЌгЃ—гЃЏгЃ­"
+  "‚н‚Ѕ‚И‚Ч‚Н”ж‚к‚Ѕ‚©‚зЋџ‚Мђl‚ж‚л‚µ‚­‚Л"
 
-гЃЁгЃ„гЃ†гѓЎгѓѓг‚»гѓјг‚ёг‚’ж®‹гЃ—гЂЃPerl гЃ‹г‚‰й›ўг‚ЊгЃ¦гЃ„гЃЈгЃ¦гЃ—гЃѕгЃ„гЃѕгЃ—гЃџгЂ‚
+‚Ж‚ў‚¤ѓЃѓbѓZЃ[ѓW‚рЋc‚µЃAPerl ‚©‚з—Ј‚к‚Д‚ў‚Б‚Д‚µ‚Ь‚ў‚Ь‚µ‚ЅЃB
 
-г‚№гѓ©г‚¤гѓ‰15 "jperl гЃ®д»ЉеѕЊ"
+ѓXѓ‰ѓCѓh15 "jperl ‚МЌЎЊг"
 ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
-гЃЌгЃЈгЃЁиЄ°гЃ‹гЃЊеј•гЃЌз¶™гЃ„гЃ§ж›ёгЃ„гЃ¦гЃЏг‚Њг‚‹гЃ г‚ЌгЃ†гЂ‚
-гЃЄгЃ©гЃЁжњџеѕ…г‚’гЃ—гЃЄгЃЊг‚‰10е№ґй–“гЂЃеѕ…гЃЎз¶љгЃ‘г‚‹й–“гЃ«дё–з•ЊгЃЇйЃ•гЃ†ж–№еђ‘гЃёгЃЁйЂІг‚“гЃ§гЃ„гЃЏгЃ®гЃ§гЃ—гЃџгЂ‚
+‚«‚Б‚Ж’N‚©‚Є€ш‚«Њp‚ў‚ЕЏ‘‚ў‚Д‚­‚к‚й‚ѕ‚л‚¤ЃB
+‚И‚З‚ЖЉъ‘Т‚р‚µ‚И‚Є‚з10”NЉФЃA‘Т‚ї‘±‚Ї‚йЉФ‚ЙђўЉE‚Н€б‚¤•ыЊь‚Ц‚Жђi‚с‚Е‚ў‚­‚М‚Е‚µ‚ЅЃB
 
-гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЇ ShiftJIS гЃ§ж›ёгЃ‹г‚ЊгЃџ Perl г‚№г‚ЇгѓЄгѓ—гѓ€г‚’г‚Ёг‚№г‚±гѓјгѓ—е‡¦зђ†гЃ™г‚‹гЃџг‚ЃгЃ®
-г‚Ѕгѓјг‚№г‚ігѓјгѓ‰гѓ•г‚Јгѓ«г‚їгЃ§гЃ™гЂ‚г‚Ёг‚№г‚±гѓјгѓ—е‡¦зђ†гЃ«г‚€гЃЈгЃ¦ж–‡е­—г‚ігѓјгѓ‰гЃЊе¤‰еЊ–гЃ™г‚‹гЃ“гЃЁгЃЇгЃ‚г‚Љ
-гЃѕгЃ›г‚“гЂ‚
+‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Н ShiftJIS ‚ЕЏ‘‚©‚к‚Ѕ Perl ѓXѓNѓЉѓvѓg‚рѓGѓXѓPЃ[ѓvЏ€—ќ‚·‚й‚Ѕ‚Я‚М
+ѓ\Ѓ[ѓXѓRЃ[ѓhѓtѓBѓ‹ѓ^‚Е‚·ЃBѓGѓXѓPЃ[ѓvЏ€—ќ‚Й‚ж‚Б‚Д•¶ЋљѓRЃ[ѓh‚Є•П‰»‚·‚й‚±‚Ж‚Н‚ ‚и
+‚Ь‚№‚сЃB
 
-гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЇд»Ґдё‹гЃ®з‰№еѕґгЃЊгЃ‚г‚ЉгЃѕгЃ™гЂ‚
+‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Н€И‰є‚М“Б’Ґ‚Є‚ ‚и‚Ь‚·ЃB
 
 =over 2
 
-=item * ShiftJIS гЃќгЃ®гЃѕгЃѕгЃ®еЂ¤г‚’ж‰±гЃ†
+=item * ShiftJIS ‚»‚М‚Ь‚Ь‚М’l‚р€µ‚¤
 
-=item * йЃЋеЋ»гЃЁзЏѕењЁгЃ®г‚№г‚ЇгѓЄгѓ—гѓ€й–“гЃ§г‚ігѓјгѓ‰гЂЃгѓЋг‚¦гѓЏг‚¦г‚’е…±жњ‰гЃ§гЃЌг‚‹
+=item * ‰Я‹Ћ‚ЖЊ»ЌЭ‚МѓXѓNѓЉѓvѓgЉФ‚ЕѓRЃ[ѓhЃAѓmѓEѓnѓE‚р‹¤—L‚Е‚«‚й
 
-=item * UTF8 гѓ•гѓ©г‚°г‚’ж‰±г‚ЏгЃЄгЃ„гЃ§гЃ™г‚Ђ
+=item * UTF8 ѓtѓ‰ѓO‚р€µ‚н‚И‚ў‚Е‚·‚Ю(perlunitut ‚Ж perluniadvice ‚М‘О‰ћ‚Н•s—v)
 
-=item * гЃ§г‚‚ Perl5 гЃЁгЃЇдє’жЏ›жЂ§гЃЊгЃ‚г‚‹ (гЃЇгЃљгЃ )
+=item * ‚Е‚а Perl5 ‚Ж‚НЊЭЉ·ђ«‚Є‚ ‚й (‚Н‚ё‚ѕ)
 
-=item * (JPerlг‚’дїќе®€гЃ™г‚‹гЃџг‚ЃгЃ«) C гѓ—гѓ­г‚°гѓ©гѓџгѓіг‚°г‚’иЎЊг‚ЏгЃЄгЃ„гЃ§гЃ™г‚Ђ
+=item * (JPerl‚р•ЫЋз‚·‚й‚Ѕ‚Я‚Й) C ѓvѓЌѓOѓ‰ѓ~ѓ“ѓO‚рЌs‚н‚И‚ў‚Е‚·‚Ю
 
 =back
 
-гЃ•гЃ‚гЂЃJPerl гЃ®жњЄжќҐгЃ«г‚€гЃЈгЃ¦г‚‚гЃ†гЃІгЃЁгЃ¤гЃ®жњЄжќҐг‚’дЅњг‚ЉгЃѕгЃ—г‚‡гЃ†гЂ‚
+‚і‚ ЃAJPerl ‚М–ў—€‚Й‚ж‚Б‚Д‚а‚¤‚Р‚Ж‚В‚М–ў—€‚рЌм‚и‚Ь‚µ‚е‚¤ЃB
 
-=head1 еџєжњ¬зљ„гЃЄд»•зµ„гЃї
+=head1 Љо–{“I‚ИЋd‘g‚Э
 
-жњЂиї‘гЂЃд»Ґдё‹гЃ®гѓЎгѓјгѓ«г‚’е†Ќз™єи¦‹гЃ—гЃѕгЃ—гЃџгЂ‚
+ЌЕ‹ЯЃA€И‰є‚МѓЃЃ[ѓ‹‚рЌД”­Њ©‚µ‚Ь‚µ‚ЅЃB
 
 [Tokyo.pm] jus Benkyoukai
 http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
-("SJIS.pm" гЃЁгЃ„гЃ†гѓ•г‚Ўг‚¤гѓ«еђЌгЃ§дїќе­гЃ•г‚ЊгЃ¦гЃ„г‚‹г‚‚гЃ®гЃЁгЃ—гЃѕгЃ™)
+("SJIS.pm" ‚Ж‚ў‚¤ѓtѓ@ѓCѓ‹–ј‚Е•Ы‘¶‚і‚к‚Д‚ў‚й‚а‚М‚Ж‚µ‚Ь‚·)
 
   package SJIS;
   use Filter::Util::Call;
@@ -130,35 +131,35 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
   }
   1;
 
-еџєжњ¬зљ„гЃ«гЃЇгЂЃгЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЇдёЉиЁгЃ®г‚€гЃ†гЃЄгЃ“гЃЁг‚’иЎЊгЃ„гЃѕгЃ™гЂ‚
-гЃџгЃ гЃ—гЂЃFilter::Util::Call г‚’е€©з”ЁгЃ—гЃ¦гЃ„гЃЄгЃ„з‚№гЂЃPerl гЃ®ж§‹ж–‡г‚’и§ЈжћђгЃ—гЃ¦еї…и¦ЃгЃ«еїњгЃгЃ¦
-г‚Ёг‚№г‚±гѓјгѓ—гЃ™г‚‹з‚№гЃЊз•°гЃЄг‚ЉгЃѕгЃ™гЂ‚
+Љо–{“I‚Й‚НЃA‚±‚Мѓ\ѓtѓgѓEѓFѓA‚НЏг‹L‚М‚ж‚¤‚И‚±‚Ж‚рЌs‚ў‚Ь‚·ЃB
+‚Ѕ‚ѕ‚µЃAFilter::Util::Call ‚р——p‚µ‚Д‚ў‚И‚ў“_ЃAPerl ‚МЌ\•¶‚р‰рђН‚µ‚Д•K—v‚Й‰ћ‚¶‚Д
+ѓGѓXѓPЃ[ѓv‚·‚й“_‚Є€Щ‚И‚и‚Ь‚·ЃB
 
-=head1 г‚¤гѓіг‚№гѓ€гѓјгѓ«ж–№жі•
+=head1 ѓCѓ“ѓXѓgЃ[ѓ‹•ы–@
 
-   perl Makefile.pl         --- Makefile.pl гЃЊ make.bat г‚’з”џж€ђгЃ—гЃѕгЃ™
+   perl Makefile.pl         --- Makefile.pl ‚Є make.bat ‚рђ¶ђ¬‚µ‚Ь‚·
    make.bat install
    make.bat test
 
-   make.bat install         --- зЏѕењЁдЅїз”Ёдё­гЃ® perl з’°еўѓгЃ«г‚¤гѓіг‚№гѓ€гѓјгѓ«гЃ—гЃѕгЃ™
-   perl58 make.bat install  --- perl5.008 з’°еўѓгЃ«г‚¤гѓіг‚№гѓ€гѓјгѓ«гЃ—гЃѕгЃ™
-   perl510 make.bat install --- perl5.010 з’°еўѓгЃ«г‚¤гѓіг‚№гѓ€гѓјгѓ«гЃ—гЃѕгЃ™
-   perl512 make.bat install --- perl5.012 з’°еўѓгЃ«г‚¤гѓіг‚№гѓ€гѓјгѓ«гЃ—гЃѕгЃ™
+   make.bat install         --- Њ»ЌЭЋg—p’†‚М perl ЉВ‹«‚ЙѓCѓ“ѓXѓgЃ[ѓ‹‚µ‚Ь‚·
+   perl58 make.bat install  --- perl5.008 ЉВ‹«‚ЙѓCѓ“ѓXѓgЃ[ѓ‹‚µ‚Ь‚·
+   perl510 make.bat install --- perl5.010 ЉВ‹«‚ЙѓCѓ“ѓXѓgЃ[ѓ‹‚µ‚Ь‚·
+   perl512 make.bat install --- perl5.012 ЉВ‹«‚ЙѓCѓ“ѓXѓgЃ[ѓ‹‚µ‚Ь‚·
 
-   make.bat dist            --- CPAN й…Ќеёѓз”Ёгѓ‘гѓѓг‚±гѓјг‚ёг‚’дЅњг‚ЉгЃѕгЃ™
-   make.bat tar.bat         --- tar.bat г‚’дЅњж€ђгЃ—гЃѕгЃ™
+   make.bat dist            --- CPAN ”z•z—pѓpѓbѓPЃ[ѓW‚рЌм‚и‚Ь‚·
+   make.bat tar.bat         --- tar.bat ‚рЌмђ¬‚µ‚Ь‚·
 
-=head1 г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃ®дёЂи¦§
+=head1 ѓ\ѓtѓgѓEѓFѓA‚М€к——
 
-   Sjis.pm          --- ShiftJIS г‚Ѕгѓјг‚№г‚ігѓјгѓ‰гѓ•г‚Јгѓ«г‚їгѓўг‚ёгѓҐгѓјгѓ«
-   Esjis.pm         --- Sjis.pm гЃ®гѓ©гѓіг‚їг‚¤гѓ гѓ«гѓјгѓЃгѓі
-   perl58.bat       --- з’°еўѓе¤‰ж•° PATH гЃ®иЁ­е®љгЃЄгЃ—гЃ« perl5.8 г‚’жЋўгЃ—гЃ¦е®џиЎЊгЃ™г‚‹
-   perl510.bat      --- з’°еўѓе¤‰ж•° PATH гЃ®иЁ­е®љгЃЄгЃ—гЃ« perl5.10 г‚’жЋўгЃ—гЃ¦е®џиЎЊгЃ™г‚‹
-   perl512.bat      --- з’°еўѓе¤‰ж•° PATH гЃ®иЁ­е®љгЃЄгЃ—гЃ« perl5.12 г‚’жЋўгЃ—гЃ¦е®џиЎЊгЃ™г‚‹
+   Sjis.pm          --- ShiftJIS ѓ\Ѓ[ѓXѓRЃ[ѓhѓtѓBѓ‹ѓ^ѓ‚ѓWѓ…Ѓ[ѓ‹
+   Esjis.pm         --- Sjis.pm ‚Мѓ‰ѓ“ѓ^ѓCѓЂѓ‹Ѓ[ѓ`ѓ“
+   perl58.bat       --- ЉВ‹«•Пђ” PATH ‚МђЭ’и‚И‚µ‚Й perl5.8 ‚р’T‚µ‚ДЋАЌs‚·‚й
+   perl510.bat      --- ЉВ‹«•Пђ” PATH ‚МђЭ’и‚И‚µ‚Й perl5.10 ‚р’T‚µ‚ДЋАЌs‚·‚й
+   perl512.bat      --- ЉВ‹«•Пђ” PATH ‚МђЭ’и‚И‚µ‚Й perl5.12 ‚р’T‚µ‚ДЋАЌs‚·‚й
 
-=head1 ж–‡е­—г‚Їгѓ©г‚№гЃ®е®љзѕ©
+=head1 •¶ЋљѓNѓ‰ѓX‚М’и‹`
 
-йЃЋеЋ»гЃ®perlгЃЁгЃ®дє’жЏ›жЂ§г‚’дїќгЃ¤гЃџг‚ЃгЃ«ж–‡е­—г‚Їгѓ©г‚№гЃЇд»Ґдё‹гЃ®г‚€гЃ†гЃ«е†Ќе®љзѕ©гЃ•г‚ЊгЃ¦гЃ„гЃѕгЃ™гЂ‚
+‰Я‹Ћ‚Мperl‚Ж‚МЊЭЉ·ђ«‚р•Ы‚В‚Ѕ‚Я‚Й•¶ЋљѓNѓ‰ѓX‚Н€И‰є‚М‚ж‚¤‚ЙЌД’и‹`‚і‚к‚Д‚ў‚Ь‚·ЃB
 
   ---------------------------------------------------------------------------
   escape        class
@@ -175,179 +176,179 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
   \V            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x0C\x0A\x0D])
   ---------------------------------------------------------------------------
 
-=head1 JPerl дє’жЏ›гЃ®ж©џиѓЅ
+=head1 JPerl ЊЭЉ·‚М‹@”\
 
-д»Ґдё‹гЃ®й–ўж•°гЃЇ JPerl гЃЁеђЊж§гЃ«ж©џиѓЅгЃ—гЃѕгЃ™гЂ‚
-гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃ«г‚€гЃЈгЃ¦ж›ёгЃЌжЏ›г‚Џг‚‹й–ўж•°гЃЊгЃ‚г‚ЉгЃѕгЃ™гЂ‚
+€И‰є‚МЉЦђ”‚Н JPerl ‚Ж“Ї—l‚Й‹@”\‚µ‚Ь‚·ЃB
+‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Й‚ж‚Б‚ДЏ‘‚«Љ·‚н‚йЉЦђ”‚Є‚ ‚и‚Ь‚·ЃB
 
 =over 2
 
-=item * г‚·гѓіг‚°гѓ«г‚Їг‚©гѓјгѓ€дё­гЃ®2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰ж–‡е­—е€—гЃ®ж‰±гЃ„
+=item * ѓVѓ“ѓOѓ‹ѓNѓHЃ[ѓg’†‚М2ѓIѓNѓeѓbѓgѓRЃ[ѓh•¶Ћљ—с‚М€µ‚ў
 
-=item * гѓЂгѓ–гѓ«г‚Їг‚©гѓјгѓ€дё­гЃ®2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰ж–‡е­—е€—гЃ®ж‰±гЃ„
+=item * ѓ_ѓuѓ‹ѓNѓHЃ[ѓg’†‚М2ѓIѓNѓeѓbѓgѓRЃ[ѓh•¶Ћљ—с‚М€µ‚ў
 
-=item * г‚·гѓіг‚°гѓ«г‚Їг‚©гѓјгѓ€дё­гЃ®2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰ж­Ји¦ЏиЎЁзЏѕгЃ®ж‰±гЃ„
+=item * ѓVѓ“ѓOѓ‹ѓNѓHЃ[ѓg’†‚М2ѓIѓNѓeѓbѓgѓRЃ[ѓhђі‹K•\Њ»‚М€µ‚ў
 
-=item * гѓЂгѓ–гѓ«г‚Їг‚©гѓјгѓ€дё­гЃ®2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰ж­Ји¦ЏиЎЁзЏѕгЃ®ж‰±гЃ„
+=item * ѓ_ѓuѓ‹ѓNѓHЃ[ѓg’†‚М2ѓIѓNѓeѓbѓgѓRЃ[ѓhђі‹K•\Њ»‚М€µ‚ў
 
-=item * chop гЃЇ Esjis::chop гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * chop ‚Н Esjis::chop ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-=item * split гЃЇ Esjis::split гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * split ‚Н Esjis::split ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-=item * length гЃЇгЃќгЃ®гЃѕгЃѕгЃ§гЃ™
+=item * length ‚Н‚»‚М‚Ь‚Ь‚Е‚·
 
-=item * substr гЃЇгЃќгЃ®гЃѕгЃѕгЃ§гЃ™
+=item * substr ‚Н‚»‚М‚Ь‚Ь‚Е‚·
 
-=item * index гЃЇ Esjis::index гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * index ‚Н Esjis::index ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-=item * rindex гЃЇ Esjis::rindex гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * rindex ‚Н Esjis::rindex ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-=item * pos гЃЇгЃќгЃ®гЃѕгЃѕгЃ§гЃ™
+=item * pos ‚Н‚»‚М‚Ь‚Ь‚Е‚·
 
-=item * lc гЃЇ Esjis::lc гЃѕгЃџгЃЇ Esjis::lc_ гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * lc ‚Н Esjis::lc ‚Ь‚Ѕ‚Н Esjis::lc_ ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-=item * uc гЃЇ Esjis::uc гЃѕгЃџгЃЇ Esjis::uc_ гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * uc ‚Н Esjis::uc ‚Ь‚Ѕ‚Н Esjis::uc_ ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-=item * ord гЃЇгЃќгЃ®гЃѕгЃѕгЃ§гЃ™(г‚¤гѓігѓќгѓјгѓ€гЃ—гЃЄгЃ„е ґеђ€)
+=item * ord ‚Н‚»‚М‚Ь‚Ь‚Е‚·(ѓCѓ“ѓ|Ѓ[ѓg‚µ‚И‚ўЏкЌ‡)
 
-=item * reverse гЃЇгЃќгЃ®гЃѕгЃѕгЃ§гЃ™(г‚¤гѓігѓќгѓјгѓ€гЃ—гЃЄгЃ„е ґеђ€)
+=item * reverse ‚Н‚»‚М‚Ь‚Ь‚Е‚·(ѓCѓ“ѓ|Ѓ[ѓg‚µ‚И‚ўЏкЌ‡)
 
-=item * tr/// гЃѕгЃџгЃЇ y/// гЃЇ Esjis::tr гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * tr/// ‚Ь‚Ѕ‚Н y/// ‚Н Esjis::tr ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-    /b гЃЁ /B дї®йЈѕе­ђгЃЊе€©з”ЁгЃ§гЃЌгЃѕгЃ™гЂ‚
+    /b ‚Ж /B ЏCЏьЋq‚Є——p‚Е‚«‚Ь‚·ЃB
 
-=item * chdir гЃЇ Esjis::chdir гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * chdir ‚Н Esjis::chdir ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-    MSWin32 з’°еўѓгЃ®е ґеђ€гЃЇ perl5.005 гЃ«й™ђг‚Љж–‡е­—г‚ігѓјгѓ‰(0x5C)гЃ§зµ‚г‚Џг‚‹гѓ‘г‚№г‚’ж‰±гЃ†гЃ“гЃЁ
-    гЃЊгЃ§гЃЌгЃѕгЃ™гЂ‚
+    MSWin32 ЉВ‹«‚МЏкЌ‡‚Н perl5.005 ‚ЙЊА‚и•¶ЋљѓRЃ[ѓh(0x5C)‚ЕЏI‚н‚йѓpѓX‚р€µ‚¤‚±‚Ж
+    ‚Є‚Е‚«‚Ь‚·ЃB
 
-=item * do file гЃЇ Esjis::do file гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * do file ‚Н Esjis::do file ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-=item * require гЃЇ Esjis::require гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * require ‚Н Esjis::require ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-=item * use Perl::Module @list; гЃЇ
+=item * use Perl::Module @list; ‚Н
 
-    BEGIN { Esjis::require 'Perl/Module.pm'; Perl::Module->import(@list); } гЃ«
-    ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™гЂ‚
+    BEGIN { Esjis::require 'Perl/Module.pm'; Perl::Module->import(@list); } ‚Й
+    Џ‘‚«Љ·‚н‚и‚Ь‚·ЃB
 
-=item * use Perl::Module (); гЃЇ
+=item * use Perl::Module (); ‚Н
 
-    BEGIN { Esjis::require 'Perl/Module.pm'; } гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™гЂ‚
+    BEGIN { Esjis::require 'Perl/Module.pm'; } ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·ЃB
 
 =back
 
-=head1 JPerl гЃЁдёЉдЅЌдє’жЏ›гЃ®ж©џиѓЅ
+=head1 JPerl ‚ЖЏг€КЊЭЉ·‚М‹@”\
 
-д»Ґдё‹гЃ®ж©џиѓЅгЃЇ JPerl гЃЁдёЉдЅЌдє’жЏ›гЃ§гЃ™гЂ‚
+€И‰є‚М‹@”\‚Н JPerl ‚ЖЏг€КЊЭЉ·‚Е‚·ЃB
 
 =over 2
 
-=item * chr гЃЇ Esjis::chr гЃѕгЃџгЃЇ Esjis::chr_ гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * chr ‚Н Esjis::chr ‚Ь‚Ѕ‚Н Esjis::chr_ ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-    2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰гЃ«еЇѕеїњгЃ—гЃ¦гЃ„гЃѕгЃ™гЂ‚
+    2ѓIѓNѓeѓbѓgѓRЃ[ѓh‚Й‘О‰ћ‚µ‚Д‚ў‚Ь‚·ЃB
 
-=item * -X (гѓ•г‚Ўг‚¤гѓ«гѓ†г‚№гѓ€жј”з®—е­ђ) гЃЇ Esjis::X гЃѕгЃџгЃЇ Esjis::X_ гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * -X (ѓtѓ@ѓCѓ‹ѓeѓXѓg‰‰ЋZЋq) ‚Н Esjis::X ‚Ь‚Ѕ‚Н Esjis::X_ ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-    дѕ‹гЃ€гЃ°иЄ­еЏ–г‚ЉеЏЇиѓЅгЃ‹гЃ©гЃ†гЃ‹г‚’гѓ†г‚№гѓ€гЃ™г‚‹ -r гЃЇ Esjis::r гЃ«гЃЄг‚ЉгЃѕгЃ™гЂ‚
+    —б‚¦‚О“ЗЋж‚и‰В”\‚©‚З‚¤‚©‚рѓeѓXѓg‚·‚й -r ‚Н Esjis::r ‚Й‚И‚и‚Ь‚·ЃB
 
-    MSWin32 з’°еўѓгЃ«гЃ¦ж–‡е­—г‚ігѓјгѓ‰(0x5C)гЃ§зµ‚г‚Џг‚‹гѓ‘г‚№г‚’ж‰±гЃ†гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ™гЂ‚
+    MSWin32 ЉВ‹«‚Й‚Д•¶ЋљѓRЃ[ѓh(0x5C)‚ЕЏI‚н‚йѓpѓX‚р€µ‚¤‚±‚Ж‚Є‚Е‚«‚Ь‚·ЃB
 
-=item * glob гЃЇ Esjis::glob гЃѕгЃџгЃЇ Esjis::glob_ гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * glob ‚Н Esjis::glob ‚Ь‚Ѕ‚Н Esjis::glob_ ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
     @glob = Esjis::glob($string);
     @glob = Esjis::glob_;
 
-    Esjis::glob гЃЇгЂЃOSй–“гЃ§еЏЇжђ¬жЂ§гЃ®гЃ‚г‚‹ж‹ЎејµгЃ•г‚ЊгЃџDOSйўЁг‚°гѓ­гѓ–(гѓЇг‚¤гѓ«гѓ‰г‚«гѓјгѓ‰)
-    ж©џиѓЅг‚’жЏђдѕ›гЃ—гЃѕгЃ™гЂ‚гѓ‡г‚Јгѓ¬г‚Їгѓ€гѓЄгѓ‘г‚№гЃ«г‚‚гѓЇг‚¤гѓ«гѓ‰г‚«гѓјгѓ‰гЃЊдЅїз”ЁгЃ§гЃЌгЂЃе¤§ж–‡е­—гЃ‹
-    е°Џж–‡е­—гЃ®еЊєе€ҐгЃЊгЃЄгЃЏгЂЃйЂ†г‚№гѓ©гѓѓг‚·гѓҐгЃЁг‚№гѓ©гѓѓг‚·гѓҐгЃЊдёЎж–№дЅїз”ЁгЃ§гЃЌгЃѕгЃ™(гЃџгЃ гЃ—
-    йЂ†г‚№гѓ©гѓѓг‚·гѓҐгЃЇ2й‡ЌгЃ«гЃ—гЃЄгЃ‘г‚ЊгЃ°гЃЄг‚ЉгЃѕгЃ›г‚“)гЂ‚
+    Esjis::glob ‚НЃAOSЉФ‚Е‰В”Ађ«‚М‚ ‚йЉg’Ј‚і‚к‚ЅDOS•—ѓOѓЌѓu(ѓЏѓCѓ‹ѓhѓJЃ[ѓh)
+    ‹@”\‚р’с‹џ‚µ‚Ь‚·ЃBѓfѓBѓЊѓNѓgѓЉѓpѓX‚Й‚аѓЏѓCѓ‹ѓhѓJЃ[ѓh‚ЄЋg—p‚Е‚«ЃA‘е•¶Ћљ‚©
+    Џ¬•¶Ћљ‚М‹ж•К‚Є‚И‚­ЃA‹tѓXѓ‰ѓbѓVѓ…‚ЖѓXѓ‰ѓbѓVѓ…‚Є—ј•ыЋg—p‚Е‚«‚Ь‚·(‚Ѕ‚ѕ‚µ
+    ‹tѓXѓ‰ѓbѓVѓ…‚Н2Џd‚Й‚µ‚И‚Ї‚к‚О‚И‚и‚Ь‚№‚с)ЃB
 
-    е®џиЎЊж–№жі•гЃЇгЂЃ
+    ЋАЌs•ы–@‚НЃA
 
     use Sjis;
     @perlfiles = glob  "..\pe?l/*.p?";
     print <..\pe?l/*.p?>;
 
-    "~" гЃЇзЏѕењЁгЃ®гѓ¦гѓјг‚¶гЃ®гѓ›гѓјгѓ гѓ‡г‚Јгѓ¬г‚Їгѓ€гѓЄгЃ«е±•й–‹гЃ•г‚ЊгЃѕгЃ™гЂ‚
-    MSWin32 з’°еўѓгЃ«гЃ¦ж–‡е­—г‚ігѓјгѓ‰(0x5C)гЃ§зµ‚г‚Џг‚‹гѓ‘г‚№г‚’ж‰±гЃ†гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ™гЂ‚
+    "~" ‚НЊ»ЌЭ‚Мѓ†Ѓ[ѓU‚МѓzЃ[ѓЂѓfѓBѓЊѓNѓgѓЉ‚Й“WЉJ‚і‚к‚Ь‚·ЃB
+    MSWin32 ЉВ‹«‚Й‚Д•¶ЋљѓRЃ[ѓh(0x5C)‚ЕЏI‚н‚йѓpѓX‚р€µ‚¤‚±‚Ж‚Є‚Е‚«‚Ь‚·ЃB
 
-=item * lstat гЃЇ Esjis::lstat гЃѕгЃџгЃЇ Esjis::lstat_ гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * lstat ‚Н Esjis::lstat ‚Ь‚Ѕ‚Н Esjis::lstat_ ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-    MSWin32 з’°еўѓгЃ«гЃ¦ж–‡е­—г‚ігѓјгѓ‰(0x5C)гЃ§зµ‚г‚Џг‚‹гѓ‘г‚№г‚’ж‰±гЃ†гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ™гЂ‚
+    MSWin32 ЉВ‹«‚Й‚Д•¶ЋљѓRЃ[ѓh(0x5C)‚ЕЏI‚н‚йѓpѓX‚р€µ‚¤‚±‚Ж‚Є‚Е‚«‚Ь‚·ЃB
 
-=item * opendir гЃЇ Esjis::opendir гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * opendir ‚Н Esjis::opendir ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-    MSWin32 з’°еўѓгЃ«гЃ¦ж–‡е­—г‚ігѓјгѓ‰(0x5C)гЃ§зµ‚г‚Џг‚‹гѓ‘г‚№г‚’ж‰±гЃ†гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ™гЂ‚
+    MSWin32 ЉВ‹«‚Й‚Д•¶ЋљѓRЃ[ѓh(0x5C)‚ЕЏI‚н‚йѓpѓX‚р€µ‚¤‚±‚Ж‚Є‚Е‚«‚Ь‚·ЃB
 
-=item * stat гЃЇ Esjis::stat гЃѕгЃџгЃЇ Esjis::stat_ гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * stat ‚Н Esjis::stat ‚Ь‚Ѕ‚Н Esjis::stat_ ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-    MSWin32 з’°еўѓгЃ«гЃ¦ж–‡е­—г‚ігѓјгѓ‰(0x5C)гЃ§зµ‚г‚Џг‚‹гѓ‘г‚№г‚’ж‰±гЃ†гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ™гЂ‚
+    MSWin32 ЉВ‹«‚Й‚Д•¶ЋљѓRЃ[ѓh(0x5C)‚ЕЏI‚н‚йѓpѓX‚р€µ‚¤‚±‚Ж‚Є‚Е‚«‚Ь‚·ЃB
 
-=item * unlink гЃЇ Esjis::unlink гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * unlink ‚Н Esjis::unlink ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-    MSWin32 з’°еўѓгЃ«гЃ¦ж–‡е­—г‚ігѓјгѓ‰(0x5C)гЃ§зµ‚г‚Џг‚‹гѓ‘г‚№г‚’ж‰±гЃ†гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ™гЂ‚
+    MSWin32 ЉВ‹«‚Й‚Д•¶ЋљѓRЃ[ѓh(0x5C)‚ЕЏI‚н‚йѓpѓX‚р€µ‚¤‚±‚Ж‚Є‚Е‚«‚Ь‚·ЃB
 
 =back
 
-=head1 ж–‡е­—жЊ‡еђ‘гЃ®й–ўж•°
+=head1 •¶ЋљЋwЊь‚МЉЦђ”
 
-=item * ord гЃЇ Sjis::ord гЃѕгЃџгЃЇ Sjis::ord_ гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * ord ‚Н Sjis::ord ‚Ь‚Ѕ‚Н Sjis::ord_ ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-    "use Sjis qw(ord);" гЃ«г‚€гЃЈгЃ¦ ord гЃЇ Sjis::ord гЃ«ж›ёгЃЌжЏ›г‚Џг‚‹г‚€гЃ†гЃ«гЃЄг‚ЉгЃѕгЃ™гЂ‚
+    "use Sjis qw(ord);" ‚Й‚ж‚Б‚Д ord ‚Н Sjis::ord ‚ЙЏ‘‚«Љ·‚н‚й‚ж‚¤‚Й‚И‚и‚Ь‚·ЃB
 
     $ord = Sjis::ord($string);
 
-    Sjis::ord($string) гЃЇ $string гЃ®е…€й ­гЃ®ж–‡е­—гЃ® ShiftJIS г‚ігѓјгѓ‰еЂ¤г‚’иї”гЃ—гЃѕгЃ™гЂ‚
-    $string гЃЊзњЃз•ҐгЃ•г‚ЊгЃџе ґеђ€гЃЇ $_ гЃЊеЇѕи±ЎгЃЁгЃЄг‚ЉгЃѕгЃ™гЂ‚гЃ“гЃ®й–ўж•°гЃЇеёёгЃ«з¬¦еЏ·гЃЄгЃ—гЃ®
-    еЂ¤г‚’иї”гЃ—гЃѕгЃ™гЂ‚
+    Sjis::ord($string) ‚Н $string ‚Мђж“Є‚М•¶Ћљ‚М ShiftJIS ѓRЃ[ѓh’l‚р•Ф‚µ‚Ь‚·ЃB
+    $string ‚ЄЏИ—Є‚і‚к‚ЅЏкЌ‡‚Н $_ ‚Є‘ОЏЫ‚Ж‚И‚и‚Ь‚·ЃB‚±‚МЉЦђ”‚НЏн‚Й•„Ќ†‚И‚µ‚М
+    ’l‚р•Ф‚µ‚Ь‚·ЃB
 
-    гЃ“гЃ®е‹•дЅњгЃЇ JPerl гЃЁйќћдє’жЏ›гЃЄгЃ®гЃ§жЋз¤єзљ„гЃ«г‚¤гѓігѓќгѓјгѓ€гЃ—гЃџе ґеђ€гЃ®гЃїж©џиѓЅгЃ™г‚‹г‚€гЃ†гЃ«
-    гЃЄгЃЈгЃ¦гЃ„гЃѕгЃ™гЂ‚
+    ‚±‚М“®Ќм‚Н JPerl ‚Ж”сЊЭЉ·‚И‚М‚Е–ѕЋ¦“I‚ЙѓCѓ“ѓ|Ѓ[ѓg‚µ‚ЅЏкЌ‡‚М‚Э‹@”\‚·‚й‚ж‚¤‚Й
+    ‚И‚Б‚Д‚ў‚Ь‚·ЃB
 
-=item * reverse гЃЇ Sjis::reverse гЃ«ж›ёгЃЌжЏ›г‚Џг‚ЉгЃѕгЃ™
+=item * reverse ‚Н Sjis::reverse ‚ЙЏ‘‚«Љ·‚н‚и‚Ь‚·
 
-    "use Sjis qw(reverse);" гЃ«г‚€гЃЈгЃ¦ reverse гЃЇ Sjis::reverse гЃ«ж›ёгЃЌжЏ›г‚Џг‚‹г‚€гЃ†
-    гЃ«гЃЄг‚ЉгЃѕгЃ™гЂ‚
+    "use Sjis qw(reverse);" ‚Й‚ж‚Б‚Д reverse ‚Н Sjis::reverse ‚ЙЏ‘‚«Љ·‚н‚й‚ж‚¤
+    ‚Й‚И‚и‚Ь‚·ЃB
 
     @reverse = Sjis::reverse(@list);
     $reverse = Sjis::reverse(@list);
 
-    Sjis::reverse(@list) гЃЇгѓЄг‚№гѓ€г‚ігѓігѓ†г‚­г‚№гѓ€гЃ§гЃЇ @list гЃ®и¦Ѓзґ г‚’йЂ†й †гЃ«дё¦гЃ№гЃџ
-    гѓЄг‚№гѓ€еЂ¤г‚’иї”гЃ—гЃѕгЃ™гЂ‚
-    гЃ“г‚Њг‚’е€©з”ЁгЃ—гЃ¦гЂЃй™Ќй †гЃ®ж•°е€—г‚’з™єз”џгЃ•гЃ›г‚‹гЃ“гЃЁг‚‚гЃ§гЃЌгЃѕгЃ™гЂ‚
+    Sjis::reverse(@list) ‚НѓЉѓXѓgѓRѓ“ѓeѓLѓXѓg‚Е‚Н @list ‚М—v‘f‚р‹tЏ‡‚Й•А‚Ч‚Ѕ
+    ѓЉѓXѓg’l‚р•Ф‚µ‚Ь‚·ЃB
+    ‚±‚к‚р——p‚µ‚ДЃAЌ~Џ‡‚Мђ”—с‚р”­ђ¶‚і‚№‚й‚±‚Ж‚а‚Е‚«‚Ь‚·ЃB
 
     for (Sjis::reverse(1 .. 10)) { ... }
 
-    @list гЃЁгЃ—гЃ¦гѓЏгѓѓг‚·гѓҐг‚’жёЎгЃ—гЃџе ґеђ€гЂЃгЃќгЃ®гѓЏгѓѓг‚·гѓҐгЃЇгѓ•гѓ©гѓѓгѓ€гЃЄгѓЄг‚№гѓ€гЃ«е¤‰жЏ›гЃ•г‚ЊгЃѕ
-    гЃ™гЂ‚гЃ“гЃ®гЃ“гЃЁг‚’е€©з”ЁгЃ™г‚ЊгЃ°гЂЃreverse г‚’дЅїгЃЈгЃ¦гѓЏгѓѓг‚·гѓҐг‚’йЂ†еђ‘гЃЌгЃ«гЃ™г‚‹(еЂ¤гЃ‹г‚‰г‚­гѓјг‚’
-    гЃІгЃ‘г‚‹г‚€гЃ†гЃ«гЃ™г‚‹)гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ™(гЃџгЃ гЃ—гЂЃгЃ™гЃ№гЃ¦гЃ®еЂ¤гЃЊгѓ¦гѓ‹гѓјг‚ЇгЃ§гЃ‚г‚‹гЃ“гЃЁгЃЊе‰ЌжЏђ
-    гЃ§гЃ™)гЂ‚
+    @list ‚Ж‚µ‚ДѓnѓbѓVѓ…‚р“n‚µ‚ЅЏкЌ‡ЃA‚»‚МѓnѓbѓVѓ…‚Нѓtѓ‰ѓbѓg‚ИѓЉѓXѓg‚Й•ПЉ·‚і‚к‚Ь
+    ‚·ЃB‚±‚М‚±‚Ж‚р——p‚·‚к‚ОЃAreverse ‚рЋg‚Б‚ДѓnѓbѓVѓ…‚р‹tЊь‚«‚Й‚·‚й(’l‚©‚зѓLЃ[‚р
+    ‚Р‚Ї‚й‚ж‚¤‚Й‚·‚й)‚±‚Ж‚Є‚Е‚«‚Ь‚·(‚Ѕ‚ѕ‚µЃA‚·‚Ч‚Д‚М’l‚Єѓ†ѓjЃ[ѓN‚Е‚ ‚й‚±‚Ж‚Є‘O’с
+    ‚Е‚·)ЃB
 
     %barfoo = Sjis::reverse(%foobar);
 
-    г‚№г‚«гѓ©гѓјг‚ігѓігѓ†г‚­г‚№гѓ€гЃ§гЃЇ @list гЃ®гЃ™гЃ№гЃ¦гЃ®и¦Ѓзґ г‚’йЂЈзµђгЃ—гЃџдёЉгЃ§гЂЃShiftJIS гЃ®
-    ж–‡е­—еЌдЅЌгЃ§йЂ†й †гЃ«гЃ—гЃџг‚‚гЃ®г‚’иї”гЃ—гЃѕгЃ™гЂ‚
+    ѓXѓJѓ‰Ѓ[ѓRѓ“ѓeѓLѓXѓg‚Е‚Н @list ‚М‚·‚Ч‚Д‚М—v‘f‚рAЊ‹‚µ‚ЅЏг‚ЕЃAShiftJIS ‚М
+    •¶Ћљ’P€К‚Е‹tЏ‡‚Й‚µ‚Ѕ‚а‚М‚р•Ф‚µ‚Ь‚·ЃB
 
-    гЃ“гЃ®е‹•дЅњгЃЇ JPerl гЃЁйќћдє’жЏ›гЃЄгЃ®гЃ§жЋз¤єзљ„гЃ«г‚¤гѓігѓќгѓјгѓ€гЃ—гЃџе ґеђ€гЃ®гЃїж©џиѓЅгЃ™г‚‹г‚€гЃ†гЃ«
-    гЃЄгЃЈгЃ¦гЃ„гЃѕгЃ™гЂ‚
+    ‚±‚М“®Ќм‚Н JPerl ‚Ж”сЊЭЉ·‚И‚М‚Е–ѕЋ¦“I‚ЙѓCѓ“ѓ|Ѓ[ѓg‚µ‚ЅЏкЌ‡‚М‚Э‹@”\‚·‚й‚ж‚¤‚Й
+    ‚И‚Б‚Д‚ў‚Ь‚·ЃB
 
 =item * Sjis::length
 
     $length = Sjis::length($string);
     $length = Sjis::length();
 
-    Sjis::length($string) гЃЇг‚№г‚«гѓ©гѓјеЂ¤ $string гЃ®й•·гЃ•г‚’ ShiftJIS гЃ®ж–‡е­—ж•°гЃ§иї”
-    гЃ—гЃѕгЃ™гЂ‚$string г‚’зњЃз•ҐгЃ—гЃџе ґеђ€гЃЇ $_ гЃ®ж–‡е­—ж•°г‚’иї”гЃ—гЃѕгЃ™гЂ‚
+    Sjis::length($string) ‚НѓXѓJѓ‰Ѓ[’l $string ‚М’·‚і‚р ShiftJIS ‚М•¶Ћљђ”‚Е•Ф
+    ‚µ‚Ь‚·ЃB$string ‚рЏИ—Є‚µ‚ЅЏкЌ‡‚Н $_ ‚М•¶Ћљђ”‚р•Ф‚µ‚Ь‚·ЃB
 
-    ж–‡е­—е€—гЃ®й•·гЃ•г‚’гЂЃж–‡е­—еЌдЅЌгЃ§гЃЇгЃЄгЃЏгЂЃгѓђг‚¤гѓ€еЌдЅЌгЃ§ж•°гЃ€г‚‹гЃ«гЃЇ
+    •¶Ћљ—с‚М’·‚і‚рЃA•¶Ћљ’P€К‚Е‚Н‚И‚­ЃAѓoѓCѓg’P€К‚Еђ”‚¦‚й‚Й‚Н
 
     $blen = length $string;
 
-    гЃ‚г‚‹гЃ„гЃЇ
+    ‚ ‚й‚ў‚Н
 
     $blen = CORE::length $string;
 
-    гЃЁгЃ—гЃѕгЃ™гЂ‚
+    ‚Ж‚µ‚Ь‚·ЃB
 
 =item * Sjis::substr
 
@@ -355,32 +356,32 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
     $substr = Sjis::substr($string,$offset,$length);
     $substr = Sjis::substr($string,$offset);
 
-    Sjis::substr гЃЇгЂЃShiftJIS ж–‡е­—е€— $string гЃ§жЊ‡е®љгЃ•г‚ЊгЃџж–‡е­—е€—гЃ‹г‚‰йѓЁе€†ж–‡е­—е€—г‚’еЏ–г‚Љ
-    е‡єгЃ—гЃ¦иї”гЃ—гЃѕгЃ™гЂ‚йѓЁе€†ж–‡е­—е€—гЃЇгЂЃж–‡е­—е€—гЃ®е…€й ­гЃ‹г‚‰ж•°гЃ€гЃ¦ $offset ж–‡е­—з›®гЃ‹г‚‰е§‹гЃѕг‚‹гЂЃ
-    $length ж–‡е­—е€†гЃ§гЃ™гЂ‚$offset гЃЊиІ гЃЄг‚‰гЃ°гЂЃж–‡е­—е€—гЃ®жњ«е°ѕгЃ‹г‚‰ -$offset ж–‡е­—е€†ж€»гЃЈгЃџ
-    гЃЁгЃ“г‚ЌгЃ‹г‚‰йѓЁе€†ж–‡е­—е€—гЃЊй–‹е§‹гЃ—гЃѕгЃ™гЂ‚$length г‚’зњЃз•ҐгЃ™г‚‹гЃЁгЂЃж–‡е­—е€—гЃ®жњ«е°ѕгЃѕгЃ§гЃ™гЃ№гЃ¦гЃЊ
-    иї”гЃ•г‚ЊгЃѕгЃ™гЂ‚$length гЃЊиІ гЃЄг‚‰гЃ°гЂЃж–‡е­—е€—гЃ®жњ«е°ѕгЃ‹г‚‰ -$length ж–‡е­—гЃЊж®‹г‚‹г‚€гЃ†гЃ«гЂЃй•·гЃ•
-    гЃЊж±єг‚Ѓг‚‰г‚ЊгЃѕгЃ™гЂ‚гЃќгЃ†гЃ§гЃЄгЃ‘г‚ЊгЃ°гЂЃ$length гЃЇгЂЃгЃ‚гЃЄгЃџгЃЊжњџеѕ…гЃ™г‚‹г‚€гЃ†гЃ«гЂЃеЏ–г‚Ље‡єгЃ™йѓЁе€†
-    ж–‡е­—е€—гЃ®й•·гЃ•г‚’иЎЁгЃ—гЃ¦гЃ„гЃѕгЃ™гЂ‚
+    Sjis::substr ‚НЃAShiftJIS •¶Ћљ—с $string ‚ЕЋw’и‚і‚к‚Ѕ•¶Ћљ—с‚©‚з•”•Є•¶Ћљ—с‚рЋж‚и
+    Џo‚µ‚Д•Ф‚µ‚Ь‚·ЃB•”•Є•¶Ћљ—с‚НЃA•¶Ћљ—с‚Мђж“Є‚©‚зђ”‚¦‚Д $offset •¶Ћљ–Ъ‚©‚зЋn‚Ь‚йЃA
+    $length •¶Ћљ•Є‚Е‚·ЃB$offset ‚Є•‰‚И‚з‚ОЃA•¶Ћљ—с‚М––”ц‚©‚з -$offset •¶Ћљ•Є–Я‚Б‚Ѕ
+    ‚Ж‚±‚л‚©‚з•”•Є•¶Ћљ—с‚ЄЉJЋn‚µ‚Ь‚·ЃB$length ‚рЏИ—Є‚·‚й‚ЖЃA•¶Ћљ—с‚М––”ц‚Ь‚Е‚·‚Ч‚Д‚Є
+    •Ф‚і‚к‚Ь‚·ЃB$length ‚Є•‰‚И‚з‚ОЃA•¶Ћљ—с‚М––”ц‚©‚з -$length •¶Ћљ‚ЄЋc‚й‚ж‚¤‚ЙЃA’·‚і
+    ‚ЄЊ€‚Я‚з‚к‚Ь‚·ЃB‚»‚¤‚Е‚И‚Ї‚к‚ОЃA$length ‚НЃA‚ ‚И‚Ѕ‚ЄЉъ‘Т‚·‚й‚ж‚¤‚ЙЃAЋж‚иЏo‚·•”•Є
+    •¶Ћљ—с‚М’·‚і‚р•\‚µ‚Д‚ў‚Ь‚·ЃB
 
-    Sjis::substr г‚’е·¦иѕєеЂ¤(д»Је…ҐгЃ®еЇѕи±ЎгЃЁгЃЄг‚‹г‚‚гЃ®)гЃЁгЃ—гЃ¦дЅїгЃ†гЃ“гЃЁгЃЇгЃ§гЃЌгЃѕгЃ›г‚“гЂ‚гЃќгЃ®д»Јг‚Џ
-    г‚ЉгЃ«гЂЃз¬¬4еј•ж•° $replacement гЃ«зЅ®гЃЌжЏ›гЃ€з”ЁгЃ®ж–‡е­—е€—г‚’жЊ‡е®љгЃ—гЃѕгЃ™гЂ‚гЃ“гЃ®е ґеђ€гЂЃ
-    Sjis::substr гЃЇ $string гЃ®дёЂйѓЁг‚’ж–‡е­—е€— $replacement гЃ§зЅ®гЃЌжЏ›гЃ€г‚‹гЃЁгЃЁг‚‚гЃ«гЂЃ
-    (splice гЃ®г‚€гЃ†гЃ«)зЅ®гЃЌжЏ›гЃ€г‚‰г‚ЊгЃџйѓЁе€†г‚’еЂ¤гЃЁгЃ—гЃ¦иї”гЃ—гЃѕгЃ™гЂ‚ж¬ЎгЃ®дѕ‹гЃЇгЂЃ$var гЃ®жњЂеѕЊгЃ®
-    ж–‡е­—г‚’ "Curly" гЃ§зЅ®гЃЌжЏ›гЃ€г‚‹гЃЁгЃЁг‚‚гЃ«гЂЃзЅ®гЃЌжЏ›гЃ€г‚‰г‚ЊгЃџж–‡е­—г‚’ $oldstr гЃ«г‚»гѓѓгѓ€гЃ—гЃѕ
-    гЃ™:
+    Sjis::substr ‚рЌ¶•У’l(‘г“ь‚М‘ОЏЫ‚Ж‚И‚й‚а‚М)‚Ж‚µ‚ДЋg‚¤‚±‚Ж‚Н‚Е‚«‚Ь‚№‚сЃB‚»‚М‘г‚н
+    ‚и‚ЙЃA‘ж4€шђ” $replacement ‚Й’u‚«Љ·‚¦—p‚М•¶Ћљ—с‚рЋw’и‚µ‚Ь‚·ЃB‚±‚МЏкЌ‡ЃA
+    Sjis::substr ‚Н $string ‚М€к•”‚р•¶Ћљ—с $replacement ‚Е’u‚«Љ·‚¦‚й‚Ж‚Ж‚а‚ЙЃA
+    (splice ‚М‚ж‚¤‚Й)’u‚«Љ·‚¦‚з‚к‚Ѕ•”•Є‚р’l‚Ж‚µ‚Д•Ф‚µ‚Ь‚·ЃBЋџ‚М—б‚НЃA$var ‚МЌЕЊг‚М
+    •¶Ћљ‚р "Curly" ‚Е’u‚«Љ·‚¦‚й‚Ж‚Ж‚а‚ЙЃA’u‚«Љ·‚¦‚з‚к‚Ѕ•¶Ћљ‚р $oldstr ‚ЙѓZѓbѓg‚µ‚Ь
+    ‚·:
 
     $oldstr = Sjis::substr($var, -1, 1, "Curly");
 
-    $var гЃ®е…€й ­гЃ«ж–‡е­—е€— "Larry" г‚’д»гЃ‘г‚‹гЃ«гЃЇгЂЃж¬ЎгЃ®г‚€гЃ†гЃ«гЃ—гЃѕгЃ™:
+    $var ‚Мђж“Є‚Й•¶Ћљ—с "Larry" ‚р•t‚Ї‚й‚Й‚НЃAЋџ‚М‚ж‚¤‚Й‚µ‚Ь‚·:
 
     Sjis::substr($var, 0, 0, "Larry");
 
-    $var гЃ®жњЂе€ќгЃ®1ж–‡е­—г‚’ "Moe" гЃ§зЅ®гЃЌжЏ›гЃ€г‚‹гЃ«гЃЇгЂЃж¬ЎгЃ®г‚€гЃ†гЃ«гЃ—гЃѕгЃ™:
+    $var ‚МЌЕЏ‰‚М1•¶Ћљ‚р "Moe" ‚Е’u‚«Љ·‚¦‚й‚Й‚НЃAЋџ‚М‚ж‚¤‚Й‚µ‚Ь‚·:
 
     Sjis::substr($var, 0, 1, "Moe");
 
-    $var гЃ®жњЂеѕЊгЃ®1ж–‡е­—г‚’ "Curly" гЃ§зЅ®гЃЌжЏ›гЃ€г‚‹гЃ«гЃЇж¬ЎгЃ®г‚€гЃ†гЃ«гЃ—гЃѕгЃ™:
+    $var ‚МЌЕЊг‚М1•¶Ћљ‚р "Curly" ‚Е’u‚«Љ·‚¦‚й‚Й‚НЋџ‚М‚ж‚¤‚Й‚µ‚Ь‚·:
 
     Sjis::substr($var, -1, 1, "Curly");
 
@@ -389,13 +390,13 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
     $index = Sjis::index($string,$substring,$start);
     $index = Sjis::index($string,$substring);
 
-    Sjis::index гЃЇгЂЃShiftJIS ж–‡е­—е€— $string гЃ®дё­гЃ«еђ«гЃѕг‚Њг‚‹гЂЃг‚‚гЃ†1гЃ¤гЃ® ShiftJIS ж–‡
-    е­—е€— $substr г‚’жЋўгЃ—гЃѕгЃ™гЂ‚$string гЃ®дё­гЃ§гЂЃ$substr гЃЊжњЂе€ќгЃ«е‡єзЏѕгЃ™г‚‹дЅЌзЅ®г‚’ж–‡е­—еЌдЅЌ
-    гЃ§ж•°гЃ€гЃ¦иї”гЃ—гЃѕгЃ™гЂ‚$start гЃЊжЊ‡е®љгЃ•г‚ЊгЃ¦гЃ„г‚‹е ґеђ€гЂЃ$string гЃ®е…€й ­гЃ‹г‚‰ $start еЂ‹гЃ®
-    ж–‡е­—г‚’г‚№г‚­гѓѓгѓ—гЃ—гЃџдЅЌзЅ®гЃ‹г‚‰гЂЃ$substr г‚’жЋўгЃ—е§‹г‚ЃгЃѕгЃ™гЂ‚дЅЌзЅ®гЃЇ 0 г‚’гѓ™гѓјг‚№гЃ«гЃЁгЃ—гЃ¦
-    ж•°гЃ€гЃѕгЃ™гЂ‚$substr гЃЊи¦‹гЃ¤гЃ‹г‚‰гЃЄгЃ‘г‚ЊгЃ°гЂЃSjis::index й–ўж•°гЃЇгѓ™гѓјг‚№г‚€г‚Љ 1 гЃ гЃ‘е°ЏгЃ•гЃ„
-    еЂ¤ -1 г‚’иї”гЃ—гЃѕгЃ™гЂ‚Sjis::index г‚’дЅїгЃЈгЃ¦гЂЃж–‡е­—е€—е…ЁдЅ“г‚’иЄїгЃ№г‚‹гЃ«гЃЇгЂЃж¬ЎгЃ®г‚€гЃ†гЃ«гЃ—
-    гЃѕгЃ™гЂ‚
+    Sjis::index ‚НЃAShiftJIS •¶Ћљ—с $string ‚М’†‚ЙЉЬ‚Ь‚к‚йЃA‚а‚¤1‚В‚М ShiftJIS •¶
+    Ћљ—с $substr ‚р’T‚µ‚Ь‚·ЃB$string ‚М’†‚ЕЃA$substr ‚ЄЌЕЏ‰‚ЙЏoЊ»‚·‚й€К’u‚р•¶Ћљ’P€К
+    ‚Еђ”‚¦‚Д•Ф‚µ‚Ь‚·ЃB$start ‚ЄЋw’и‚і‚к‚Д‚ў‚йЏкЌ‡ЃA$string ‚Мђж“Є‚©‚з $start ЊВ‚М
+    •¶Ћљ‚рѓXѓLѓbѓv‚µ‚Ѕ€К’u‚©‚зЃA$substr ‚р’T‚µЋn‚Я‚Ь‚·ЃB€К’u‚Н 0 ‚рѓxЃ[ѓX‚Й‚Ж‚µ‚Д
+    ђ”‚¦‚Ь‚·ЃB$substr ‚ЄЊ©‚В‚©‚з‚И‚Ї‚к‚ОЃASjis::index ЉЦђ”‚НѓxЃ[ѓX‚ж‚и 1 ‚ѕ‚ЇЏ¬‚і‚ў
+    ’l -1 ‚р•Ф‚µ‚Ь‚·ЃBSjis::index ‚рЋg‚Б‚ДЃA•¶Ћљ—с‘S‘М‚р’І‚Ч‚й‚Й‚НЃAЋџ‚М‚ж‚¤‚Й‚µ
+    ‚Ь‚·ЃB
 
     $pos = -1;
     while (($pos = Sjis::index($string, $lookfor, $pos)) > -1) {
@@ -408,12 +409,12 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
     $rindex = Sjis::rindex($string,$substring,$position);
     $rindex = Sjis::rindex($string,$substring);
 
-    Sjis::rindex гЃЇ Sjis::index гЃЁдјјгЃ¦гЃ„гЃѕгЃ™гЃЊгЂЃShiftJIS ж–‡е­—е€— $string гЃ®дё­гЃ§гЂЃ
-    йѓЁе€†ж–‡е­—е€— $substr гЃЊжњЂеѕЊгЃ«е‡єзЏѕгЃ™г‚‹дЅЌзЅ®г‚’ж–‡е­—еЌдЅЌгЃ§ж•°гЃ€гЃ¦иї”гЃ—гЃѕгЃ™(гЃ¤гЃѕг‚Љ
-    reverse Sjis::index гЃ§гЃ™)гЂ‚$substr гЃЊи¦‹гЃ¤гЃ‹г‚‰гЃЄгЃ‘г‚ЊгЃ°гЂЃ-1 г‚’иї”гЃ—гЃѕгЃ™гЂ‚$position
-    гЃ«г‚€гЃЈгЃ¦гЂЃеЂ¤гЃЁгЃ—гЃ¦иї”гЃ™гЃ“гЃЁгЃЊиЁ±гЃ•г‚Њг‚‹гЂЃжњЂг‚‚еЏіг‚€г‚ЉгЃ®дЅЌзЅ®г‚’жЊ‡е®љгЃ™г‚‹гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ™гЂ‚
-    Sjis::rindex г‚’дЅїгЃЈгЃ¦гЂЃж–‡е­—е€—е…ЁдЅ“г‚’жњ«е°ѕгЃ‹г‚‰е…€й ­гЃ«еђ‘гЃ‹гЃЈгЃ¦иЄїгЃ№г‚‹гЃ«гЃЇгЂЃж¬ЎгЃ®г‚€гЃ†
-    гЃ«гЃ—гЃѕгЃ™гЂ‚
+    Sjis::rindex ‚Н Sjis::index ‚ЖЋ—‚Д‚ў‚Ь‚·‚ЄЃAShiftJIS •¶Ћљ—с $string ‚М’†‚ЕЃA
+    •”•Є•¶Ћљ—с $substr ‚ЄЌЕЊг‚ЙЏoЊ»‚·‚й€К’u‚р•¶Ћљ’P€К‚Еђ”‚¦‚Д•Ф‚µ‚Ь‚·(‚В‚Ь‚и
+    reverse Sjis::index ‚Е‚·)ЃB$substr ‚ЄЊ©‚В‚©‚з‚И‚Ї‚к‚ОЃA-1 ‚р•Ф‚µ‚Ь‚·ЃB$position
+    ‚Й‚ж‚Б‚ДЃA’l‚Ж‚µ‚Д•Ф‚·‚±‚Ж‚Є‹–‚і‚к‚йЃAЌЕ‚а‰E‚ж‚и‚М€К’u‚рЋw’и‚·‚й‚±‚Ж‚Є‚Е‚«‚Ь‚·ЃB
+    Sjis::rindex ‚рЋg‚Б‚ДЃA•¶Ћљ—с‘S‘М‚р––”ц‚©‚зђж“Є‚ЙЊь‚©‚Б‚Д’І‚Ч‚й‚Й‚НЃAЋџ‚М‚ж‚¤
+    ‚Й‚µ‚Ь‚·ЃB
 
     $pos = Sjis::length($string);
     while (($pos = Sjis::rindex($string, $lookfor, $pos)) >= 0) {
@@ -423,333 +424,346 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
 
 =back
 
-=head1 гѓђг‚°гЃЁе€¶й™ђдє‹й …
+=head1 ЉВ‹«•Пђ”
 
-гѓђг‚°е ±е‘ЉгЂЃгѓ‘гѓѓгѓЃг‚’ж­“иїЋгЃ—гЃѕгЃ™гЂ‚
+ ‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Н”r‘јђ§Њд‚Й flock ЉЦђ”‚рЋg—p‚µ‚Ь‚·ЃBѓtѓ@ѓCѓ‹‚Є“ЗЋж‚и‰В”\‚Й‚И‚й‚Ь‚Е
+ ‚ ‚й‚ў‚НЏ‘Ќћ‚Э‰В”\‚Й‚И‚й‚Ь‚ЕѓvѓЌѓOѓ‰ѓЂ‚МЋАЌs‚НѓuѓЌѓbѓN‚і‚к‚Ь‚·ЃB
+ ‚±‚к‚рЉВ‹«•Пђ” SJIS_NONBLOCK ‚р’и‹`‚·‚й‚±‚Ж‚ЕѓuѓЌѓbѓN‚і‚№‚И‚ў‚ж‚¤‚Й‚·‚й‚±‚Ж‚Є‚Е‚«‚Ь
+ ‚·ЃB
+
+ —б:
+
+   SET SJIS_NONBLOCK=1
+
+ (’l '1' ‚Н€У–Ў‚рЋќ‚Ѕ‚И‚ў‚М‚Е‰Ѕ‚Е‚аЌ\‚ў‚Ь‚№‚с)
+
+=head1 ѓoѓO‚Жђ§ЊАЋ–ЌЂ
+
+ѓoѓO•сЌђЃAѓpѓbѓ`‚рЉЅЊ}‚µ‚Ь‚·ЃB
 
 =over 2
 
 =item * format
 
-    г‚ЄгѓЄг‚ёгѓЉгѓ«гЃ® Perl гЃЁж©џиѓЅгЃЊеђЊгЃгЃ§гЃ™(ShiftJIS гЃ«еЇѕеїњгЃ—гЃ¦гЃ„гЃѕгЃ›г‚“)гЂ‚
+    ѓIѓЉѓWѓiѓ‹‚М Perl ‚Ж‹@”\‚Є“Ї‚¶‚Е‚·(ShiftJIS ‚Й‘О‰ћ‚µ‚Д‚ў‚Ь‚№‚с)ЃB
 
 =item * chdir
 
-    MSWin32 з’°еўѓгЃ® perl5.006, perl5.008, perl5.010 гЃ«гЃ¦ж–‡е­—г‚ігѓјгѓ‰(0x5C)гЃ§зµ‚г‚Џ
-    г‚‹гѓ‘г‚№г‚’ж‰±гЃ†гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ›г‚“гЂ‚
+    MSWin32 ЉВ‹«‚М perl5.006, perl5.008, perl5.010 ‚Й‚Д•¶ЋљѓRЃ[ѓh(0x5C)‚ЕЏI‚н
+    ‚йѓpѓX‚р€µ‚¤‚±‚Ж‚Є‚Е‚«‚Ь‚№‚сЃB
 
-    еЏ‚иЂѓгѓЄгѓіг‚Ї
+    ЋQЌlѓЉѓ“ѓN
     Bug #81839
     chdir does not work with chr(0x5C) at end of path
     http://bugs.activestate.com/show_bug.cgi?id=81839
 
-=item * m/$re/o, s/$re/foo/o, qr/$re/o гЃ® /o дї®йЈѕе­ђ
+=item * m/$re/o, s/$re/foo/o, qr/$re/o ‚М /o ЏCЏьЋq
 
-    perl5.006 гЃ«гЃ¦ /o дї®йЈѕе­ђгЃЊжњџеѕ…йЂљг‚ЉгЃ®е‹•дЅњг‚’гЃ—гЃѕгЃ›г‚“гЃ§гЃ—гЃџгЂ‚е¤‰ж•° $re гЃ®еЂ¤гЃЊ
-    е¤‰ж›ґгЃ•г‚Њг‚‹гЃЁж¬Ўе›ћгЃ®е®џиЎЊж™‚гЃ«гЃќгЃ®е¤‰ж›ґгЃЊеЏЌж гЃ•г‚ЊгЃѕгЃ™гЂ‚
+    perl5.006 ‚Й‚Д /o ЏCЏьЋq‚ЄЉъ‘Т’К‚и‚М“®Ќм‚р‚µ‚Ь‚№‚с‚Е‚µ‚ЅЃB•Пђ” $re ‚М’l‚Є
+    •ПЌX‚і‚к‚й‚ЖЋџ‰с‚МЋАЌsЋћ‚Й‚»‚М•ПЌX‚Є”Ѕ‰f‚і‚к‚Ь‚·ЃB
 
-=item * ж­Ји¦ЏиЎЁзЏѕе†…гЃ®г‚Ёг‚№г‚±гѓјгѓ—ж–‡е­— \b гЃЁ \B
+=item * ђі‹K•\Њ»“а‚МѓGѓXѓPЃ[ѓv•¶Ћљ \b ‚Ж \B
 
-    ж­Ји¦ЏиЎЁзЏѕе†…гЃ®г‚Ёг‚№г‚±гѓјгѓ—ж–‡е­— \b гЃЁ \B гЃЇжњџеѕ…йЂљг‚ЉгЃ®ж©џиѓЅг‚’гЃ—гЃѕгЃ›г‚“гЂ‚
+    ђі‹K•\Њ»“а‚МѓGѓXѓPЃ[ѓv•¶Ћљ \b ‚Ж \B ‚НЉъ‘Т’К‚и‚М‹@”\‚р‚µ‚Ь‚№‚сЃB
 
 =back
 
-=head1 дЅњиЂ…
+=head1 ЌмЋТ
 
-гЃ“гЃ®гѓ—гѓ­г‚ёг‚§г‚Їгѓ€гЃЇ зЁІи‘‰ жє– ina@cpan.org гЃ«г‚€гЃЈгЃ¦е§‹гЃѕг‚ЉгЃѕгЃ—гЃџгЂ‚
-гЃ“гЃ®гѓ•г‚Ўг‚¤гѓ«г‚’е€†гЃ‹гЃЎеђ€гЃ„гЃѕгЃ—г‚‡гЃ†гЂ‚
+‚±‚МѓvѓЌѓWѓFѓNѓg‚Н €о—t ЏЂ ina@cpan.org ‚Й‚ж‚Б‚ДЋn‚Ь‚и‚Ь‚µ‚ЅЃB
+‚±‚Мѓtѓ@ѓCѓ‹‚р•Є‚©‚їЌ‡‚ў‚Ь‚µ‚е‚¤ЃB
 
-=head1 и‘—дЅњжЁ©
+=head1 ’ЌмЊ 
 
-гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЇгѓ•гѓЄгѓјг‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃ§гЃ™гЂ‚гЃ‚гЃЄгЃџгЃЇ Perl гЃЁеђЊгЃгѓ©г‚¤г‚»гѓіг‚№
-гЃ®е…ѓгЃ§е†Ќй…ЌеёѓеЏЉгЃіе¤‰ж›ґг‚’иЎЊгЃ†гЃ“гЃЁгЃЊе‡єжќҐгЃѕгЃ™гЂ‚и©ігЃ—гЃЏгЃЇ perlartistic г‚’еЏ‚з…§гЃ—гЃ¦
-гЃЏгЃ гЃ•гЃ„гЂ‚
+‚±‚Мѓ\ѓtѓgѓEѓFѓA‚НѓtѓЉЃ[ѓ\ѓtѓgѓEѓFѓA‚Е‚·ЃB‚ ‚И‚Ѕ‚Н Perl ‚Ж“Ї‚¶ѓ‰ѓCѓZѓ“ѓX
+‚МЊі‚ЕЌД”z•z‹y‚С•ПЌX‚рЌs‚¤‚±‚Ж‚ЄЏo—€‚Ь‚·ЃBЏЪ‚µ‚­‚Н perlartistic ‚рЋQЏЖ‚µ‚Д
+‚­‚ѕ‚і‚ўЃB
 
-гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЇжњ‰з”ЁгЃ§гЃ‚г‚‹гЃ“гЃЁг‚’йЎгЃЈгЃ¦й ’еёѓгЃ•г‚ЊгЃѕгЃ™гЃЊгЂЃ*е…ЁгЃЏгЃ®з„ЎдїќиЁј* 
-гЃ§гЃ™гЂ‚е•†жҐ­еЏЇиѓЅжЂ§гЃ®дїќиЁјг‚„з‰№е®љгЃ®з›®зљ„гЃёгЃ®йЃ©еђ€жЂ§гЃЇгЂЃиЁЂе¤–гЃ«з¤єгЃ•г‚ЊгЃџг‚‚гЃ®г‚‚еђ«
-г‚Ѓе…ЁгЃЏе­ењЁгЃ—гЃѕгЃ›г‚“гЂ‚
+‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Н—L—p‚Е‚ ‚й‚±‚Ж‚рЉи‚Б‚Д”Р•z‚і‚к‚Ь‚·‚ЄЃA*‘S‚­‚М–і•ЫЏШ* 
+‚Е‚·ЃBЏ¤‹Ж‰В”\ђ«‚М•ЫЏШ‚в“Б’и‚М–Ъ“I‚Ц‚М“KЌ‡ђ«‚НЃAЊѕЉO‚ЙЋ¦‚і‚к‚Ѕ‚а‚М‚аЉЬ
+‚Я‘S‚­‘¶ЌЭ‚µ‚Ь‚№‚сЃB
 
-=head1 г‚·гѓ•гѓ€JISг‚ігѓјгѓ‰гЃЁгЃЇ(ж—Ґжњ¬иЄћжѓ…е ±е‡¦зђ†г‚€г‚Љ)
+=head1 ѓVѓtѓgJISѓRЃ[ѓh‚Ж‚Н(“ъ–{ЊкЏо•сЏ€—ќ‚ж‚и)
 
-г‚·гѓ•гѓ€JISз¬¦еЏ·еЊ–гЃЇгЂЃгѓћг‚¤г‚Їгѓ­г‚Ѕгѓ•гѓ€з¤ѕгЃ«г‚€г‚Љй–‹з™єгЃ•г‚ЊгЃџгЂЃж—Ґжњ¬гЃ®г‚ігѓігѓ”гѓҐгѓјг‚їгЃ§жњЂг‚‚г‚€гЃЏ
-з”ЁгЃ„г‚‰г‚Њг‚‹з¬¦еЏ·еЊ–ж–№ејЏгЃ§гЃ™гЂ‚г‚·гѓ•гѓ€JISгЃЇгЂЊMSжјўе­—(Microsoftжјўе­—)гЂЌгЂЃгЃѕгЃџгЃЇгЂЊSJIS
-(ShiftJISгЃ®з•Ґз§°)гЂЌгЃЁг‚‚е‘јгЃ°г‚ЊгЃ¦гЃ„гЃѕгЃ™гЂ‚
+ѓVѓtѓgJIS•„Ќ†‰»‚НЃAѓ}ѓCѓNѓЌѓ\ѓtѓgЋР‚Й‚ж‚иЉJ”­‚і‚к‚ЅЃA“ъ–{‚МѓRѓ“ѓsѓ…Ѓ[ѓ^‚ЕЌЕ‚а‚ж‚­
+—p‚ў‚з‚к‚й•„Ќ†‰»•ыЋ®‚Е‚·ЃBѓVѓtѓgJIS‚НЃuMSЉїЋљ(MicrosoftЉїЋљ)ЃvЃA‚Ь‚Ѕ‚НЃuSJIS
+(ShiftJIS‚М—ЄЏМ)Ѓv‚Ж‚аЊД‚О‚к‚Д‚ў‚Ь‚·ЃB
 
-гЃ‹гЃ¤гЃ¦ж—Ґжњ¬гЃ®г‚ігѓігѓ”гѓҐгѓјг‚їгѓ¦гѓјг‚¶гЃЇеЌЉи§’з‰‡д»®еђЌгЃ—гЃ‹дЅїгЃ€гЃЄгЃ‹гЃЈгЃџгЃџг‚ЃгЂЃеѕ“жќҐж–№ејЏгЃЁгЃ®дє’жЏ›жЂ§
-г‚’з¶­жЊЃгЃ™г‚‹з›®зљ„гЃ§г‚·гѓ•гѓ€JISгЃЊй–‹з™єгЃ•г‚ЊгЃѕгЃ—гЃџгЂ‚
+‚©‚В‚Д“ъ–{‚МѓRѓ“ѓsѓ…Ѓ[ѓ^ѓ†Ѓ[ѓU‚Н”јЉp•Р‰ј–ј‚µ‚©Ћg‚¦‚И‚©‚Б‚Ѕ‚Ѕ‚ЯЃAЏ]—€•ыЋ®‚Ж‚МЊЭЉ·ђ«
+‚р€ЫЋќ‚·‚й–Ъ“I‚ЕѓVѓtѓgJIS‚ЄЉJ”­‚і‚к‚Ь‚µ‚ЅЃB
 
-г‚·гѓ•гѓ€JISгЃ«гЃЉгЃ„гЃ¦гЃЇгЂЃ16йЂІж•°гЃ§ 0x81пЅћ0x9F гЃѕгЃџгЃЇ 0xE0пЅћ0xEF гЃ®зЇ„е›Іг‚’жЊЃгЃ¤г‚Єг‚Їгѓ†гѓѓгѓ€
-гЃ«г‚€гЃЈгЃ¦1ж–‡е­—2г‚Єг‚Їгѓ†гѓѓгѓ€гѓўгѓјгѓ‰гЃЊй–‹е§‹гЃ—гЃѕгЃ™гЂ‚гЃќгЃ—гЃ¦гЃ“гЃ®г‚Єг‚Їгѓ†гѓѓгѓ€гЃЇгЂЃгЃќгЃ“гЃ‹г‚‰е§‹гЃѕг‚‹
-2г‚Єг‚Їгѓ†гѓѓгѓ€ж–‡е­—гЃ®з¬¬1г‚Єг‚Їгѓ†гѓѓгѓ€гЃЁгЃ—гЃ¦е‡¦зђ†гЃ•г‚ЊгЃѕгЃ™гЂ‚з¶љгЃЏ(з¬¬2)г‚Єг‚Їгѓ†гѓѓгѓ€гЃЇгЂЃ16йЂІж•°гЃ§
-0x40пЅћ0x7E гЃѕгЃџгЃЇ 0x80пЅћ0xFC гЃ®зЇ„е›Іг‚’жЊЃгЃ¤еЂ¤гЃ§гЃЄгЃ‘г‚ЊгЃ°гЃЄг‚ЉгЃѕгЃ›г‚“гЂ‚з¬¬1г‚Єг‚Їгѓ†гѓѓгѓ€гЃ®
-зЇ„е›ІгЃЇж‹ЎејµASCIIж–‡е­—г‚»гѓѓгѓ€гЂЃгЃ¤гЃѕг‚ЉжњЂдёЉдЅЌгѓ“гѓѓгѓ€гЃЊг‚ЄгѓігЃ«гЃЄгЃЈгЃџ8гѓ“гѓѓгѓ€ж–‡е­—г‚»гѓѓгѓ€гЃ®зЇ„е›І
-гЃ«е®Ње…ЁгЃ«еЏЋгЃѕгЃЈгЃ¦гЃ„г‚‹гЃ“гЃЁгЃ«жіЁз›®гЃ—гЃ¦гЃЏгЃ гЃ•гЃ„гЂ‚гЃѕгЃџг‚·гѓ•гѓ€JISгЃЇгЂЃеЌЉи§’з‰‡д»®еђЌгЃЁASCII/JIS
-гѓ­гѓјгѓће­—г‚‚г‚µгѓќгѓјгѓ€гЃ—гЃ¦гЃ„гЃѕгЃ™гЂ‚
+ѓVѓtѓgJIS‚Й‚Ё‚ў‚Д‚НЃA16ђiђ”‚Е 0x81Ѓ`0x9F ‚Ь‚Ѕ‚Н 0xE0Ѓ`0xEF ‚М”Н€Н‚рЋќ‚ВѓIѓNѓeѓbѓg
+‚Й‚ж‚Б‚Д1•¶Ћљ2ѓIѓNѓeѓbѓgѓ‚Ѓ[ѓh‚ЄЉJЋn‚µ‚Ь‚·ЃB‚»‚µ‚Д‚±‚МѓIѓNѓeѓbѓg‚НЃA‚»‚±‚©‚зЋn‚Ь‚й
+2ѓIѓNѓeѓbѓg•¶Ћљ‚М‘ж1ѓIѓNѓeѓbѓg‚Ж‚µ‚ДЏ€—ќ‚і‚к‚Ь‚·ЃB‘±‚­(‘ж2)ѓIѓNѓeѓbѓg‚НЃA16ђiђ”‚Е
+0x40Ѓ`0x7E ‚Ь‚Ѕ‚Н 0x80Ѓ`0xFC ‚М”Н€Н‚рЋќ‚В’l‚Е‚И‚Ї‚к‚О‚И‚и‚Ь‚№‚сЃB‘ж1ѓIѓNѓeѓbѓg‚М
+”Н€Н‚НЉg’ЈASCII•¶ЋљѓZѓbѓgЃA‚В‚Ь‚иЌЕЏг€Кѓrѓbѓg‚ЄѓIѓ“‚Й‚И‚Б‚Ѕ8ѓrѓbѓg•¶ЋљѓZѓbѓg‚М”Н€Н
+‚ЙЉ®‘S‚ЙЋы‚Ь‚Б‚Д‚ў‚й‚±‚Ж‚Й’Ќ–Ъ‚µ‚Д‚­‚ѕ‚і‚ўЃB‚Ь‚ЅѓVѓtѓgJIS‚НЃA”јЉp•Р‰ј–ј‚ЖASCII/JIS
+ѓЌЃ[ѓ}Ћљ‚аѓTѓ|Ѓ[ѓg‚µ‚Д‚ў‚Ь‚·ЃB
 
-дёЂйѓЁгЃ®г‚·гѓ•гѓ€JISд»•ж§(з‰№гЃ«гѓЎгѓјг‚«д»•ж§)гЃ§гЃЇгЂЃгѓ¦гѓјг‚¶е®љзѕ©ж–‡е­—гЃ®г‚ігѓјгѓ‰й еџџг‚„гЂЃе ґеђ€гЃ«г‚€гЃЈгЃ¦
-гЃЇеЌЉи§’з‰‡д»®еђЌз©єз™Ѕж–‡е­—гЃ®г‚ігѓјгѓ‰дЅЌзЅ®г‚‚е®љзѕ©гЃ•г‚ЊгЃ¦гЃ„гЃѕгЃ™гЂ‚г‚‚гЃ—жњ¬ж јзљ„гЃЄжѓ…е ±дє¤жЏ›г‚’жњ›г‚ЂгЃ®гЃ§
-гЃ‚г‚ЊгЃ°гЂЃгЃ“гЃ®г‚€гЃ†гЃЄг‚ігѓјгѓ‰й еџџг‚„г‚ігѓјгѓ‰дЅЌзЅ®гЃЇдёЌйѓЅеђ€гЃ§гЃ™гЂ‚гЃЁгЃ„гЃ†гЃ®г‚‚гЂЃгЃ“гЃ®г‚€гЃ†гЃЄж–‡е­—гЃЇгЂЃ
-е€ҐгЃ®ж—Ґжњ¬иЄћз¬¦еЏ·еЊ–ж–№ејЏ(гЃ¤гЃѕг‚ЉJISгЃЁEUC)гЃ®г‚ігѓјгѓ‰дЅЌзЅ®гЃ«е¤‰жЏ›гЃ§гЃЌгЃЄгЃ„г‚€гЃ†гЃ«з¬¦еЏ·еЊ–гЃ•г‚ЊгЃ¦гЃ—
-гЃѕгЃ†гЃ‹г‚‰гЃ§гЃ™гЂ‚
+€к•”‚МѓVѓtѓgJISЋd—l(“Б‚ЙѓЃЃ[ѓJЋd—l)‚Е‚НЃAѓ†Ѓ[ѓU’и‹`•¶Ћљ‚МѓRЃ[ѓh—М€ж‚вЃAЏкЌ‡‚Й‚ж‚Б‚Д
+‚Н”јЉp•Р‰ј–ј‹у”’•¶Ћљ‚МѓRЃ[ѓh€К’u‚а’и‹`‚і‚к‚Д‚ў‚Ь‚·ЃB‚а‚µ–{Љi“I‚ИЏо•сЊрЉ·‚р–]‚Ю‚М‚Е
+‚ ‚к‚ОЃA‚±‚М‚ж‚¤‚ИѓRЃ[ѓh—М€ж‚вѓRЃ[ѓh€К’u‚Н•s“sЌ‡‚Е‚·ЃB‚Ж‚ў‚¤‚М‚аЃA‚±‚М‚ж‚¤‚И•¶Ћљ‚НЃA
+•К‚М“ъ–{Њк•„Ќ†‰»•ыЋ®(‚В‚Ь‚иJIS‚ЖEUC)‚МѓRЃ[ѓh€К’u‚Й•ПЉ·‚Е‚«‚И‚ў‚ж‚¤‚Й•„Ќ†‰»‚і‚к‚Д‚µ
+‚Ь‚¤‚©‚з‚Е‚·ЃB
 
-=head1 г‚¦г‚Јг‚­гѓљгѓ‡г‚Јг‚ўгЃ«г‚€г‚‹гЂЊShift_JISгЂЌгЃ®е®љзѕ©
+=head1 ѓEѓBѓLѓyѓfѓBѓA‚Й‚ж‚йЃuShift_JISЃv‚М’и‹`
 
 Shift_JIS (2009.09.17 14:00:00 JST). In Wikipedia: The Free Encyclopedia.
 Retrieved from
 http://ja.wikipedia.org/wiki/Shift_JIS
 
-е‡єе…ё: гѓ•гѓЄгѓјз™ѕз§‘дє‹е…ёгЂЋг‚¦г‚Јг‚­гѓљгѓ‡г‚Јг‚ў(Wikipedia)гЂЏ
+Џo“T: ѓtѓЉЃ[•S‰ИЋ–“TЃwѓEѓBѓLѓyѓfѓBѓA(Wikipedia)Ѓx
 
-Shift_JIS(IANAгЃёгЃ®з™»йЊІеђЌгЂ‚иЄ­гЃїж–№гЃЇгЂЋг‚·гѓ•гѓ€г‚ёг‚№гЂЏ)гЃЇгЂЃзЏѕењЁе¤љгЃЏгЃ®гѓ‘г‚Ѕг‚ігѓідёЉгЃ§
-ж—Ґжњ¬иЄћг‚’иЎЁгЃ™гЃџг‚ЃгЃ«дЅїг‚Џг‚ЊгЃ¦гЃ„г‚‹ж–‡е­—г‚ігѓјгѓ‰гЃ§гЃ‚г‚‹гЂ‚з‹¬и‡ЄгЃ®г‚ігѓјгѓ‰г‚’дЅїгЃЈгЃ¦гЃ„гЃџдјљз¤ѕ
-гЃЊгЃ‚гЃЈгЃџгЃЊгЂЃзЏѕењЁгЃЇжЁ™жє–еЊ–гЃ—гЃ¦гЃ„г‚‹JIS X 0208гЃ®й™„е±ћж›ё1гЃ§и¦Џе®љгЃ—гЃ¦гЃ„г‚‹гЂ‚
+Shift_JIS(IANA‚Ц‚М“o^–јЃB“З‚Э•ы‚НЃwѓVѓtѓgѓWѓXЃx)‚НЃAЊ»ЌЭ‘Ѕ‚­‚Мѓpѓ\ѓRѓ“Џг‚Е
+“ъ–{Њк‚р•\‚·‚Ѕ‚Я‚ЙЋg‚н‚к‚Д‚ў‚й•¶ЋљѓRЃ[ѓh‚Е‚ ‚йЃB“ЖЋ©‚МѓRЃ[ѓh‚рЋg‚Б‚Д‚ў‚Ѕ‰пЋР
+‚Є‚ ‚Б‚Ѕ‚ЄЃAЊ»ЌЭ‚Н•WЏЂ‰»‚µ‚Д‚ў‚йJIS X 0208‚М•Ќ‘®Џ‘1‚Е‹K’и‚µ‚Д‚ў‚йЃB
 
-Microsoftз­‰гЃ®еђ„гѓ™гѓігѓЂгЃЊе®џиЈ…гЃ™г‚‹Shift_JISгЃ®дєњзЁ®гЃ«гЃ¤гЃ„гЃ¦гЃЇгЂЋMicrosoftг‚ігѓјгѓ‰гѓљгѓј
-г‚ё932гЂЏг‚’еЏ‚з…§гЂ‚Mac OSгЃЊе®џиЈ…гЃ™г‚‹дєњзЁ®гЃ«гЃ¤гЃ„гЃ¦гЃЇгЂЋMacJapaneseгЂЏг‚’еЏ‚з…§гЂ‚
+Microsoft“™‚МЉeѓxѓ“ѓ_‚ЄЋА‘•‚·‚йShift_JIS‚М€џЋн‚Й‚В‚ў‚Д‚НЃwMicrosoftѓRЃ[ѓhѓyЃ[
+ѓW932Ѓx‚рЋQЏЖЃBMac OS‚ЄЋА‘•‚·‚й€џЋн‚Й‚В‚ў‚Д‚НЃwMacJapaneseЃx‚рЋQЏЖЃB
 
-Shift_JISгЃ®иЄ•з”џ
-1980е№ґд»ЈгЂЃгѓ‘г‚Ѕг‚ігѓіз”Ё16гѓ“гѓѓгѓ€CPUгЃ®ж™®еЏЉг‚‚гЃ‚гЃ„гЃѕгЃЈгЃ¦гЂЃжјўе­—г‚’иЎЁз¤єеЏЇиѓЅгЃЄгѓЏгѓјгѓ‰г‚¦г‚§
-г‚ўг‚’е‚™гЃ€гЃџгѓ‘г‚Ѕг‚ігѓігЃЊз¶љгЂ…гЃЁз™єеЈІгЃ•г‚ЊгЃџгЂ‚гЃќгЃ®гЃџг‚ЃгЂЃгЃ“г‚Њг‚‰гѓ‘г‚Ѕг‚ігѓіз”ЁгЃ®ж–‡е­—з¬¦еЏ·еЊ–
-ж–№ејЏг‚’жЁЎзґўгЃ—гЃ¦гЃ„гЃџгЂ‚
+Shift_JIS‚М’aђ¶
+1980”N‘гЃAѓpѓ\ѓRѓ“—p16ѓrѓbѓgCPU‚М•Ѓ‹y‚а‚ ‚ў‚Ь‚Б‚ДЃAЉїЋљ‚р•\Ћ¦‰В”\‚ИѓnЃ[ѓhѓEѓF
+ѓA‚р”х‚¦‚Ѕѓpѓ\ѓRѓ“‚Є‘±ЃX‚Ж”­”„‚і‚к‚ЅЃB‚»‚М‚Ѕ‚ЯЃA‚±‚к‚зѓpѓ\ѓRѓ“—p‚М•¶Ћљ•„Ќ†‰»
+•ыЋ®‚р–НЌх‚µ‚Д‚ў‚ЅЃB
 
-Shift_JISг‚’гЂЊг‚·гѓ•гѓ€JISг‚ігѓјгѓ‰гЂЌгЃЁе‘јг‚“гЃ§з¬¦еЏ·еЊ–ж–‡е­—й›†еђ€(ж–‡е­—г‚ігѓјгѓ‰)гЃ®йќўгЃ®гЃїг‚’
-иЂѓгЃ€г‚‹и­°и«–гЃЊгЃ‚г‚‹гЃЊгЂЃгЃ“гЃ“гЃ§гЃЇж–‡е­—з¬¦еЏ·еЊ–ж–№ејЏгЃ®йќўгЃ«з„¦з‚№г‚’еЅ“гЃ¦г‚‹гЂ‚
+Shift_JIS‚рЃuѓVѓtѓgJISѓRЃ[ѓhЃv‚ЖЊД‚с‚Е•„Ќ†‰»•¶ЋљЏWЌ‡(•¶ЋљѓRЃ[ѓh)‚М–К‚М‚Э‚р
+Ќl‚¦‚й‹c_‚Є‚ ‚й‚ЄЃA‚±‚±‚Е‚Н•¶Ћљ•„Ќ†‰»•ыЋ®‚М–К‚ЙЏЕ“_‚р“–‚Д‚йЃB
 
-гЃ“гЃ®ж–‡е­—з¬¦еЏ·еЊ–ж–№ејЏгЃ«гЃЇгЂЃе…€иЎЊгЃ—гЃ¦г‚€гЃЏе€©з”ЁгЃ—гЃ¦гЃ„гЃџJIS C 6220(зЏѕењЁгЃ®JIS X 0201)
-гЃ®8гѓ“гѓѓгѓ€з¬¦еЏ·(д»Ґдё‹гЂЊи‹±ж•°е­—гѓ»еЌЉи§’г‚«гѓЉгЂЌ)гЃЁгЂЃJIS C 6226(зЏѕењЁгЃ®JIS X 0208гЂЃ
-д»Ґдё‹гЂЊжјўе­—гЂЌ)гЃ®дёЎж–‡е­—й›†еђ€г‚’гЂЃиЎЁзЏѕгЃ—г‚€гЃ†гЃЁгЃ—гЃџгЂ‚гѓ•г‚Ўг‚¤гѓ«гЃ®е¤§гЃЌгЃ•гЂЃе‡¦зђ†ж™‚й–“гЃ®
-зџ­зё®г‚’е›іг‚‹гЃџг‚Ѓг‚Ёг‚№г‚±гѓјгѓ—г‚·гѓјг‚±гѓіг‚№гЃЄгЃ—гЃ§ж··ењЁеЏЇиѓЅгЃ«гЃ™г‚‹гЃ“гЃЁг‚’иЂѓжЎ€гЃ—гЃџгЂ‚
+‚±‚М•¶Ћљ•„Ќ†‰»•ыЋ®‚Й‚НЃAђжЌs‚µ‚Д‚ж‚­——p‚µ‚Д‚ў‚ЅJIS C 6220(Њ»ЌЭ‚МJIS X 0201)
+‚М8ѓrѓbѓg•„Ќ†(€И‰єЃu‰pђ”ЋљЃE”јЉpѓJѓiЃv)‚ЖЃAJIS C 6226(Њ»ЌЭ‚МJIS X 0208ЃA
+€И‰єЃuЉїЋљЃv)‚М—ј•¶ЋљЏWЌ‡‚рЃA•\Њ»‚µ‚ж‚¤‚Ж‚µ‚ЅЃBѓtѓ@ѓCѓ‹‚М‘е‚«‚іЃAЏ€—ќЋћЉФ‚М
+’ZЏk‚рђ}‚й‚Ѕ‚ЯѓGѓXѓPЃ[ѓvѓVЃ[ѓPѓ“ѓX‚И‚µ‚ЕЌ¬ЌЭ‰В”\‚Й‚·‚й‚±‚Ж‚рЌl€Д‚µ‚ЅЃB
 
-JIS C 6220гЃЁJIS C 6226гЃ®2гЃ¤гЃЇгЃЁг‚‚гЃ«гЂЃISO 2022гЃ§ж–‡е­—й›†еђ€г‚’е€‡г‚Љж›їгЃ€гЃ¦е€©з”ЁгЃ™г‚‹
-иЁ­иЁ€гЃЊгЃ‚гЃЈгЃџгЂ‚ISO 2022гЃ«г‚‚гЃЁгЃҐгЃЏж–‡е­—з¬¦еЏ·еЊ–ж–№ејЏгЃ§гЃЇгЂЃи‹±ж•°е­—гЂЃеЌЉи§’г‚«гѓЉгЂЃжјўе­—гЃЇ
-гЃќг‚ЊгЃћг‚ЊгЂЃ8гѓ“гѓѓгѓ€з¬¦еЏ·з©єй–“гЃ®дё­гЃ®GL/GRгЃЁгЃ„гЃ†й еџџгЃ®1гЃ¤г‚’(гЃџгЃ гЃ—жјўе­—гЃЇ2е›ћ)дЅїгЃ†
-гЃ“гЃЁгЃ§иЎЁзЏѕгЃ§гЃЌг‚‹гЂ‚г‚‚гЃ—и‹±ж•°е­—гЃЁжјўе­—гЃ®2гЃ¤г‚’г‚Ёг‚№г‚±гѓјгѓ—г‚·гѓјг‚±гѓіг‚№гЃЄгЃ—гЃ§ж··ењЁгЃ—гЃџгЃ„
-гЃЄг‚‰гЂЃи‹±ж•°е­—г‚’GLгЂЃжјўе­—г‚’GRгЃ«е‰Іг‚ЉеЅ“гЃ¦г‚‹ж–№жі•гЃЊгЃ‚г‚‹гЂ‚EUC-JPгЃЇгЂЃгЃЉгЃЉг‚€гЃќгЃќгЃ®г‚€гЃ†
-гЃ«е®џиЈ…гЃ—гЃ¦гЃ„г‚‹гЂ‚
+JIS C 6220‚ЖJIS C 6226‚М2‚В‚Н‚Ж‚а‚ЙЃAISO 2022‚Е•¶ЋљЏWЌ‡‚рђШ‚и‘Ц‚¦‚Д——p‚·‚й
+ђЭЊv‚Є‚ ‚Б‚ЅЃBISO 2022‚Й‚а‚Ж‚Г‚­•¶Ћљ•„Ќ†‰»•ыЋ®‚Е‚НЃA‰pђ”ЋљЃA”јЉpѓJѓiЃAЉїЋљ‚Н
+‚»‚к‚ј‚кЃA8ѓrѓbѓg•„Ќ†‹уЉФ‚М’†‚МGL/GR‚Ж‚ў‚¤—М€ж‚М1‚В‚р(‚Ѕ‚ѕ‚µЉїЋљ‚Н2‰с)Ћg‚¤
+‚±‚Ж‚Е•\Њ»‚Е‚«‚йЃB‚а‚µ‰pђ”Ћљ‚ЖЉїЋљ‚М2‚В‚рѓGѓXѓPЃ[ѓvѓVЃ[ѓPѓ“ѓX‚И‚µ‚ЕЌ¬ЌЭ‚µ‚Ѕ‚ў
+‚И‚зЃA‰pђ”Ћљ‚рGLЃAЉїЋљ‚рGR‚ЙЉ„‚и“–‚Д‚й•ы–@‚Є‚ ‚йЃBEUC-JP‚НЃA‚Ё‚Ё‚ж‚»‚»‚М‚ж‚¤
+‚ЙЋА‘•‚µ‚Д‚ў‚йЃB
 
-гЃ—гЃ‹гЃ—гЂЃгѓ‘г‚Ѕг‚ігѓігЃ§гЃЇгЃ™гЃ§гЃ«гЂЃJIS X 0201гЃ®8гѓ“гѓѓгѓ€з¬¦еЏ·гЂЃгЃ¤гЃѕг‚ЉгЂЃGLгЃ«и‹±ж•°е­—гЂЃGRгЃ«
-пј‘гѓђг‚¤гѓ€г‚«г‚їг‚«гѓЉ(еЌЉи§’г‚«г‚їг‚«гѓЉ)г‚’е‰Іг‚ЉеЅ“гЃ¦г‚‹гЃ“гЃЁгЃЊж™®еЏЉгЃ—гЃ¦гЃ„гЃџгЂ‚и‹±ж•°е­—гЃЁпј‘гѓђг‚¤
-гѓ€г‚«г‚їг‚«гѓЉгЃ®2гЃ¤г‚’е‹•гЃ‹гЃ™гЃ“гЃЁгЃЇгЂЃж–‡е­—еЊ–гЃ‘гЃ®еЋџе› гЃ«гЃЄг‚‹гЃџг‚ЃйЃїгЃ‘г‚‹еї…и¦ЃгЃЊгЃ‚гЃЈгЃџгЂ‚
-гЃќгЃ®гЃџг‚ЃгЂЃISO 2022гЃ®жћ е†…гЃ®й еџџгЃ«жјўе­—г‚’ж··ењЁгЃ•гЃ›г‚‹гЃ“гЃЁгЃЇе›°й›ЈгЃ гЃЈгЃџгЃ®гЃ§гЃ‚г‚‹гЂ‚
+‚µ‚©‚µЃAѓpѓ\ѓRѓ“‚Е‚Н‚·‚Е‚ЙЃAJIS X 0201‚М8ѓrѓbѓg•„Ќ†ЃA‚В‚Ь‚иЃAGL‚Й‰pђ”ЋљЃAGR‚Й
+‚PѓoѓCѓgѓJѓ^ѓJѓi(”јЉpѓJѓ^ѓJѓi)‚рЉ„‚и“–‚Д‚й‚±‚Ж‚Є•Ѓ‹y‚µ‚Д‚ў‚ЅЃB‰pђ”Ћљ‚Ж‚PѓoѓC
+ѓgѓJѓ^ѓJѓi‚М2‚В‚р“®‚©‚·‚±‚Ж‚НЃA•¶Ћљ‰»‚Ї‚МЊґ€ц‚Й‚И‚й‚Ѕ‚Я”р‚Ї‚й•K—v‚Є‚ ‚Б‚ЅЃB
+‚»‚М‚Ѕ‚ЯЃAISO 2022‚Мg“а‚М—М€ж‚ЙЉїЋљ‚рЌ¬ЌЭ‚і‚№‚й‚±‚Ж‚НЌў“п‚ѕ‚Б‚Ѕ‚М‚Е‚ ‚йЃB
 
-1982е№ґгЂЃжјўе­—гЃ®з¬¦еЏ·дЅЌзЅ®г‚’и¤‡й›‘гЃ«з§»е‹•(г‚·гѓ•гѓ€)гЃ—гЂЃз¬¦еЏ·з©єй–“гЃ®йљ™й–“гЃ«жЉјгЃ—иѕјг‚Ђ
-ShiftJISгЃЊиЄ•з”џгЃ—гЃџгЂ‚гЃ“г‚Њг‚’е®џзЏѕгЃ™г‚‹гЃџг‚ЃгЃ«гЃЇгЂЃжјўе­—гЃ®1гѓђг‚¤гѓ€з›®гЃЁгЃ—гЃ¦гЂЃISO 2022
-гЃ«гЃЉгЃ‘г‚‹GR(A1(16)-FE(16))й еџџгЃ«3е€†гЃ®1ж®‹гЃ—гЃ¦гЃ„гЃџжњЄдЅїз”Ёй еџџгЃ«гЃЏг‚ЏгЃ€гЂЃISO 2022
-гЃ«гЃЉгЃ„гЃ¦йќћдЅїз”ЁгЃ®CR(80(16)-9F(16))й еџџг‚’дЅїз”ЁгЃ™г‚‹гЃ“гЃЁгЃЁгЃ—гЃџгЂ‚гЃџгЃ гЃ—гЂЃGL
-(21(16)-7E(16))й еџџгЃ«гЃЉгЃ„гЃ¦гЃЇгЂЃJIS X 0201гЃ®иЁеЏ·гЃ«еЅ“гЃџг‚‹йѓЁе€†гЃЇжҐµеЉ›йЃїгЃ‘гЃџгЂ‚
-гЃ•г‚‰гЃ«2гѓђг‚¤гѓ€з›®гЃ«гЃЇISO 2022гЃЁгЃЇз•°гЃЄг‚ЉгЂЃи‹±ж•°е­—гѓ»еЌЉи§’г‚«гѓЉгЃ«дЅїз”Ёжё€гЃїгЃ®й еџџг‚’г‚‚
-еђ«г‚ЂгЂЃGLгЂЃCRгЂЃGRгЃ«гЃ‚гЃџг‚‹еђ„й еџџгЃ®гЃ»гЃје…ЁгЃ¦г‚’дЅїгЃ†еї…и¦ЃгЃЊгЃ‚гЃЈгЃџгЂ‚
+1982”NЃAЉїЋљ‚М•„Ќ†€К’u‚р•ЎЋG‚Й€Ъ“®(ѓVѓtѓg)‚µЃA•„Ќ†‹уЉФ‚МЊ„ЉФ‚Й‰џ‚µЌћ‚Ю
+ShiftJIS‚Є’aђ¶‚µ‚ЅЃB‚±‚к‚рЋАЊ»‚·‚й‚Ѕ‚Я‚Й‚НЃAЉїЋљ‚М1ѓoѓCѓg–Ъ‚Ж‚µ‚ДЃAISO 2022
+‚Й‚Ё‚Ї‚йGR(A1(16)-FE(16))—М€ж‚Й3•Є‚М1Ћc‚µ‚Д‚ў‚Ѕ–ўЋg—p—М€ж‚Й‚­‚н‚¦ЃAISO 2022
+‚Й‚Ё‚ў‚Д”сЋg—p‚МCR(80(16)-9F(16))—М€ж‚рЋg—p‚·‚й‚±‚Ж‚Ж‚µ‚ЅЃB‚Ѕ‚ѕ‚µЃAGL
+(21(16)-7E(16))—М€ж‚Й‚Ё‚ў‚Д‚НЃAJIS X 0201‚М‹LЌ†‚Й“–‚Ѕ‚й•”•Є‚Н‹Й—Н”р‚Ї‚ЅЃB
+‚і‚з‚Й2ѓoѓCѓg–Ъ‚Й‚НISO 2022‚Ж‚Н€Щ‚И‚иЃA‰pђ”ЋљЃE”јЉpѓJѓi‚ЙЋg—pЌП‚Э‚М—М€ж‚р‚а
+ЉЬ‚ЮЃAGLЃACRЃAGR‚Й‚ ‚Ѕ‚йЉe—М€ж‚М‚Щ‚Ъ‘S‚Д‚рЋg‚¤•K—v‚Є‚ ‚Б‚ЅЃB
 
-гѓћг‚¤г‚Їгѓ­г‚Ѕгѓ•гѓ€(ж—Ґжњ¬жі•дєє)е…ѓдјљй•·гЃ®еЏ¤е·ќдє«гЃ«г‚€г‚‹гЃЁгЂЃShift_JISгЃ®е€¶е®љгЃ«гЃЇгЂЃг‚ўг‚№
-г‚­гѓјгЂЃгѓћг‚¤г‚Їгѓ­г‚Ѕгѓ•гѓ€(з±і)гЂЃдё‰иЏ±й›»ж©џгЂЃгѓћг‚¤г‚Їгѓ­г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгѓ»г‚ўг‚Ѕг‚·г‚Ёг‚¤гѓ„гЂЃ
-гѓ‡г‚ёг‚їгѓ«гѓЄг‚µгѓјгѓЃ(з±і)гЃЊй–ўг‚Џг‚ЉгЂЃз‰№гЃ«г‚ўг‚№г‚­гѓјгЃ®е±±дё‹и‰Їи”µгЃЊдё­еїѓгЃЁгЃЄгЃЈгЃ¦дЅњж€ђгЃ—гЃџ
-г‚‚гЃ®гЃ гЃЁгЃ„гЃ†гЂ‚гЃ“г‚ЊгЃ«еЇѕгЃ™г‚‹з•°иЄ¬гЃЁгЃ—гЃ¦гЂЃдє¬йѓЅе¤§е­¦еЉ©ж•™жЋ€гЃ®е®‰еІЎе­ќдёЂгЃЇгЂЃгѓћг‚¤г‚Їгѓ­г‚Ѕгѓ•
-гѓ€г‚¦г‚§г‚ўгѓ»г‚ўг‚Ѕг‚·г‚Ёг‚¤гѓ„гЃЁдё‰иЏ±й›»ж©џгЃ®гЃїгЃ®е…±еђЊй–‹з™єгЃ гЃЁдё»ејµгЃ—гЃ¦гЃ„г‚‹гЂ‚е±±дё‹жњ¬дєєгЃ®з™єиЁЂ
-гЃ«г‚€г‚Ље®‰еІЎгЃЇи‡ЄиЄ¬гЃ®ж’¤е›ћгЃЁг‚‚еЏ–г‚Њг‚‹з™єиЁЂг‚’гЃ—гЃ¦гЃ„г‚‹гЂ‚
+ѓ}ѓCѓNѓЌѓ\ѓtѓg(“ъ–{–@ђl)Њі‰п’·‚МЊГђм‹ќ‚Й‚ж‚й‚ЖЃAShift_JIS‚Мђ§’и‚Й‚НЃAѓAѓX
+ѓLЃ[ЃAѓ}ѓCѓNѓЌѓ\ѓtѓg(•Д)ЃAЋO•H“d‹@ЃAѓ}ѓCѓNѓЌѓ\ѓtѓgѓEѓFѓAЃEѓAѓ\ѓVѓGѓCѓcЃA
+ѓfѓWѓ^ѓ‹ѓЉѓTЃ[ѓ`(•Д)‚ЄЉЦ‚н‚иЃA“Б‚ЙѓAѓXѓLЃ[‚МЋR‰є—З‘ ‚Є’†ђS‚Ж‚И‚Б‚ДЌмђ¬‚µ‚Ѕ
+‚а‚М‚ѕ‚Ж‚ў‚¤ЃB‚±‚к‚Й‘О‚·‚й€Щђа‚Ж‚µ‚ДЃA‹ћ“s‘еЉwЏ•‹іЋц‚М€А‰ЄЌF€к‚НЃAѓ}ѓCѓNѓЌѓ\ѓt
+ѓgѓEѓFѓAЃEѓAѓ\ѓVѓGѓCѓc‚ЖЋO•H“d‹@‚М‚Э‚М‹¤“ЇЉJ”­‚ѕ‚ЖЋе’Ј‚µ‚Д‚ў‚йЃBЋR‰є–{ђl‚М”­Њѕ
+‚Й‚ж‚и€А‰Є‚НЋ©ђа‚М“P‰с‚Ж‚аЋж‚к‚й”­Њѕ‚р‚µ‚Д‚ў‚йЃB
 
-Shift_JISгЃ®жЁ™жє–еЊ–
-Shift_JISгЃЇгЂЃз¬¦еЏ·еЊ–ж–‡е­—й›†еђ€гЃЁгЃќгЃ®ж–‡е­—з¬¦еЏ·еЊ–ж–№ејЏгЃ®дёЎж–№г‚’еђ«г‚ЂзЏѕе®џгЃ®е•ЏйЎЊг‚’и§Јж±є
-гЃ™г‚‹гЃџг‚ЃгЃ®жЉЂиЎ“гЃ§гЃ‚г‚‹гЂ‚гЃќг‚Њг‚†гЃ€гЂЃJIS X 0208гЃ®ж–‡е­—й›†еђ€г‚’е€©з”ЁгЃ—гЃ¦гЃЇгЃ„г‚‹г‚‚гЃ®гЃ®гЂЃ
-ISO 2022гЃ®з¬¦еЏ·еЊ–гЃ®ж–№й‡ќгЃ®зЇ„е›ІгЃ®е¤–гЃ«гЃ‚г‚‹гЂ‚
+Shift_JIS‚М•WЏЂ‰»
+Shift_JIS‚НЃA•„Ќ†‰»•¶ЋљЏWЌ‡‚Ж‚»‚М•¶Ћљ•„Ќ†‰»•ыЋ®‚М—ј•ы‚рЉЬ‚ЮЊ»ЋА‚М–в‘и‚р‰рЊ€
+‚·‚й‚Ѕ‚Я‚М‹ZЏp‚Е‚ ‚йЃB‚»‚к‚д‚¦ЃAJIS X 0208‚М•¶ЋљЏWЌ‡‚р——p‚µ‚Д‚Н‚ў‚й‚а‚М‚МЃA
+ISO 2022‚М•„Ќ†‰»‚М•ыђj‚М”Н€Н‚МЉO‚Й‚ ‚йЃB
 
-гЃ—гЃ‹гЃ—гЃЄгЃЊг‚‰гЂЃзЏѕењЁгЃ§гЃЇгЂЃJIS X 0208:1997гЃ®й™„е±ћж›ё1гЃ«гЃ¦гЂЊг‚·гѓ•гѓ€з¬¦еЏ·еЊ–иЎЁзЏѕгЂЌгЃЁгЃ„гЃ†
-еђЌе‰ЌгЃ§гЂЃд»•ж§гЃЊе®љзѕ©гЃ•г‚ЊгЃ¦гЃ„г‚‹гЂ‚гЃ“г‚ЊгЃЇгЂЃгѓ‡гѓ•г‚Ўг‚Їгѓ€г‚№г‚їгѓігѓЂгѓјгѓ‰гЃЁгЃЄгЃЈгЃ¦гЃ„г‚‹жЉЂиЎ“
-гЃ«гЃ¤гЃ„гЃ¦гЃЇе‡єи‡Єг‚’е•ЏйЎЊгЃЁгЃ›гЃљгЂЃгЃЁг‚‚гЃ‹гЃЏжЁ™жє–еЊ–гЃ—гЃ¦гЃ—гЃѕгЃЉгЃ†гЃЁгЃ„гЃ†ж„Џе›ігЃЊж—Ґжњ¬е·ҐжҐ­жЁ™жє–
-иЄїжџ»дјљ (JISC) гЃ«гЃ‚гЃЈгЃ¦гЃ®гЃ“гЃЁгЃ§гЃ‚г‚‹гЂ‚
+‚µ‚©‚µ‚И‚Є‚зЃAЊ»ЌЭ‚Е‚НЃAJIS X 0208:1997‚М•Ќ‘®Џ‘1‚Й‚ДЃuѓVѓtѓg•„Ќ†‰»•\Њ»Ѓv‚Ж‚ў‚¤
+–ј‘O‚ЕЃAЋd—l‚Є’и‹`‚і‚к‚Д‚ў‚йЃB‚±‚к‚НЃAѓfѓtѓ@ѓNѓgѓXѓ^ѓ“ѓ_Ѓ[ѓh‚Ж‚И‚Б‚Д‚ў‚й‹ZЏp
+‚Й‚В‚ў‚Д‚НЏoЋ©‚р–в‘и‚Ж‚№‚ёЃA‚Ж‚а‚©‚­•WЏЂ‰»‚µ‚Д‚µ‚Ь‚Ё‚¤‚Ж‚ў‚¤€Уђ}‚Є“ъ–{ЌH‹Ж•WЏЂ
+’ІЌё‰п (JISC) ‚Й‚ ‚Б‚Д‚М‚±‚Ж‚Е‚ ‚йЃB
 
-JIS X 0208гЃ®ж‹Ўејµи¦Џж јгЃ§гЃ‚г‚‹JIS X 0213гЃ§гЃЇгЂЃ2000е№ґе€¶е®љгЃ®е€ќз‰€гЃ§й™„е±ћж›ё1гЃЁгЃ—гЃ¦
-Shift_JISX0213гЃЊе®љг‚Ѓг‚‰г‚ЊгЃџгЂ‚2004е№ґж”№ж­Јж™‚гЃ®10ж–‡е­—иїЅеЉ гЃ«дјґгЃЈгЃ¦гЂЃShift_JIS-2004
-гЃЁеђЌз§°гЃЊе¤‰ж›ґгЃ•г‚ЊгЃџгЂ‚
+JIS X 0208‚МЉg’Ј‹KЉi‚Е‚ ‚йJIS X 0213‚Е‚НЃA2000”Nђ§’и‚МЏ‰”Е‚Е•Ќ‘®Џ‘1‚Ж‚µ‚Д
+Shift_JISX0213‚Є’и‚Я‚з‚к‚ЅЃB2004”N‰ьђіЋћ‚М10•¶Ћљ’З‰Б‚Й”є‚Б‚ДЃAShift_JIS-2004
+‚Ж–јЏМ‚Є•ПЌX‚і‚к‚ЅЃB
 
-IANAг‚‚гЂЊShift_JISгЂЌгЃЁгЃ„гЃ†еђЌе‰ЌгЃ§з™»йЊІгЃ—гЃ¦гЃ„г‚‹гЂ‚
+IANA‚аЃuShift_JISЃv‚Ж‚ў‚¤–ј‘O‚Е“o^‚µ‚Д‚ў‚йЃB
 
-е€©з‚№гЃЁж¬ з‚№
+—“_‚ЖЊ‡“_
 
-е€©з‚№
-1. е…Ёи§’ж–‡е­—гЃЁгЂЃJIS X 0201гЃ§е®љзѕ©гЃ—гЃџгЃ„г‚Џг‚†г‚‹еЌЉи§’г‚«гѓЉж–‡е­—г‚’еђЊдёЂгЃ®г‚ігѓјгѓ‰дЅ“зі»гЃ§
-   иЎЁзЏѕгЃ§гЃЌг‚‹гЂ‚
-2. ж—Ґжњ¬иЄћз’°еўѓгЃ«гЃЉгЃ„гЃ¦гЃЇгЂЃMS-DOSгЃ§ж—Ґжњ¬иЄћз”Ёж–‡е­—г‚ігѓјгѓ‰гЃЁгЃ—гЃ¦жЋЎз”ЁгЃ•г‚ЊгЃ¦д»ҐжќҐгЂЃгѓ‘г‚Ѕ
-   г‚ігѓігЃ«гЃЉгЃ„гЃ¦ењ§еЂ’зљ„гЃЄж™®еЏЉеє¦гЃЊгЃ‚г‚ЉгЂЃгЃќгЃ®д»–гЃ®ж–‡е­—з¬¦еЏ·еЊ–ж–№ејЏгЃ«жЇ”гЃ№гЃ¦гѓ‡гѓјг‚їдє¤жЏ›
-   еЏЇиѓЅжЂ§гЃЊй«гЃ„ (гЃџгЃ гЃ—гЂЃж–‡е­—й›†еђ€гЃ«гЃ¤гЃ„гЃ¦гЃЇе®џиЈ…гѓ™гѓігѓЂгЃЊJIS X 0208гЃ§и¦Џе®љгЃ•г‚ЊгЃ¦
-   гЃ„гЃЄгЃ„ж©џзЁ®дѕќе­гЃ®ж‹Ўејµг‚’ж–ЅгЃ—гЃ¦гЃ„г‚‹гЃ“гЃЁгЃЊе¤љгЃЏгЂЃгЃ“гЃ†гЃ„гЃЈгЃџж‹ЎејµйѓЁе€†гЃ«й–ўгЃ—гЃ¦гЃЇ
-   гѓ‡гѓјг‚їдє¤жЏ›еЏЇиѓЅжЂ§гЃЊдЅЋгЃ„)гЂ‚
+—“_
+1. ‘SЉp•¶Ћљ‚ЖЃAJIS X 0201‚Е’и‹`‚µ‚Ѕ‚ў‚н‚д‚й”јЉpѓJѓi•¶Ћљ‚р“Ї€к‚МѓRЃ[ѓh‘МЊn‚Е
+   •\Њ»‚Е‚«‚йЃB
+2. “ъ–{ЊкЉВ‹«‚Й‚Ё‚ў‚Д‚НЃAMS-DOS‚Е“ъ–{Њк—p•¶ЋљѓRЃ[ѓh‚Ж‚µ‚ДЌМ—p‚і‚к‚Д€И—€ЃAѓpѓ\
+   ѓRѓ“‚Й‚Ё‚ў‚Д€і“|“I‚И•Ѓ‹y“x‚Є‚ ‚иЃA‚»‚М‘ј‚М•¶Ћљ•„Ќ†‰»•ыЋ®‚Й”д‚Ч‚ДѓfЃ[ѓ^ЊрЉ·
+   ‰В”\ђ«‚ЄЌ‚‚ў (‚Ѕ‚ѕ‚µЃA•¶ЋљЏWЌ‡‚Й‚В‚ў‚Д‚НЋА‘•ѓxѓ“ѓ_‚ЄJIS X 0208‚Е‹K’и‚і‚к‚Д
+   ‚ў‚И‚ў‹@Ћн€Л‘¶‚МЉg’Ј‚рЋ{‚µ‚Д‚ў‚й‚±‚Ж‚Є‘Ѕ‚­ЃA‚±‚¤‚ў‚Б‚ЅЉg’Ј•”•Є‚ЙЉЦ‚µ‚Д‚Н
+   ѓfЃ[ѓ^ЊрЉ·‰В”\ђ«‚Є’б‚ў)ЃB
 
-ж¬ з‚№
-1. еЌЉи§’г‚«гѓЉгЃ®гЃџг‚ЃгЃ®й еџџг‚’зўєдїќгЃ—гЃџй–ўдї‚дёЉгЂЃг‚ігѓјгѓ‰г‚·гѓјг‚Їг‚Ёгѓіг‚№гЃЊеЊєз‚№з•ЄеЏ·гЃ®гЂЊеЊєгЂЌ
-   гЃ®еЊєе€‡г‚ЉгЃ§гЃЇгЃЄгЃ„з®‡ж‰ЂгЃ§е€†ж–­гЃ—гЃ¦гЃ„г‚‹гЂ‚гЃ“гЃ®гЃџг‚ЃгЂЃг‚ігѓјгѓ‰з•ЄеЏ·г‚’жј”з®—гЃ§ж±‚г‚Ѓг‚‹йљ›гЃЇ
-   з…©й›‘гЃЄе‡¦зђ†гЃЊеї…и¦ЃгЃ§гЃ‚г‚‹гЂ‚
-2. 2гѓђг‚¤гѓ€з›®гЃ«80(16)жњЄжєЂ(ASCIIгЃ®г‚ігѓјгѓ‰й еџџ)гЃЊзЏѕг‚Њг‚‹гЂ‚гЃ“гЃ®гЃџг‚ЃгЂЃж–‡е­—гЃ®еЊєе€‡г‚ЉгЃ®
-   е€¤е®љгЃ«ж‰‹й–“гЃЊгЃ‹гЃ‹г‚‹гЂ‚гѓ•г‚Ўг‚¤гѓ«гЂЃй›»ж–‡гЃ®е…€й ­гЃ‹г‚‰ж–‡е­—г‚ігѓјгѓ‰е€¤е®љгЃ™г‚‹е ґеђ€гЃЇг‚€гЃ„гЃЊгЂЃ
-   еѕЊг‚ЌгЃ‹г‚‰ж–‡е­—г‚ігѓјгѓ‰гЃ®е€¤е®љг‚’гЃ—г‚€гЃ†гЃЁжЂќгЃ†гЃЁгЂЃжњЂж‚ЄгЃ®е ґеђ€гЂЃе…€й ­гЃѕгЃ§гЃџгЃ©г‚‰гЃЄгЃ„гЃЁ
-   гЃ„гЃ‘гЃЄгЃ„гЃ“гЃЁгЃЊгЃ‚г‚‹гЃџг‚ЃгЂЃгѓ—гѓ­г‚°гѓ©гѓ гЃ®дЅњг‚Љж–№гЃ«е·Ґе¤«гЃЊеї…и¦ЃгЃ«гЃЄг‚‹гЂ‚гЃѕгЃџгЂЃгЃ“гЃ®й 
-   еџџгЃ«еђ«гЃѕг‚Њг‚‹дёЂйѓЁгЃ®ж–‡е­—гЃ®ж‰±гЃ„гЃ®гЃџг‚ЃгЂЃгѓћгѓ«гѓЃгѓђг‚¤гѓ€гЃ®EUC-JPгЂЃUTF-8гЃЄгЃ©г‚€г‚ЉгЂЃгѓ—
-   гѓ­г‚°гѓ©гѓџгѓіг‚°дёЉгЃ®ж‰±гЃ„гЃЊй›ЈгЃ—гЃ„гЂ‚в†’ж¬Ўй …
-3. JISиЈњеЉ©жјўе­—гЃЊиЎЁзЏѕгЃ§гЃЌгЃЄгЃ„гЂ‚иЈњеЉ©жјўе­—гЃ®ж–‡е­—ж•°гЃЇShift_JISгЃ®г‚ігѓјгѓ‰жњЄз™»йЊІйѓЁе€†гЃ«
-   еЏЋгЃѕг‚‰гЃЄгЃ„гЂ‚
+Њ‡“_
+1. ”јЉpѓJѓi‚М‚Ѕ‚Я‚М—М€ж‚рЉm•Ы‚µ‚ЅЉЦЊWЏгЃAѓRЃ[ѓhѓVЃ[ѓNѓGѓ“ѓX‚Є‹ж“_”ФЌ†‚МЃu‹жЃv
+   ‚М‹жђШ‚и‚Е‚Н‚И‚ў‰УЏЉ‚Е•Є’f‚µ‚Д‚ў‚йЃB‚±‚М‚Ѕ‚ЯЃAѓRЃ[ѓh”ФЌ†‚р‰‰ЋZ‚Е‹Ѓ‚Я‚йЌЫ‚Н
+   ”ПЋG‚ИЏ€—ќ‚Є•K—v‚Е‚ ‚йЃB
+2. 2ѓoѓCѓg–Ъ‚Й80(16)–ў–ћ(ASCII‚МѓRЃ[ѓh—М€ж)‚ЄЊ»‚к‚йЃB‚±‚М‚Ѕ‚ЯЃA•¶Ћљ‚М‹жђШ‚и‚М
+   ”»’и‚ЙЋиЉФ‚Є‚©‚©‚йЃBѓtѓ@ѓCѓ‹ЃA“d•¶‚Мђж“Є‚©‚з•¶ЋљѓRЃ[ѓh”»’и‚·‚йЏкЌ‡‚Н‚ж‚ў‚ЄЃA
+   Њг‚л‚©‚з•¶ЋљѓRЃ[ѓh‚М”»’и‚р‚µ‚ж‚¤‚ЖЋv‚¤‚ЖЃAЌЕ€«‚МЏкЌ‡ЃAђж“Є‚Ь‚Е‚Ѕ‚З‚з‚И‚ў‚Ж
+   ‚ў‚Ї‚И‚ў‚±‚Ж‚Є‚ ‚й‚Ѕ‚ЯЃAѓvѓЌѓOѓ‰ѓЂ‚МЌм‚и•ы‚ЙЌH•v‚Є•K—v‚Й‚И‚йЃB‚Ь‚ЅЃA‚±‚М—М
+   €ж‚ЙЉЬ‚Ь‚к‚й€к•”‚М•¶Ћљ‚М€µ‚ў‚М‚Ѕ‚ЯЃAѓ}ѓ‹ѓ`ѓoѓCѓg‚МEUC-JPЃAUTF-8‚И‚З‚ж‚иЃAѓv
+   ѓЌѓOѓ‰ѓ~ѓ“ѓOЏг‚М€µ‚ў‚Є“п‚µ‚ўЃBЃЁЋџЌЂ
+3. JIS•вЏ•ЉїЋљ‚Є•\Њ»‚Е‚«‚И‚ўЃB•вЏ•ЉїЋљ‚М•¶Ћљђ”‚НShift_JIS‚МѓRЃ[ѓh–ў“o^•”•Є‚Й
+   Ћы‚Ь‚з‚И‚ўЃB
 
-2гѓђг‚¤гѓ€з›®гЃЊ5Cз­‰гЃ«гЃЄг‚ЉгЃ†г‚‹гЃ“гЃЁгЃ«г‚€г‚‹е•ЏйЎЊ
+2ѓoѓCѓg–Ъ‚Є5C“™‚Й‚И‚и‚¤‚й‚±‚Ж‚Й‚ж‚й–в‘и
 
-Shift_JISгЃ§гЃЇгЂЃгЂЊг‚ЅгЂЌгЂЊе™‚гЂЌгЃЄгЃ©дёЂйѓЁгЃ®е­—гЃ®2гѓђг‚¤гѓ€з›®гЃ«гЂЃ5C(16)(Shift_JISгЃ§гЃЇ
-пїҐиЁеЏ·гЂЃASCIIгЃЄгЃ©гЃ§гЃЇгѓђгѓѓг‚Їг‚№гѓ©гѓѓг‚·гѓҐ)г‚’дЅїз”ЁгЃ—гЃ¦гЃ„г‚‹гЂ‚е¤љгЃЏгЃ®гѓ—гѓ­г‚°гѓ©гѓџгѓіг‚°
-иЁЂиЄћ (CгЂЃPerlгЂЃBourne ShellгЃЄгЃ©е¤љж•°) гЃ§гЃЇгЂЃгЃ“гЃ®5C(16)г‚’г‚Ёг‚№г‚±гѓјгѓ—ж–‡е­—гЃЁгЃ—гЃ¦
-гЃ„г‚‹гЂ‚гЃ—гЃџгЃЊгЃЈгЃ¦гЂЃг‚Ѕгѓјг‚№г‚ігѓјгѓ‰г‚„ж–‡е­—гѓ‡гѓјг‚їгЃ®е‡¦зђ†гЃ«гЃЉгЃ„гЃ¦Shift_JISг‚’жѓіе®љгЃ—гЃ¦
-гЃ„гЃЄгЃ„гѓ—гѓ­г‚°гѓ©гѓџгѓіг‚°з’°еўѓгЃ§гЃЇе•ЏйЎЊгЃЊиµ·гЃ“г‚‹гЂ‚гЃ“гЃ®е•ЏйЎЊгЃЇгЂЃеђЊгЃг‚€гЃ†гЃ«2гѓђг‚¤гѓ€з›®гЃ®
-зЇ„е›ІгЃ«5C(16)г‚’еђ«г‚ЂBig5г‚„гЂЃгЃѕг‚ЊгЃ§гЃЇгЃ‚г‚‹гЃЊGBKгЃЄгЃ©гЃ®ж–‡е­—г‚ігѓјгѓ‰гЃ§г‚‚з™єз”џгЃ—гЃ†г‚‹гЂ‚
+Shift_JIS‚Е‚НЃAЃuѓ\ЃvЃu‰\Ѓv‚И‚З€к•”‚МЋљ‚М2ѓoѓCѓg–Ъ‚ЙЃA5C(16)(Shift_JIS‚Е‚Н
+ЃЏ‹LЌ†ЃAASCII‚И‚З‚Е‚НѓoѓbѓNѓXѓ‰ѓbѓVѓ…)‚рЋg—p‚µ‚Д‚ў‚йЃB‘Ѕ‚­‚МѓvѓЌѓOѓ‰ѓ~ѓ“ѓO
+ЊѕЊк (CЃAPerlЃABourne Shell‚И‚З‘Ѕђ”) ‚Е‚НЃA‚±‚М5C(16)‚рѓGѓXѓPЃ[ѓv•¶Ћљ‚Ж‚µ‚Д
+‚ў‚йЃB‚µ‚Ѕ‚Є‚Б‚ДЃAѓ\Ѓ[ѓXѓRЃ[ѓh‚в•¶ЋљѓfЃ[ѓ^‚МЏ€—ќ‚Й‚Ё‚ў‚ДShift_JIS‚р‘z’и‚µ‚Д
+‚ў‚И‚ўѓvѓЌѓOѓ‰ѓ~ѓ“ѓOЉВ‹«‚Е‚Н–в‘и‚Є‹N‚±‚йЃB‚±‚М–в‘и‚НЃA“Ї‚¶‚ж‚¤‚Й2ѓoѓCѓg–Ъ‚М
+”Н€Н‚Й5C(16)‚рЉЬ‚ЮBig5‚вЃA‚Ь‚к‚Е‚Н‚ ‚й‚ЄGBK‚И‚З‚М•¶ЋљѓRЃ[ѓh‚Е‚а”­ђ¶‚µ‚¤‚йЃB
 
-гЃѕгЃџгЂЃ5C(16)д»Ґе¤–гЃ«гЃ¤гЃ„гЃ¦г‚‚йЎћдјјгЃ®е•ЏйЎЊгЃЊз™єз”џгЃ™г‚‹гЃ“гЃЁгЃЊгЃ‚г‚‹гЂ‚гЃџгЃЁгЃ€гЃ°гЂЃUnixг‚„
-MS-DOSгЃЄгЃ©гЃ®г‚·г‚§гѓ«дёЉгЃ§7C(16) (Shift_JISг‚„ASCIIгЃ§гЃЇгѓђгѓјгѓ†г‚Јг‚«гѓ«гѓђгѓј) г‚’еђ«г‚Ђ
-ж–‡е­—(пјЌгЂЃгѓќгЂЃР»гЂЃж¦ЋгЂЃжЋ›гЂЃеј“гЂЃиЉёгЂЃвЂ¦вЂ¦)г‚’гѓ•г‚Ўг‚¤гѓ«еђЌгЃ«дЅїз”ЁгЃ—г‚€гЃ†гЃЁгЃ™г‚‹гЃЁгЂЃ
-гѓ‘г‚¤гѓ—иЁеЏ·гЃЁиЄЌи­гЃ•г‚ЊгЂЃж­ЈеёёгЃ«гѓ•г‚Ўг‚¤гѓ«гЃЊдЅњж€ђгЃ•г‚ЊгЃЄгЃ‹гЃЈгЃџг‚ЉгЂЃиЄ­гЃїиѕјгЃїгЃЊдёЌи‰ЇгЃ«
-гЃЄгЃЈгЃџг‚ЉгЃ™г‚‹гЃ“гЃЁгЃЊгЃ‚г‚‹гЂ‚
+‚Ь‚ЅЃA5C(16)€ИЉO‚Й‚В‚ў‚Д‚а—ЮЋ—‚М–в‘и‚Є”­ђ¶‚·‚й‚±‚Ж‚Є‚ ‚йЃB‚Ѕ‚Ж‚¦‚ОЃAUnix‚в
+MS-DOS‚И‚З‚МѓVѓFѓ‹Џг‚Е7C(16) (Shift_JIS‚вASCII‚Е‚НѓoЃ[ѓeѓBѓJѓ‹ѓoЃ[) ‚рЉЬ‚Ю
+•¶Ћљ(Ѓ|ЃAѓ|ЃA„|ЃA‰|ЃAЉ|ЃA‹|ЃAЊ|ЃAЃcЃc)‚рѓtѓ@ѓCѓ‹–ј‚ЙЋg—p‚µ‚ж‚¤‚Ж‚·‚й‚ЖЃA
+ѓpѓCѓv‹LЌ†‚Ж”FЋЇ‚і‚кЃAђіЏн‚Йѓtѓ@ѓCѓ‹‚ЄЌмђ¬‚і‚к‚И‚©‚Б‚Ѕ‚иЃA“З‚ЭЌћ‚Э‚Є•s—З‚Й
+‚И‚Б‚Ѕ‚и‚·‚й‚±‚Ж‚Є‚ ‚йЃB
 
-зЏѕењЁгЃ§г‚‚гЂЃг‚·гѓіг‚°гѓ«гѓђг‚¤гѓ€ж–‡е­—г‚ігѓјгѓ‰еЇѕеїњгЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўг‚’Shift_JISз’°еўѓгЃ§дЅїз”ЁгЃ™г‚‹
-гЃЁгЂЃж”№иЎЊгЃЄгЃ©гЃ®е‹•дЅњг‚„гѓ•г‚Ўг‚¤гѓ«еђЌгЃ®е‡¦зђ†гЃЄгЃ©гЃ«гЃ—гЃ°гЃ—гЃ°гЃ“гЃ®е•ЏйЎЊгЃЊгЃ¤гЃЌгЃѕгЃЁгЃ†гЂ‚гЃ“гЃ®
-дёЌе…·еђ€г‚’ж‹›гЃЏгЂЃ2гѓђг‚¤гѓ€з›®гЃ«5C(16)г‚’жЊЃгЃ¤ж–‡е­—гЃ®гЃ“гЃЁг‚’гЂЃгЃ г‚Ѓж–‡е­—гЃЁе‘јгЃігЂЃгЃ“гЃ®дё­гЃ«гЃЇ
-гЂЊг‚ЅгЂЌгЂЊж§‹гЂЌгЂЊиѓЅгЂЌгЂЊиЎЁгЂЌгЃЄгЃ©дёЂи€¬гЃ«дЅїз”Ёй »еє¦гЃ®й«гЃ„ж–‡е­—г‚‚гЃ‚г‚‹[1]гЂ‚
+Њ»ЌЭ‚Е‚аЃAѓVѓ“ѓOѓ‹ѓoѓCѓg•¶ЋљѓRЃ[ѓh‘О‰ћ‚Мѓ\ѓtѓgѓEѓFѓA‚рShift_JISЉВ‹«‚ЕЋg—p‚·‚й
+‚ЖЃA‰ьЌs‚И‚З‚М“®Ќм‚вѓtѓ@ѓCѓ‹–ј‚МЏ€—ќ‚И‚З‚Й‚µ‚О‚µ‚О‚±‚М–в‘и‚Є‚В‚«‚Ь‚Ж‚¤ЃB‚±‚М
+•s‹пЌ‡‚рЏµ‚­ЃA2ѓoѓCѓg–Ъ‚Й5C(16)‚рЋќ‚В•¶Ћљ‚М‚±‚Ж‚рЃA‚ѕ‚Я•¶Ћљ‚ЖЊД‚СЃA‚±‚М’†‚Й‚Н
+Ѓuѓ\ЃvЃuЌ\ЃvЃu”\ЃvЃu•\Ѓv‚И‚З€к”К‚ЙЋg—p•p“x‚МЌ‚‚ў•¶Ћљ‚а‚ ‚й[1]ЃB
 
-гЃ“гЃ®е•ЏйЎЊг‚’е›ћйЃїгЃ™г‚‹дјќзµ±зљ„гЃЄж–№жі•гЃЁгЃ—гЃ¦гЂЃг‚Ѕгѓјг‚№г‚ігѓјгѓ‰е…ЁдЅ“г‚’EUCг‚ігѓјгѓ‰г‚„UTF-8гЃЄгЃ©
-гЃ«е¤‰жЏ›гЃ—гЃ¦гЃ‹г‚‰г‚ігѓігѓ‘г‚¤гѓ«гЃ—гЃџг‚Ље®џиЎЊгЃ—гЃџг‚ЉгЃ™г‚‹ж–№жі•гЃЊгЃ‚г‚‹гЂ‚гЃ‚г‚‹гЃ„гЃЇгЂЊг‚Ѕ\гЂЌгЃ®
-г‚€гЃ†гЃ«2гѓђг‚¤гѓ€з›®гЃ®з›ґе‰ЌгЃ«г‚Ёг‚№г‚±гѓјгѓ—ж–‡е­—гЃ®5C(16)г‚’иЁиї°гЃ—гЂЃгЃ г‚Ѓж–‡е­—г‚’ж–‡е­—гЃЁгЃ—гЃ¦
-ж­ЈгЃ—гЃЏиЄЌи­гЃ•гЃ›г‚‹гЃЄгЃ©гЃ®ж–№жі•г‚‚гЃ‚г‚‹(Perl гЃ®Sjisг‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЄгЃ©)гЂ‚жњЂиї‘гЃ§гЃЇгЂЃе¤љгЃЏ
-гЃ®гѓ—гѓ­г‚°гѓ©гѓџгѓіг‚°иЁЂиЄћгЃЊShift_JISгЃ«еЇѕеїњгЃ™г‚‹г‚€гЃ†гЃ«гЃЄгЃЈгЃџгЃџг‚ЃгЂЃShift_JISг‚’еђ«г‚Ђ
-г‚Ѕгѓјг‚№г‚ігѓјгѓ‰г‚„гѓ‡гѓјг‚їг‚’ж‰±гЃЈгЃ¦г‚‚гЃ“гЃ®е•ЏйЎЊгЃЇиµ·гЃЌгЃЄгЃЏгЃЄгЃЈгЃџгЃЊгЂЃж—§жќҐгЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ў
-иі‡з”Јг‚’е€©з”ЁгЃ™г‚‹дёЉгЃ§гЃЇдѕќз„¶гЂЃе•ЏйЎЊгЃЊгЃ¤гЃЌгЃѕгЃЁгЃ†гЂ‚
+‚±‚М–в‘и‚р‰с”р‚·‚й“`“ќ“I‚И•ы–@‚Ж‚µ‚ДЃAѓ\Ѓ[ѓXѓRЃ[ѓh‘S‘М‚рEUCѓRЃ[ѓh‚вUTF-8‚И‚З
+‚Й•ПЉ·‚µ‚Д‚©‚зѓRѓ“ѓpѓCѓ‹‚µ‚Ѕ‚иЋАЌs‚µ‚Ѕ‚и‚·‚й•ы–@‚Є‚ ‚йЃB‚ ‚й‚ў‚НЃuѓ\\Ѓv‚М
+‚ж‚¤‚Й2ѓoѓCѓg–Ъ‚М’ј‘O‚ЙѓGѓXѓPЃ[ѓv•¶Ћљ‚М5C(16)‚р‹LЏq‚µЃA‚ѕ‚Я•¶Ћљ‚р•¶Ћљ‚Ж‚µ‚Д
+ђі‚µ‚­”FЋЇ‚і‚№‚й‚И‚З‚М•ы–@‚а‚ ‚й(Perl ‚МSjisѓ\ѓtѓgѓEѓFѓA‚И‚З)ЃBЌЕ‹Я‚Е‚НЃA‘Ѕ‚­
+‚МѓvѓЌѓOѓ‰ѓ~ѓ“ѓOЊѕЊк‚ЄShift_JIS‚Й‘О‰ћ‚·‚й‚ж‚¤‚Й‚И‚Б‚Ѕ‚Ѕ‚ЯЃAShift_JIS‚рЉЬ‚Ю
+ѓ\Ѓ[ѓXѓRЃ[ѓh‚вѓfЃ[ѓ^‚р€µ‚Б‚Д‚а‚±‚М–в‘и‚Н‹N‚«‚И‚­‚И‚Б‚Ѕ‚ЄЃA‹Њ—€‚Мѓ\ѓtѓgѓEѓFѓA
+Ћ‘ЋY‚р——p‚·‚йЏг‚Е‚Н€Л‘RЃA–в‘и‚Є‚В‚«‚Ь‚Ж‚¤ЃB
 
-дѕ‹
+—б
 
-й »з№ЃгЃ«и¦‹г‚‹дѕ‹гЃЁгЃ—гЃ¦гЂЃгЂЊж§‹г‚ЏгЃЄгЃ„гЂЌгЃЁгЃ„гЃ†ж–‡е­—е€—гЃЊгЃ„гЃЏгЃ¤гЃ‹гЃ®жЋІз¤єжќїг‚Ѕгѓ•гѓ€гЃ§
-гЂЊй«пўЇпѕ€гЃ„гЂЌгЃЁеЊ–гЃ‘г‚‹гЂ‚
+•p”Й‚ЙЊ©‚й—б‚Ж‚µ‚ДЃAЃuЌ\‚н‚И‚ўЃv‚Ж‚ў‚¤•¶Ћљ—с‚Є‚ў‚­‚В‚©‚МЊfЋ¦”Вѓ\ѓtѓg‚Е
+ЃuЌ‚пўЇИ‚ўЃv‚Ж‰»‚Ї‚йЃB
 
-   ж§‹   г‚Џ   гЃЄ   гЃ„
+   Ќ\   ‚н   ‚И   ‚ў
   8d5c 82ed 82c8 82a2
-  гѓђгѓѓг‚Їг‚№гѓ©гѓѓг‚·гѓҐгЃ«гЃ‚гЃџг‚‹5cгЃЊжЉњгЃ‘г‚‹гЃЁгЂЃ
+  ѓoѓbѓNѓXѓ‰ѓbѓVѓ…‚Й‚ ‚Ѕ‚й5c‚Є”І‚Ї‚й‚ЖЃA
   8d   82ed 82c8 82a2
-    й«    пўЇ  пѕ€   гЃ„
+    Ќ‚    пўЇ  И   ‚ў
 
-гЂЊгЃ„гЂЌгЃЁгЃ„гЃ†ж–‡е­—гЃ®гЃЁгЃ“г‚ЌгЃ§гѓ‡г‚ігѓјгѓ‰гЃЊе†ЌеђЊжњџгЃ•г‚ЊеѕЊгЃ®ж–‡е­—е€—гЃЇж­ЈеёёгЃ«ж€»г‚‹гЂ‚гЃѕгЃџеђЊж§
-гЃ«гЂЊиЉёиѓЅз•ЊгЂЌгЃЊгЂЊиЉёзџ§EгЂЌгЃ«еЊ–гЃ‘г‚‹дѕ‹г‚‚гЃ‚г‚‹гЂ‚ 
+Ѓu‚ўЃv‚Ж‚ў‚¤•¶Ћљ‚М‚Ж‚±‚л‚ЕѓfѓRЃ[ѓh‚ЄЌД“ЇЉъ‚і‚кЊг‚М•¶Ћљ—с‚НђіЏн‚Й–Я‚йЃB‚Ь‚Ѕ“Ї—l
+‚ЙЃuЊ|”\ЉEЃv‚ЄЃuЊ|”ЉEЃv‚Й‰»‚Ї‚й—б‚а‚ ‚йЃB 
 
-   иЉё    иѓЅ   з•Њ
+   Њ|    ”\   ЉE
   8c7c 945c 8a45
-  гѓђгѓѓг‚Їг‚№гѓ©гѓѓг‚·гѓҐгЃ«гЃ‚гЃџг‚‹5cгЃЊжЉњгЃ‘г‚‹гЃЁгЂЃ
+  ѓoѓbѓNѓXѓ‰ѓbѓVѓ…‚Й‚ ‚Ѕ‚й5c‚Є”І‚Ї‚й‚ЖЃA
   8c7c 94   8a45
-   иЉё    зџ§   E
+   Њ|    ”Љ   E
 
-  иЎЁ 2гѓђг‚¤гѓ€з›®гЃ«5C(16)г‚’жЊЃгЃ¤ж–‡е­—дёЂи¦§ ж–‡е­— з¬¦еЏ·(16йЂІ) иЄ­гЃїгѓ»ж„Џе‘і 
+  •\ 2ѓoѓCѓg–Ъ‚Й5C(16)‚рЋќ‚В•¶Ћљ€к—— •¶Ћљ •„Ќ†(16ђi) “З‚ЭЃE€У–Ў 
 
-  вЂ•   815C гѓЂгѓѓг‚·гѓҐ
-  г‚Ѕ   835C з‰‡д»®еђЌгЃ®гЂЊгЃќгЂЌ
-  Р«   845C г‚­гѓЄгѓ«ж–‡е­—гЃ®г‚¦г‚Ј
-  в…Ё/? 875C Windowsз’°еўѓгЃ§гЃЇгѓ­гѓјгѓћж•°е­—гЃ®9
-            Macз’°еўѓгЃ§гЃЇGB(г‚®г‚¬гѓђг‚¤гѓ€)
-  е™‚   895C гЃ†г‚ЏгЃ•гЂ‚
-  жµ¬   8A5C жµ·й‡Њ
-  ж¬є   8B5C гЃ‚гЃ–г‚ЂгЃЏгЂ‚и©ђж¬є
-  ењ­   8C5C гЃ‘гЃ„гЂ‚дєєеђЌгЂ‚
-  ж§‹   8D5C гЃ‹гЃѕгЃ€г‚‹гЂ‚ж§‹йЂ 
-  иљ•   8E5C г‚«г‚¤г‚ігЂ‚й¤Љиљ•
-  еЌЃ   8F5C жјўж•°е­—гЃ®10гЂ‚
-  з”і   905C г‚‚гЃ†гЃ™гЂЃгЃ—г‚“гЂ‚з”іи«‹
-  ж›ѕ   915C гЃќгЂЃгЃІгЂ‚гЂЊж›ЅгЂЌгЃ®еЌ°е€·жЁ™жє–е­—дЅ“гЂ‚ж›ѕе­«
-  з®Є   925C гЃџг‚“гЂ‚з®Єз¬Ґ
-  иІј   935C гЃЇг‚‹гЂ‚иІјд»
-  иѓЅ   945C гЃ®гЃ†гЂ‚иѓЅеЉ›
-  иЎЁ   955C гЃ‚г‚‰г‚ЏгЃ™гЂЃгЃІг‚‡гЃ†гЂ‚иЎЁзЏѕ
-  жљґ   965C гЃ‚гЃ°г‚Њг‚‹гЂЃгЃјгЃ†гЂ‚жљґеЉ›
-  дє€   975C гЃ‚г‚‰гЃ‹гЃг‚ЃгЂЃг‚€гЂ‚дє€е‚™
-  з¦„   985C г‚ЌгЃЏгЂ‚дїёз¦„
-  е…”   995C гЃЁгЂЃгЃ†гЃ•гЃЋгЂ‚гЂЊе…ЋгЂЌгЃ®з•°дЅ“е­—
-  е–Ђ   9A5C гЃ‹гЃЏгЂ‚е–ЂиЎЂ
-  еЄѕ   9B5C гЃ“гЃ†гЂ‚еЄѕе’Њ(и¬›е’ЊгЃ®йќћж›ёжЏ›гЃ€)
-  еЅЊ   9C5C г‚„гЂ‚ејҐз”џгЃ®гЂЊејҐгЂЌгЃ®ж—§е­—дЅ“
-  ж‹ї   9D5C гЃ гЂ‚ж‹їжЌ•
-  жќ¤   9E5C ж ѓгЃ®е€ҐдЅ“
-  ж­ѓ   9F5C гЃ™гЃ™г‚‹гЂЃгЃќгЃ†гЂЃгЃ—г‚‡гЃ†гЂ‚
-  жї¬   E05C гЃ•г‚‰гЃ†гЂЃгЃ—г‚…г‚“гЂ‚
-  з•љ   E15C гЃµгЃ”гЂЃгЃ»г‚“гЂ‚
-  з§‰   E25C гЃЁг‚‹гЂЃгЃёгЃ„гЂ‚
-  з¶µ   E35C гЃ‚г‚„гЂЃгЃ•гЃ„гЂ‚
-  и‡Ђ   E45C гЃ§г‚“гЂЃгЃ—г‚ЉгЂ‚и‡ЂйѓЁ
-  и—№   E55C гЃ‚гЃ„гЂ‚е’Њж°—и—№гЂ…
-  и§ё   E65C и§¦гЃ®ж—§е­—дЅ“
-  и»†   E75C дЅ“гЃ®еЏ¤е­—
-  йђ”   E85C гЃ¤гЃ°гЂ‚е€ЂгЃ®йђ”(йЌ”)гЂ‚
-  йҐ…   E95C гЃѕг‚“гЂ‚йҐ…й ­
-  й·­   EA5C гѓђгѓігЂ‚йіҐгЃ®еђЌгЂ‚
-  еЃ†   ED5C гЃ—г‚…г‚“гЂ‚
-  з Ў   EE5C гЃЋг‚‡гЃЏгЂ‚
-  зєЉ   FA5C г‚ЏгЃџгЂЃгЃ“гЃ†гЂ‚
-  зЉѕ   FB5C гЃЋг‚“гЂ‚
+  Ѓ\   815C ѓ_ѓbѓVѓ…
+  ѓ\   835C •Р‰ј–ј‚МЃu‚»Ѓv
+  „\   845C ѓLѓЉѓ‹•¶Ћљ‚МѓEѓB
+  ‡\/? 875C WindowsЉВ‹«‚Е‚НѓЌЃ[ѓ}ђ”Ћљ‚М9
+            MacЉВ‹«‚Е‚НGB(ѓMѓKѓoѓCѓg)
+  ‰\   895C ‚¤‚н‚іЃB
+  Љ\   8A5C ЉC—ў
+  ‹\   8B5C ‚ ‚ґ‚Ю‚­ЃBЌј‹\
+  Њ\   8C5C ‚Ї‚ўЃBђl–јЃB
+  Ќ\   8D5C ‚©‚Ь‚¦‚йЃBЌ\‘ў
+  Ћ\   8E5C ѓJѓCѓRЃB—{Ћ\
+  Џ\   8F5C Љїђ”Ћљ‚М10ЃB
+  ђ\   905C ‚а‚¤‚·ЃA‚µ‚сЃBђ\ђї
+  ‘\   915C ‚»ЃA‚РЃBЃu‘]Ѓv‚М€уЌь•WЏЂЋљ‘МЃB‘\‘·
+  ’\   925C ‚Ѕ‚сЃB’\ђy
+  “\   935C ‚Н‚йЃB“\•t
+  ”\   945C ‚М‚¤ЃB”\—Н
+  •\   955C ‚ ‚з‚н‚·ЃA‚Р‚е‚¤ЃB•\Њ»
+  –\   965C ‚ ‚О‚к‚йЃA‚Ъ‚¤ЃB–\—Н
+  —\   975C ‚ ‚з‚©‚¶‚ЯЃA‚жЃB—\”х
+  \   985C ‚л‚­ЃB•о\
+  ™\   995C ‚ЖЃA‚¤‚і‚¬ЃBЃu“eЃv‚М€Щ‘МЋљ
+  љ\   9A5C ‚©‚­ЃBљ\ЊЊ
+  ›\   9B5C ‚±‚¤ЃB›\a(Ќua‚М”сЏ‘Љ·‚¦)
+  њ\   9C5C ‚вЃB–нђ¶‚МЃu–нЃv‚М‹ЊЋљ‘М
+  ќ\   9D5C ‚ѕЃBќ\•Я
+  ћ\   9E5C “И‚М•К‘М
+  џ\   9F5C ‚·‚·‚йЃA‚»‚¤ЃA‚µ‚е‚¤ЃB
+  а\   E05C ‚і‚з‚¤ЃA‚µ‚г‚сЃB
+  б\   E15C ‚У‚ІЃA‚Щ‚сЃB
+  в\   E25C ‚Ж‚йЃA‚Ц‚ўЃB
+  г\   E35C ‚ ‚вЃA‚і‚ўЃB
+  д\   E45C ‚Е‚сЃA‚µ‚иЃBд\•”
+  е\   E55C ‚ ‚ўЃBa‹Cе\ЃX
+  ж\   E65C ђG‚М‹ЊЋљ‘М
+  з\   E75C ‘М‚МЊГЋљ
+  и\   E85C ‚В‚ОЃB“Ѓ‚Ми\(’Х)ЃB
+  й\   E95C ‚Ь‚сЃBй\“Є
+  к\   EA5C ѓoѓ“ЃB’№‚М–јЃB
+  ъx   ED5C ‚µ‚г‚сЃB
+  ыx   EE5C ‚¬‚е‚­ЃB
+  ъ\   FA5C ‚н‚ЅЃA‚±‚¤ЃB
+  ы\   FB5C ‚¬‚сЃB
 
-г‚ігѓјгѓ‰з©єй–“гЃ«гЃЉгЃ‘г‚‹ж–‡е­—ж•°е€¶й™ђ
-Shift_JISгЃ®2гѓђг‚¤гѓ€г‚ігѓјгѓ‰гЃ®з©єй–“гЃЇгЂЃз¬¬1гѓђг‚¤гѓ€гЃЊ81(16)-9F(16)гЃЄг‚‰гЃігЃ«E0(16)-FC(16)гЂЃ
-з¬¬2гѓђг‚¤гѓ€гЃЊ40(16)-7E(16)гЃЄг‚‰гЃігЃ«80(16)-FC(16)гЃ§гЃ‚г‚‹гЂ‚гЃ—гЃџгЃЊгЃЈгЃ¦гЂЃ60Г—188=11280
-ж–‡е­—гЂЃгЃ•г‚‰гЃ«1гѓђг‚¤гѓ€г‚ігѓјгѓ‰гЃЊ158ж–‡е­— (г‚№гѓљгѓјг‚№г‚’еђ«гЃїгЂЃDELгЃЇж•°гЃ€гЃљ)гЃ§гЃ‚г‚‹гЃџг‚ЃгЂЃ
-иЁ€11438ж–‡е­—гЃЁгЃЄг‚‹гЂ‚
+ѓRЃ[ѓh‹уЉФ‚Й‚Ё‚Ї‚й•¶Ћљђ”ђ§ЊА
+Shift_JIS‚М2ѓoѓCѓgѓRЃ[ѓh‚М‹уЉФ‚НЃA‘ж1ѓoѓCѓg‚Є81(16)-9F(16)‚И‚з‚С‚ЙE0(16)-FC(16)ЃA
+‘ж2ѓoѓCѓg‚Є40(16)-7E(16)‚И‚з‚С‚Й80(16)-FC(16)‚Е‚ ‚йЃB‚µ‚Ѕ‚Є‚Б‚ДЃA60Ѓ~188=11280
+•¶ЋљЃA‚і‚з‚Й1ѓoѓCѓgѓRЃ[ѓh‚Є158•¶Ћљ (ѓXѓyЃ[ѓX‚рЉЬ‚ЭЃADEL‚Нђ”‚¦‚ё)‚Е‚ ‚й‚Ѕ‚ЯЃA
+Њv11438•¶Ћљ‚Ж‚И‚йЃB
 
-гЃЄгЃЉгЂЃShift_JIS-2004гЃ§гЃЇгЂЃ2гѓђг‚¤гѓ€ж–‡е­—гЃЊ11233ж–‡е­—гЂЃ1гѓђг‚¤гѓ€ж–‡е­—гЃЊ158ж–‡е­—гЃ®гЃџг‚ЃгЂЃ
-еђ€иЁ€11391ж–‡е­—г‚’дЅїз”ЁгЃ—гЃ¦гЃ„г‚‹гЂ‚
+‚И‚ЁЃAShift_JIS-2004‚Е‚НЃA2ѓoѓCѓg•¶Ћљ‚Є11233•¶ЋљЃA1ѓoѓCѓg•¶Ћљ‚Є158•¶Ћљ‚М‚Ѕ‚ЯЃA
+Ќ‡Њv11391•¶Ћљ‚рЋg—p‚µ‚Д‚ў‚йЃB
 
-Shift_JISгЃ«гЃЉгЃ‘г‚‹гЂЊг‚·гѓ•гѓ€гЂЌгЃЁгЃЇ
-ISO-2022-JPгЃЇжЊ‡з¤єг‚·гѓјг‚±гѓіг‚№гЃ§жјўе­—гЃЁг‚ўгѓ«гѓ•г‚Ўгѓ™гѓѓгѓ€г‚’е€‡г‚Љж›їгЃ€г‚‹з¬¦еЏ·еЊ–ж–№ејЏгЃ§гЃ‚г‚‹гЂ‚
-гЃѕгЃџгЂЃEUC-JPгЃЇиЈњеЉ©жјўе­—гЃЁеЌЉи§’г‚«г‚їг‚«гѓЉг‚’г‚·гѓіг‚°гѓ«г‚·гѓ•гѓ€гЃ§дёЂж™‚зљ„гЃ«е€‡г‚Љж›їгЃ€гЃ¦дЅїгЃ†
-з¬¦еЏ·еЊ–ж–№ејЏгЃ§гЃ‚г‚‹гЂ‚гЃ“г‚Њг‚‰гЃ®з¬¦еЏ·еЊ–ж–№ејЏгЃ§гЃЇгЂЃеђ„ж–‡е­—й›†еђ€гЃ®йќўг‚’г‚·гѓ•гѓ€г‚ігѓјгѓ‰гЃ«г‚€гЃЈгЃ¦
-е€‡г‚Љж›їгЃ€(г‚·гѓ•гѓ€гЃ—)гЃ¦гЃ„г‚‹гЂ‚
+Shift_JIS‚Й‚Ё‚Ї‚йЃuѓVѓtѓgЃv‚Ж‚Н
+ISO-2022-JP‚НЋwЋ¦ѓVЃ[ѓPѓ“ѓX‚ЕЉїЋљ‚ЖѓAѓ‹ѓtѓ@ѓxѓbѓg‚рђШ‚и‘Ц‚¦‚й•„Ќ†‰»•ыЋ®‚Е‚ ‚йЃB
+‚Ь‚ЅЃAEUC-JP‚Н•вЏ•ЉїЋљ‚Ж”јЉpѓJѓ^ѓJѓi‚рѓVѓ“ѓOѓ‹ѓVѓtѓg‚Е€кЋћ“I‚ЙђШ‚и‘Ц‚¦‚ДЋg‚¤
+•„Ќ†‰»•ыЋ®‚Е‚ ‚йЃB‚±‚к‚з‚М•„Ќ†‰»•ыЋ®‚Е‚НЃAЉe•¶ЋљЏWЌ‡‚М–К‚рѓVѓtѓgѓRЃ[ѓh‚Й‚ж‚Б‚Д
+ђШ‚и‘Ц‚¦(ѓVѓtѓg‚µ)‚Д‚ў‚йЃB
 
-гЃ—гЃ‹гЃ—гЃЄгЃЊг‚‰гЂЃShift_JISгЃ®гЂЋг‚·гѓ•гѓ€гЂЏгЃЁгЃЇгЃ“гЃ®ж„Џе‘ігЃ§гЃ®г‚·гѓ•гѓ€гЃ§гЃЇгЃЄгЃ„гЂ‚гЃѕгЃџгЂЃгѓ“гѓѓгѓ€
-г‚·гѓ•гѓ€гЃ®гЂЋг‚·гѓ•гѓ€гЂЏгЃ§г‚‚гЃЄгЃ„гЂ‚гЃ“гЃ®гЂЋг‚·гѓ•гѓ€гЂЏгЃЁгЃЇгЂЃ256Г—256гЃ®е№ійќўгЃ®дё­гЃ§ж–‡е­—г‚’
-и¤‡й›‘гЃ«"гЃљг‚‰гЃ™"гЃЁгЃ„гЃ†ж„Џе‘ігЃ®гЂЋг‚·гѓ•гѓ€гЂЏгЃ§гЃ‚г‚‹гЂ‚
+‚µ‚©‚µ‚И‚Є‚зЃAShift_JIS‚МЃwѓVѓtѓgЃx‚Ж‚Н‚±‚М€У–Ў‚Е‚МѓVѓtѓg‚Е‚Н‚И‚ўЃB‚Ь‚ЅЃAѓrѓbѓg
+ѓVѓtѓg‚МЃwѓVѓtѓgЃx‚Е‚а‚И‚ўЃB‚±‚МЃwѓVѓtѓgЃx‚Ж‚НЃA256Ѓ~256‚М•Ѕ–К‚М’†‚Е•¶Ћљ‚р
+•ЎЋG‚Й"‚ё‚з‚·"‚Ж‚ў‚¤€У–Ў‚МЃwѓVѓtѓgЃx‚Е‚ ‚йЃB
 
-Shift_JISгЃЁеЊєз‚№з•ЄеЏ·
-Shift_JISгЃЊз¬¦еЏ·еЊ–гЃ®еЇѕи±ЎгЃ«гЃ™г‚‹ж–‡е­—г‚»гѓѓгѓ€гЃЇгЂЃJIS X 0208гЃ§гЃ‚г‚‹гЂ‚гЃ“гЃ®з¬¦еЏ·еЊ–ж–‡е­—
-й›†еђ€гЃ«гЃЇгЂЃеЊєз‚№з•ЄеЏ·гЃЁгЃ„гЃ†ж¦‚еїµгЃЊе­ењЁгЃ™г‚‹гЂ‚гЃ“г‚ЊгЃЇгЂЃ94Г—94гЃ®ж–‡е­—иЎЁгЃ®иЎЊгЃЁе€—гЃ®з•ЄеЏ·
-гЃ®зµ„гЃ§гЃ‚г‚‹гЂ‚
+Shift_JIS‚Ж‹ж“_”ФЌ†
+Shift_JIS‚Є•„Ќ†‰»‚М‘ОЏЫ‚Й‚·‚й•¶ЋљѓZѓbѓg‚НЃAJIS X 0208‚Е‚ ‚йЃB‚±‚М•„Ќ†‰»•¶Ћљ
+ЏWЌ‡‚Й‚НЃA‹ж“_”ФЌ†‚Ж‚ў‚¤ЉT”O‚Є‘¶ЌЭ‚·‚йЃB‚±‚к‚НЃA94Ѓ~94‚М•¶Ћљ•\‚МЌs‚Ж—с‚М”ФЌ†
+‚М‘g‚Е‚ ‚йЃB
 
-Shift_JISгЃ§гЃЇгЂЃ8140(16)-FCFC(16)гЃЁгЃ„гЃ†г‚€гЃ†гЃ«гЂЃJIS X 0208гЃЁгЃЇгЃѕгЃЈгЃџгЃЏйЃ•гЃЈгЃџ
-г‚ігѓјгѓ‰дЅ“зі»гЃ§гЃ‚г‚‹гЃЊгЂЃJIS X 0208г‚’иЁ€з®—гЃ«г‚€г‚Ље¤‰еЅўгЃ—гЃџг‚‚гЃ®гЃ§гЃ‚г‚‹гЃџг‚ЃгЂЃеЊєз‚№з•ЄеЏ·г‚’
-з”ЁгЃ„гЃ¦ж–‡е­—гЃ®г‚ігѓјгѓ‰гѓќг‚¤гѓігѓ€г‚’жЊ‡гЃ—з¤єгЃ™гЃ“гЃЁгЃЊе¤љгЃ„гЂ‚е†…е®№гЃ«гЃ¤гЃ„гЃ¦гЃЇгЂЃJIS X 0208гЃ®
-1пЅћ94еЊєгЃЁеђЊгЃгЃ§гЃ‚г‚‹гЂ‚гЃџгЃ гЃ—гЂЃж©џзЁ®дѕќе­ж–‡е­—гЃ§гЃЇгЂЃг‚·гѓ•гѓ€JISгЃ®з¬¦еЏ·з©єй–“гЃ‹г‚‰йЂ†ж€ђгЃ—гЂЃ
-94еЊєгЃ®дё‹ж–№гЃ«гЃ‚гЃџгЃ‹г‚‚120еЊєгЃѕгЃ§гЃЊж‹ЎејµгЃ—гЃ¦гЃ„г‚‹гЃ‹гЃ®г‚€гЃ†гЃ«ж‰±гЃ†гЃ“гЃЁгЃЊгЃ‚г‚‹гЂ‚95еЊєд»ҐдёЉ
-гЃЇгЂЃISO/IEC 2022гЃ«е‰‡гЃЈгЃџJIS X 0208гЃ®ж§‹йЂ гЃ§гЃЇе­ењЁгЃ—еѕ—гЃЄгЃ„гЃ®гЃ§гЂЃжњ¬жќҐгЃЇгЃЉгЃ‹гЃ—гЃ„гЂ‚
-гѓ™гѓігѓЂз‹¬и‡ЄгЃ®йќће…¬ејЏгЃЄж¦‚еїµгЃ§гЃ‚г‚‹гЂ‚гЃЄгЃЉгЂЃJIS X 0213гЃ®и¦Џж јгЃ®дёЂйѓЁгЃ§гЃ‚г‚‹
-Shift_JISX0213з¬¦еЏ·еЊ–иЎЁзЏѕгЃ«гЃЉгЃ„гЃ¦гЃЇгЂЃз¬¬1гѓђг‚¤гѓ€F0(16)д»Ґй™Ќг‚’2йќўгЃ®ж–‡е­—гЃ«е‰Іг‚ЉеЅ“гЃ¦
-гЃ¦гЃЉг‚ЉгЂЃз™ѕдЅ•еЊєгЃЁгЃ„гЃ†г‚€гЃ†гЃЄе­ењЁгЃ—гЃЄгЃ„еЊєз•ЄеЏ·гЃЇз™»е ґгЃ—гЃЄгЃ„гЂ‚
+Shift_JIS‚Е‚НЃA8140(16)-FCFC(16)‚Ж‚ў‚¤‚ж‚¤‚ЙЃAJIS X 0208‚Ж‚Н‚Ь‚Б‚Ѕ‚­€б‚Б‚Ѕ
+ѓRЃ[ѓh‘МЊn‚Е‚ ‚й‚ЄЃAJIS X 0208‚рЊvЋZ‚Й‚ж‚и•ПЊ`‚µ‚Ѕ‚а‚М‚Е‚ ‚й‚Ѕ‚ЯЃA‹ж“_”ФЌ†‚р
+—p‚ў‚Д•¶Ћљ‚МѓRЃ[ѓhѓ|ѓCѓ“ѓg‚рЋw‚µЋ¦‚·‚±‚Ж‚Є‘Ѕ‚ўЃB“а—e‚Й‚В‚ў‚Д‚НЃAJIS X 0208‚М
+1Ѓ`94‹ж‚Ж“Ї‚¶‚Е‚ ‚йЃB‚Ѕ‚ѕ‚µЃA‹@Ћн€Л‘¶•¶Ћљ‚Е‚НЃAѓVѓtѓgJIS‚М•„Ќ†‹уЉФ‚©‚з‹tђ¬‚µЃA
+94‹ж‚М‰є•ы‚Й‚ ‚Ѕ‚©‚а120‹ж‚Ь‚Е‚ЄЉg’Ј‚µ‚Д‚ў‚й‚©‚М‚ж‚¤‚Й€µ‚¤‚±‚Ж‚Є‚ ‚йЃB95‹ж€ИЏг
+‚НЃAISO/IEC 2022‚Й‘Ґ‚Б‚ЅJIS X 0208‚МЌ\‘ў‚Е‚Н‘¶ЌЭ‚µ“ѕ‚И‚ў‚М‚ЕЃA–{—€‚Н‚Ё‚©‚µ‚ўЃB
+ѓxѓ“ѓ_“ЖЋ©‚М”сЊцЋ®‚ИЉT”O‚Е‚ ‚йЃB‚И‚ЁЃAJIS X 0213‚М‹KЉi‚М€к•”‚Е‚ ‚й
+Shift_JISX0213•„Ќ†‰»•\Њ»‚Й‚Ё‚ў‚Д‚НЃA‘ж1ѓoѓCѓgF0(16)€ИЌ~‚р2–К‚М•¶Ћљ‚ЙЉ„‚и“–‚Д
+‚Д‚Ё‚иЃA•S‰Ѕ‹ж‚Ж‚ў‚¤‚ж‚¤‚И‘¶ЌЭ‚µ‚И‚ў‹ж”ФЌ†‚Н“oЏк‚µ‚И‚ўЃB
 
-гЂЊx-sjisгЂЌгЃЁгЂЊMS_KanjiгЂЌ
-гЂЊx-sjisгЂЌгЃЁгЂЊMS_KanjiгЂЌгЃЇгЃЁг‚‚гЃ«гЂЃHTMLгѓ‰г‚­гѓҐгѓЎгѓігѓ€гЃ®гЂЊcharsetгЂЌгЃ®жЊ‡е®љгЃ«
-гЂЊShift_JISгЂЌгЃ®е€ҐеђЌгЃЁгЃ—гЃ¦дЅїгЃ†гЃ“гЃЁгЃЊе‡єжќҐг‚‹гЂ‚
+Ѓux-sjisЃv‚ЖЃuMS_KanjiЃv
+Ѓux-sjisЃv‚ЖЃuMS_KanjiЃv‚Н‚Ж‚а‚ЙЃAHTMLѓhѓLѓ…ѓЃѓ“ѓg‚МЃucharsetЃv‚МЋw’и‚Й
+ЃuShift_JISЃv‚М•К–ј‚Ж‚µ‚ДЋg‚¤‚±‚Ж‚ЄЏo—€‚йЃB
 
-гЂЊx-sjisгЂЌгЃЇIANAгЃ«гЂЊShift_JISгЂЌгЃЁгЃ„гЃ†еђЌе‰Ќг‚’з™»йЊІгЃ™г‚‹е‰ЌгЃ«гЂЃNetscape Navigator 2.0
-гЃ«гЃЉгЃ„гЃ¦дЅїгЃЈгЃ¦гЃ„гЃџг‚Ёгѓіг‚ігѓјгѓ‡г‚Јгѓіг‚°гЃ®жЊ‡е®ље­ђеђЌгЃ§гЃ‚г‚‹гЂ‚дёЂйѓЁгЃ®HTMLз”џж€ђг‚Ѕгѓ•гѓ€гЃЊи‡Єе‹•
-гЃ§гЃ“гЃ®жЊ‡е®ље­ђг‚’зµ„гЃїиѕјг‚“гЃ§дЅїгЃЈгЃ¦гЃ„г‚‹гЂ‚гЃќгЃ®гЃџг‚ЃиЄЌи­еЏЇиѓЅгЃЄгѓ–гѓ©г‚¦г‚¶гЃЊгЃ‚г‚‹гЃЊгЂЃ
-гЂЊShift_JISгЂЌгЃ«ж›ёгЃЌжЏ›гЃ€г‚‹гЃ“гЃЁг‚’жЋЁеҐЁгЃ—гЃ¦гЃ„г‚‹гЂ‚
+Ѓux-sjisЃv‚НIANA‚ЙЃuShift_JISЃv‚Ж‚ў‚¤–ј‘O‚р“o^‚·‚й‘O‚ЙЃANetscape Navigator 2.0
+‚Й‚Ё‚ў‚ДЋg‚Б‚Д‚ў‚ЅѓGѓ“ѓRЃ[ѓfѓBѓ“ѓO‚МЋw’иЋq–ј‚Е‚ ‚йЃB€к•”‚МHTMLђ¶ђ¬ѓ\ѓtѓg‚ЄЋ©“®
+‚Е‚±‚МЋw’иЋq‚р‘g‚ЭЌћ‚с‚ЕЋg‚Б‚Д‚ў‚йЃB‚»‚М‚Ѕ‚Я”FЋЇ‰В”\‚Иѓuѓ‰ѓEѓU‚Є‚ ‚й‚ЄЃA
+ЃuShift_JISЃv‚ЙЏ‘‚«Љ·‚¦‚й‚±‚Ж‚рђ„Џ§‚µ‚Д‚ў‚йЃB
 
 
-=head1 гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃ§гЃ® "ShiftJIS"
+=head1 ‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Е‚М "ShiftJIS"
 
-гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃ§гЃ„гЃ† "ShiftJIS" гЃЇдёЉиЁгЃ®гЂЊг‚ігѓјгѓ‰з©єй–“гЃ«гЃЉгЃ‘г‚‹ж–‡е­—ж•°е€¶й™ђгЂЌгЃ®
-11438ж–‡е­—гЃ™гЃ№гЃ¦г‚’ж‰±гЃ€г‚‹гЃ“гЃЁг‚’з›®жЊ‡гЃ—гЃ¦гЃ„гЃѕгЃ™гЂ‚гЃќгЃ®гЃџг‚ЃгЃ«г‚ўгѓ«г‚ґгѓЄг‚єгѓ гЃЇ2гЃ¤дЅїг‚Џ
-г‚ЊгЃ¦гЃ„гЃѕгЃ™гЂ‚
+‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Е‚ў‚¤ "ShiftJIS" ‚НЏг‹L‚МЃuѓRЃ[ѓh‹уЉФ‚Й‚Ё‚Ї‚й•¶Ћљђ”ђ§ЊАЃv‚М
+11438•¶Ћљ‚·‚Ч‚Д‚р€µ‚¦‚й‚±‚Ж‚р–ЪЋw‚µ‚Д‚ў‚Ь‚·ЃB‚»‚М‚Ѕ‚Я‚ЙѓAѓ‹ѓSѓЉѓYѓЂ‚Н2‚ВЋg‚н
+‚к‚Д‚ў‚Ь‚·ЃB
 
-  * г‚ўгѓ«г‚ґгѓЄг‚єгѓ  1
+  * ѓAѓ‹ѓSѓЉѓYѓЂ 1
 
-    г‚Єг‚Їгѓ†гѓѓгѓ€гЃ®дё¦гЃігЃ‹г‚‰ж–‡е­—г‚’еЏ–г‚Ље‡єгЃ™гЃЁгЃЌгЂЃ1г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰гЃЁ2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰
-    гЃ®еЊєе€ҐгЃЇз¬¬1г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰гЃ®гЃїгЃ§иЎЊг‚Џг‚ЊгЃѕгЃ™гЂ‚з¬¬2г‚Єг‚Їгѓ†гѓѓгѓ€гЃЇиЂѓж…®гЃ•г‚ЊгЃѕгЃ›г‚“гЂ‚
+    ѓIѓNѓeѓbѓg‚М•А‚С‚©‚з•¶Ћљ‚рЋж‚иЏo‚·‚Ж‚«ЃA1ѓIѓNѓeѓbѓgѓRЃ[ѓh‚Ж2ѓIѓNѓeѓbѓgѓRЃ[ѓh
+    ‚М‹ж•К‚Н‘ж1ѓIѓNѓeѓbѓgѓRЃ[ѓh‚М‚Э‚ЕЌs‚н‚к‚Ь‚·ЃB‘ж2ѓIѓNѓeѓbѓg‚НЌl—¶‚і‚к‚Ь‚№‚сЃB
 
-    1г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰:
+    1ѓIѓNѓeѓbѓgѓRЃ[ѓh:
       0x00-0x80, 0xA0-0xDF, 0xFD-0xFF
 
-    2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰:
-      з¬¬1г‚Єг‚Їгѓ†гѓѓгѓ€  0x81-0x9F, 0xE0-0xEF, 0xF0-0xFC
-      з¬¬2г‚Єг‚Їгѓ†гѓѓгѓ€  0x00-0xFF (гЃ™гЃ№гЃ¦)
+    2ѓIѓNѓeѓbѓgѓRЃ[ѓh:
+      ‘ж1ѓIѓNѓeѓbѓg  0x81-0x9F, 0xE0-0xEF, 0xF0-0xFC
+      ‘ж2ѓIѓNѓeѓbѓg  0x00-0xFF (‚·‚Ч‚Д)
 
-    дёЌж­ЈгЃЄ1г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰:
+    •sђі‚И1ѓIѓNѓeѓbѓgѓRЃ[ѓh:
       0x81-0x9F, 0xE0-0xFC
-      * ж–‡е­—е€—гЃ®жњЂзµ‚г‚Єг‚Їгѓ†гѓѓгѓ€гЃЊ2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰гЃ®з¬¬1г‚Єг‚Їгѓ†гѓѓгѓ€гЃЁеђЊгЃе ґеђ€
+      * •¶Ћљ—с‚МЌЕЏIѓIѓNѓeѓbѓg‚Є2ѓIѓNѓeѓbѓgѓRЃ[ѓh‚М‘ж1ѓIѓNѓeѓbѓg‚Ж“Ї‚¶ЏкЌ‡
 
-д»Ґдё‹гЃ«г‚ігѓјгѓ‰иЎЁг‚’жЋІиј‰гЃ—гЃѕгЃ™гЂ‚
+€И‰є‚ЙѓRЃ[ѓh•\‚рЊfЌЪ‚µ‚Ь‚·ЃB
 
-        1г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰иЎЁ
+        1ѓIѓNѓeѓbѓgѓRЃ[ѓh•\
 
    0 1 2 3 4 5 6 7 8 9 A B C D E F 
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -786,8 +800,8 @@ Shift_JISX0213з¬¦еЏ·еЊ–иЎЁзЏѕгЃ«гЃЉгЃ„гЃ¦гЃЇгЂЃз¬¬1гѓђг‚¤гѓ€F0(16)д»Ґй™Ќг‚’2йќўг
  F| | | | | | | | | | | | | |*|*|*| 0xFD-0xFF
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                                 2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰иЎЁ
-            з¬¬1г‚Єг‚Їгѓ†гѓѓгѓ€                                    з¬¬2г‚Єг‚Їгѓ†гѓѓгѓ€
+                                 2ѓIѓNѓeѓbѓgѓRЃ[ѓh•\
+            ‘ж1ѓIѓNѓeѓbѓg                                    ‘ж2ѓIѓNѓeѓbѓg
 
 
    0 1 2 3 4 5 6 7 8 9 A B C D E F                 0 1 2 3 4 5 6 7 8 9 A B C D E F 
@@ -826,12 +840,12 @@ Shift_JISX0213з¬¦еЏ·еЊ–иЎЁзЏѕгЃ«гЃЉгЃ„гЃ¦гЃЇгЂЃз¬¬1гѓђг‚¤гѓ€F0(16)д»Ґй™Ќг‚’2йќўг
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-    *дёЌж­ЈгЃЄ* 1г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰
+    *•sђі‚И* 1ѓIѓNѓeѓbѓgѓRЃ[ѓh
 
-ж–‡е­—е€—гЃ®жњЂзµ‚г‚Єг‚Їгѓ†гѓѓгѓ€гЃЊ2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰гЃ®з¬¬1г‚Єг‚Їгѓ†гѓѓгѓ€гЃЁеђЊгЃе ґеђ€
+•¶Ћљ—с‚МЌЕЏIѓIѓNѓeѓbѓg‚Є2ѓIѓNѓeѓbѓgѓRЃ[ѓh‚М‘ж1ѓIѓNѓeѓbѓg‚Ж“Ї‚¶ЏкЌ‡
 
-дёЌж­ЈгЃ§гЃ‚гЃЈгЃ¦г‚‚з„Ўи¦–гЃ•г‚ЊгЃџг‚ЉгЂЃи‡Єе‹•зљ„гЃ«е‰Љй™¤гЃ•г‚Њг‚‹гЃ“гЃЁгЃЇгЃ‚г‚ЉгЃѕгЃ›г‚“гЂ‚
-дѕ‹гЃ€гЃ°гЂЃEsjis::chop гЃЇгЃ“гЃ®г‚Єг‚Їгѓ†гѓѓгѓ€г‚’иї”гЃ—гЃѕгЃ™гЂ‚
+•sђі‚Е‚ ‚Б‚Д‚а–іЋ‹‚і‚к‚Ѕ‚иЃAЋ©“®“I‚ЙЌнЏњ‚і‚к‚й‚±‚Ж‚Н‚ ‚и‚Ь‚№‚сЃB
+—б‚¦‚ОЃAEsjis::chop ‚Н‚±‚МѓIѓNѓeѓbѓg‚р•Ф‚µ‚Ь‚·ЃB
 
    0 1 2 3 4 5 6 7 8 9 A B C D E F 
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -869,7 +883,7 @@ Shift_JISX0213з¬¦еЏ·еЊ–иЎЁзЏѕгЃ«гЃЉгЃ„гЃ¦гЃЇгЂЃз¬¬1гѓђг‚¤гѓ€F0(16)д»Ґй™Ќг‚’2йќўг
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-=head1 гѓ™гѓігѓЂе€Ґ SJIS г‚ігѓјгѓ‰дёЂи¦§
+=head1 ѓxѓ“ѓ_•К SJIS ѓRЃ[ѓh€к——
 
 http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html
 
@@ -893,28 +907,28 @@ http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html
  Oracle Oracle7 (Release 7.1.3) 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x00-0xFF)
  Sybase SQL Server, Open Server 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
 
-ж—Ґжњ¬иЄћжѓ…е ±е‡¦зђ†(ISBN 4-89052-708-7)г‚€г‚Љ
+“ъ–{ЊкЏо•сЏ€—ќ(ISBN 4-89052-708-7)‚ж‚и
 
  Hewlett-Packard HP-15          0x00-0x7F, 0xA1-0xDF, (0x80-0xA0, 0xE0-0xFE)(0x21-0x7E, 0x80-0xFF)
 
-  * г‚ўгѓ«г‚ґгѓЄг‚єгѓ  2
+  * ѓAѓ‹ѓSѓЉѓYѓЂ 2
 
-    г‚ўгѓ«г‚ґгѓЄг‚єгѓ  1 гЃ«г‚‚й–ўг‚Џг‚‰гЃљгЂЃtr/// гЃ«г‚€г‚Љж–‡е­—гЃ®зЇ„е›Іг‚’жЊ‡е®љгЃ•г‚ЊгЃџе ґеђ€гЃЇд»Ґдё‹гЃ®ж–‡е­—
-    гЃ®гЃїгЃЊжњ‰еЉ№гЃЁгЃЄг‚ЉгЃѕгЃ™гЂ‚
+    ѓAѓ‹ѓSѓЉѓYѓЂ 1 ‚Й‚аЉЦ‚н‚з‚ёЃAtr/// ‚Й‚ж‚и•¶Ћљ‚М”Н€Н‚рЋw’и‚і‚к‚ЅЏкЌ‡‚Н€И‰є‚М•¶Ћљ
+    ‚М‚Э‚Є—LЊш‚Ж‚И‚и‚Ь‚·ЃB
 
-    1г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰:
+    1ѓIѓNѓeѓbѓgѓRЃ[ѓh:
       0x00-0x80, 0xA0-0xDF, 0xFD-0xFF
 
-    2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰:
-      з¬¬1г‚Єг‚Їгѓ†гѓѓгѓ€  0x81-0x9F, 0xE0-0xEF, 0xF0-0xFC
-      з¬¬2г‚Єг‚Їгѓ†гѓѓгѓ€  0x40-0x7E, 0x80-0xFC
+    2ѓIѓNѓeѓbѓgѓRЃ[ѓh:
+      ‘ж1ѓIѓNѓeѓbѓg  0x81-0x9F, 0xE0-0xEF, 0xF0-0xFC
+      ‘ж2ѓIѓNѓeѓbѓg  0x40-0x7E, 0x80-0xFC
 
-дѕ‹гЃ€гЃ°гЂЃ[\x81\x00-\x82\xFF] гЃЁж›ёгЃ‹г‚ЊгЃџе ґеђ€гЃЇ [\x81\x82][\x40-\x7E\x80-\xFC] г‚’
-ж„Џе‘ігЃ—гЃѕгЃ™гЂ‚
+—б‚¦‚ОЃA[\x81\x00-\x82\xFF] ‚ЖЏ‘‚©‚к‚ЅЏкЌ‡‚Н [\x81\x82][\x40-\x7E\x80-\xFC] ‚р
+€У–Ў‚µ‚Ь‚·ЃB
 
-д»Ґдё‹гЃ«г‚ігѓјгѓ‰иЎЁг‚’жЋІиј‰гЃ—гЃѕгЃ™гЂ‚
+€И‰є‚ЙѓRЃ[ѓh•\‚рЊfЌЪ‚µ‚Ь‚·ЃB
 
-        1г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰иЎЁ
+        1ѓIѓNѓeѓbѓgѓRЃ[ѓh•\
 
    0 1 2 3 4 5 6 7 8 9 A B C D E F 
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -952,8 +966,8 @@ http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-                                 2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰иЎЁ
-            з¬¬1г‚Єг‚Їгѓ†гѓѓгѓ€                                    з¬¬2г‚Єг‚Їгѓ†гѓѓгѓ€
+                                 2ѓIѓNѓeѓbѓgѓRЃ[ѓh•\
+            ‘ж1ѓIѓNѓeѓbѓg                                    ‘ж2ѓIѓNѓeѓbѓg
 
    0 1 2 3 4 5 6 7 8 9 A B C D E F                 0 1 2 3 4 5 6 7 8 9 A B C D E F 
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -991,285 +1005,291 @@ http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-=head1 з›®жЁ™гЃЁгЃ—гЃ¦гЃ„г‚‹г‚‚гЃ®
+=head1 –Ъ•W‚Ж‚µ‚Д‚ў‚й‚а‚М
 
-гѓ—гѓ­г‚°гѓ©гѓџгѓіг‚° Perl з¬¬3з‰€ VOLUME 1 (ISBN 4-87311-096-3)
-15з«  Unicode еЏ‚з…§
+ѓvѓЌѓOѓ‰ѓ~ѓ“ѓO Perl ‘ж3”Е VOLUME 1 (ISBN 4-87311-096-3)
+15ЏН Unicode ЋQЏЖ
 
-Unicode г‚µгѓќгѓјгѓ€гЃЊ perl гЃ«е°Ће…ҐгЃ•г‚Њг‚‹д»Ґе‰ЌгЃЇгЂЃeq жј”з®—е­ђгЃЇгЂЃ2гЃ¤гЃ®г‚№г‚«гѓ©гѓје¤‰ж•°гЃ«г‚€гЃЈ
-гЃ¦иЎЁгЃ•г‚ЊгЃџгѓђг‚¤гѓ€е€—г‚’гЃџгЃ жЇ”гЃ№гЃ¦гЃ„гЃѕгЃ—гЃџгЂ‚perl5.8 д»Ґй™ЌгЂЃeq гЃЇгЂЃ2гЃ¤гЃ®гѓђг‚¤гѓ€е€—г‚’жЇ”гЃ№г‚‹
-гЃЁеђЊж™‚гЃ« UTF8 гѓ•гѓ©г‚°г‚’иЂѓж…®гЃ—гЃѕгЃ™гЂ‚
+Unicode ѓTѓ|Ѓ[ѓg‚Є perl ‚Й“±“ь‚і‚к‚й€И‘O‚НЃAeq ‰‰ЋZЋq‚НЃA2‚В‚МѓXѓJѓ‰Ѓ[•Пђ”‚Й‚ж‚Б
+‚Д•\‚і‚к‚ЅѓoѓCѓg—с‚р‚Ѕ‚ѕ”д‚Ч‚Д‚ў‚Ь‚µ‚ЅЃBperl5.8 €ИЌ~ЃAeq ‚НЃA2‚В‚МѓoѓCѓg—с‚р”д‚Ч‚й
+‚Ж“ЇЋћ‚Й UTF8 ѓtѓ‰ѓO‚рЌl—¶‚µ‚Ь‚·ЃB
 
-зµђжћњзљ„гЃ«гЃ“гЃ®е¤‰ж›ґгЃЇгЂЃйЃЋеЋ»гЃ®г‚№г‚ЇгѓЄгѓ—гѓ€гЃЁж–°гЃ—гЃ„г‚№г‚ЇгѓЄгѓ—гѓ€гЃ®й–“гЃ«е¤§гЃЌгЃЄжєќг‚’дЅњг‚ЉгЃѕгЃ—гЃџгЂ‚
-г‚‚гЃЇг‚„дёЎиЂ…гЃ®г‚№г‚ЇгѓЄгѓ—гѓ€гЃЇг‚ігѓјгѓ‰г‚’дє’гЃ„гЃ«е†Ќе€©з”ЁгЃ™г‚‹гЃ“гЃЁгЃЊгЃ§гЃЌгЃѕгЃ›г‚“гЂ‚гЃѕгЃџж–°гЃ—гЃ„ж–№жі•гЃЇ
-гѓ—гѓ­г‚°гѓ©гѓћгЃ«иІ ж‹…г‚’гЃ‹гЃ‘г‚‹гЃџг‚ЃгЂЃзЏѕе­гЃ™г‚‹г‚№г‚ЇгѓЄгѓ—гѓ€гЃЊгЃ™гЃ№гЃ¦зЅ®гЃЌжЏ›г‚Џг‚‹гЃ®гЃЇгЃѕгЃ гЃѕгЃ ж™‚й–“
-гЃЊгЃ‹гЃ‹г‚‹гЃЁжЂќг‚Џг‚ЊгЃѕгЃ™гЂ‚
+Њ‹‰К“I‚Й‚±‚М•ПЌX‚НЃA‰Я‹Ћ‚МѓXѓNѓЉѓvѓg‚ЖђV‚µ‚ўѓXѓNѓЉѓvѓg‚МЉФ‚Й‘е‚«‚ИЌa‚рЌм‚и‚Ь‚µ‚ЅЃB
+‚а‚Н‚в—јЋТ‚МѓXѓNѓЉѓvѓg‚НѓRЃ[ѓh‚рЊЭ‚ў‚ЙЌД——p‚·‚й‚±‚Ж‚Є‚Е‚«‚Ь‚№‚сЃB‚Ь‚ЅђV‚µ‚ў•ы–@‚Н
+ѓvѓЌѓOѓ‰ѓ}‚Й•‰’S‚р‚©‚Ї‚й‚Ѕ‚ЯЃAЊ»‘¶‚·‚йѓXѓNѓЉѓvѓg‚Є‚·‚Ч‚Д’u‚«Љ·‚н‚й‚М‚Н‚Ь‚ѕ‚Ь‚ѕЋћЉФ
+‚Є‚©‚©‚й‚ЖЋv‚н‚к‚Ь‚·ЃB
 
-ж–°гЃ—гЃ„ж–№жі•гЃ§е•ЏйЎЊгЃЁгЃЄгЃЈгЃ¦гЃ„г‚‹гЃ“гЃЁгЃЇ UTF8 гѓ•гѓ©г‚°гЃЇе®џйљ›гЃ®ж–‡е­—е€—гЃ®з¬¦еЏ·еЊ–гЃЁдёЂи‡ґгЃ—гЃЄгЃ„гЃ“гЃЁ
-гЃ§гЃ™гЂ‚и‡Єе€†гЃ§дЅњгЃЈгЃџг‚№г‚ЇгѓЄгѓ—гѓ€гЃЇгЃќгЃ®гѓ‡гѓђгѓѓг‚°гЃ®е‰ЌгЃ« UTF8 гѓ•гѓ©г‚°гЃ«гЃ¤гЃ„гЃ¦гѓ‡гѓђгѓѓг‚°гЃ—гЃЄгЃ‘
-г‚ЊгЃ°гЃЄг‚ЉгЃѕгЃ›г‚“гЂ‚
+ђV‚µ‚ў•ы–@‚Е–в‘и‚Ж‚И‚Б‚Д‚ў‚й‚±‚Ж‚Н UTF8 ѓtѓ‰ѓO‚НЋАЌЫ‚М•¶Ћљ—с‚М•„Ќ†‰»‚Ж€к’v‚µ‚И‚ў‚±‚Ж
+‚Е‚·ЃBЋ©•Є‚ЕЌм‚Б‚ЅѓXѓNѓЉѓvѓg‚Н‚»‚МѓfѓoѓbѓO‚М‘O‚Й UTF8 ѓtѓ‰ѓO‚Й‚В‚ў‚ДѓfѓoѓbѓO‚µ‚И‚Ї
+‚к‚О‚И‚и‚Ь‚№‚сЃB
 
-гЃќгЃ“гЃ§ж”гЃ®ж–№жі•гЃ«ж€»гЃ™гЃ“гЃЁгЃ«г‚€гЃЈгЃ¦гЂЃгЃ©гЃ®г‚€гЃ†гЃ«и§Јж±єгЃ•г‚Њг‚‹гЃ®гЃ‹ Programming Perl, 3rd ed.
-(й‚¦иЁі гѓ—гѓ­г‚°гѓ©гѓџгѓіг‚°Perl з¬¬3з‰€) гЃ®402гѓљгѓјг‚ёг‚’г‚‚гЃ†дёЂеє¦еј•з”ЁгЃ—гЃѕгЃ—г‚‡гЃ†гЂ‚
+‚»‚±‚ЕђМ‚М•ы–@‚Й–Я‚·‚±‚Ж‚Й‚ж‚Б‚ДЃA‚З‚М‚ж‚¤‚Й‰рЊ€‚і‚к‚й‚М‚© Programming Perl, 3rd ed.
+(–M–у ѓvѓЌѓOѓ‰ѓ~ѓ“ѓOPerl ‘ж3”Е) ‚М402ѓyЃ[ѓW‚р‚а‚¤€к“x€ш—p‚µ‚Ь‚µ‚е‚¤ЃB
 
-зђ†жѓізљ„гЃ«гЃЇгЂЃд»Ґдё‹гЃ®5гЃ¤гЃ®г‚ґгѓјгѓ«г‚’е®џзЏѕгЃ—г‚€гЃ†гЃЁиЂѓгЃ€гЃ¦гЃ„гЃѕгЃ™гЂ‚
+—ќ‘z“I‚Й‚НЃA€И‰є‚М5‚В‚МѓSЃ[ѓ‹‚рЋАЊ»‚µ‚ж‚¤‚ЖЌl‚¦‚Д‚ў‚Ь‚·ЃB
 
 =over 2
 
-=item * г‚ґгѓјгѓ«1
+=item * ѓSЃ[ѓ‹1
 
-    ж—ўе­гЃ®гѓђг‚¤гѓ€жЊ‡еђ‘гЃ®г‚№г‚ЇгѓЄгѓ—гѓ€гЃЇгЂЃд»Ґе‰Ќж‰±гЃЈгЃ¦гЃ„гЃџж—ўе­гЃ®гѓђг‚¤гѓ€жЊ‡еђ‘гЃ®гѓ‡гѓјг‚їгЃ«еЇѕгЃ—
-    гЃ¦гЂЃд»Ґе‰ЌгЃЁеђЊж§гЃ«е‹•дЅњгЃ™гЃ№гЃЌгЃ§гЃ‚г‚‹гЂ‚
+    Љщ‘¶‚МѓoѓCѓgЋwЊь‚МѓXѓNѓЉѓvѓg‚НЃA€И‘O€µ‚Б‚Д‚ў‚ЅЉщ‘¶‚МѓoѓCѓgЋwЊь‚МѓfЃ[ѓ^‚Й‘О‚µ
+    ‚ДЃA€И‘O‚Ж“Ї—l‚Й“®Ќм‚·‚Ч‚«‚Е‚ ‚йЃB
 
-    гЃ“г‚ЊгЃЇ ShiftJIS гЃЊгѓђг‚¤гѓ€жЊ‡еђ‘гЃ§гЃ‚г‚‹ ASCII гЃЉг‚€гЃі JIS X 0201 гЃЁзµ„еђ€г‚ЏгЃ›гЃ¦е€©з”Ё
-    гЃ§гЃЌг‚‹г‚€гЃ†иЁ­иЁ€гЃ•г‚ЊгЃџгЃ“гЃЁгЃ«г‚€гЃЈгЃ¦гЂЃгЃ™гЃ§гЃ«йЃ”ж€ђгЃ•г‚ЊгЃ¦гЃ„гЃѕгЃ™гЂ‚
+    ‚±‚к‚Н ShiftJIS ‚ЄѓoѓCѓgЋwЊь‚Е‚ ‚й ASCII ‚Ё‚ж‚С JIS X 0201 ‚Ж‘gЌ‡‚н‚№‚Д——p
+    ‚Е‚«‚й‚ж‚¤ђЭЊv‚і‚к‚Ѕ‚±‚Ж‚Й‚ж‚Б‚ДЃA‚·‚Е‚Й’Bђ¬‚і‚к‚Д‚ў‚Ь‚·ЃB
 
-=item * г‚ґгѓјгѓ«2
+=item * ѓSЃ[ѓ‹2
 
-    ж—ўе­гЃ®гѓђг‚¤гѓ€жЊ‡еђ‘гЃ®г‚№г‚ЇгѓЄгѓ—гѓ€гЃЇгЂЃдЅ•г‚‚ж‰‹г‚’еЉ гЃ€гЃљгЃ«гЂЃ(гЃќгЃ†гЃ™г‚‹гЃ“гЃЁгЃЊйЃ©е€‡гЃ§гЃ‚г‚ЊгЃ°)
-    ж–°гЃ—гЃ„ж–‡е­—жЊ‡еђ‘гЃ®гѓ‡гѓјг‚їгЃ«еЇѕгЃ—гЃ¦г‚‚е‹•дЅњгЃ™г‚‹г‚€гЃ†гЃ«гЃЄг‚‹гЃ№гЃЌгЃ§гЃ‚г‚‹гЂ‚
+    Љщ‘¶‚МѓoѓCѓgЋwЊь‚МѓXѓNѓЉѓvѓg‚НЃA‰Ѕ‚аЋи‚р‰Б‚¦‚ё‚ЙЃA(‚»‚¤‚·‚й‚±‚Ж‚Є“KђШ‚Е‚ ‚к‚О)
+    ђV‚µ‚ў•¶ЋљЋwЊь‚МѓfЃ[ѓ^‚Й‘О‚µ‚Д‚а“®Ќм‚·‚й‚ж‚¤‚Й‚И‚й‚Ч‚«‚Е‚ ‚йЃB
 
-    зµ„иѕјгЃїй–ўж•° length, substr, index, rindex, pos гЃЄгЃ©гЃ®ж–‡е­—е€—гЃ®й•·гЃ•г‚„дЅЌзЅ®г‚’ж‰±гЃ†
-    г‚‚гЃ®гЃЇд»ЉгЃѕгЃ§гЃ©гЃЉг‚ЉгЃ«1г‚Єг‚Їгѓ†гѓѓгѓ€г‚’ 1 гЃЁж•°гЃ€гЃѕгЃ™гЂ‚гЃ“гЃ®йѓЁе€†гЃ«гЃ¤гЃ„гЃ¦дЅ•г‚‚ж‰‹гЃЇеЉ 
-    г‚Џг‚ЉгЃѕгЃ›г‚“гЂ‚2г‚Єг‚Їгѓ†гѓѓгѓ€г‚ігѓјгѓ‰1ж–‡е­—гЃ® length гЃЇ 2 гЃ«гЃЄг‚ЉгЃѕгЃ™гЂ‚
+    ‘gЌћ‚ЭЉЦђ” length, substr, index, rindex, pos ‚И‚З‚М•¶Ћљ—с‚М’·‚і‚в€К’u‚р€µ‚¤
+    ‚а‚М‚НЌЎ‚Ь‚Е‚З‚Ё‚и‚Й1ѓIѓNѓeѓbѓg‚р 1 ‚Жђ”‚¦‚Ь‚·ЃB‚±‚М•”•Є‚Й‚В‚ў‚Д‰Ѕ‚аЋи‚Н‰Б
+    ‚н‚и‚Ь‚№‚сЃB2ѓIѓNѓeѓbѓgѓRЃ[ѓh1•¶Ћљ‚М length ‚Н 2 ‚Й‚И‚и‚Ь‚·ЃB
 
-    дёЂж–№гЂЃг‚№г‚ЇгѓЄгѓ—гѓ€дё­гЃ®ж­Ји¦ЏиЎЁзЏѕгЃЇгЂЃгѓћгѓ«гѓЃгѓђг‚¤гѓ€ж–‡е­—гЃ®гЃџг‚ЃгЃ®г‚ўгѓіг‚«гѓјгѓЄгѓіг‚°е‡¦зђ†г‚’
-    иЁиї°гЃ™г‚‹еї…и¦ЃгЃЊгЃ‚г‚ЉгЃѕгЃ™гЃЊгЂЃгЃќг‚Њг‚’гЃ‚гЃЄгЃџгЃ«д»Јг‚ЏгЃЈгЃ¦гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЊиЎЊгЃ„гЃѕгЃ™гЂ‚
+    €к•ыЃAѓXѓNѓЉѓvѓg’†‚Мђі‹K•\Њ»‚НЃAѓ}ѓ‹ѓ`ѓoѓCѓg•¶Ћљ‚М‚Ѕ‚Я‚МѓAѓ“ѓJЃ[ѓЉѓ“ѓOЏ€—ќ‚р
+    ‹LЏq‚·‚й•K—v‚Є‚ ‚и‚Ь‚·‚ЄЃA‚»‚к‚р‚ ‚И‚Ѕ‚Й‘г‚н‚Б‚Д‚±‚Мѓ\ѓtѓgѓEѓFѓA‚ЄЌs‚ў‚Ь‚·ЃB
 
-    г‚ґгѓјгѓ«1гЃЁг‚ґгѓјгѓ«2гЃ®е†…е®№г‚’е›із¤єгЃ—гЃѕгЃ™гЂ‚
+    ѓSЃ[ѓ‹1‚ЖѓSЃ[ѓ‹2‚М“а—e‚рђ}Ћ¦‚µ‚Ь‚·ЃB
 
                                    GOAL#1  GOAL#2
                             (a)     (b)     (c)     (d)     (e)
-         в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”¬в”Ђв”Ђв”Ђв”¬в”Ђв”Ђв”Ђв”¬в”Ђв”Ђв”Ђв”¬в”Ђв”Ђв”Ђв”¬в”Ђв”Ђв”Ђв”ђ
-         в”‚ гѓ‡гѓјг‚ї       в”‚ Old  в”‚ Old  в”‚ New  в”‚ Old  в”‚ New  в”‚
-         в”њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”ґв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”ґв”Ђв”Ђв”Ђв”¤
-         в”‚ г‚№г‚ЇгѓЄгѓ—гѓ€   в”‚ Old  в”‚     Old      в”‚     New      в”‚
-         в”њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ґв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”¤
-         в”‚ г‚¤гѓіг‚їгѓ—гѓЄг‚ї в”‚ Old  в”‚             New              в”‚
-         в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ґв”Ђв”Ђв”Ђв”ґв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”
-          Old --- ж—ўе­гЃ®гѓђг‚¤гѓ€жЊ‡еђ‘
-          New --- ж–°гЃ—гЃ„ж–‡е­—жЊ‡еђ‘
+         „Ў„џ„џ„џ„џ„џ„џ„џ„¦„џ„џ„џ„¦„џ„џ„џ„¦„џ„џ„џ„¦„џ„џ„џ„¦„џ„џ„џ„ў
+         „  ѓfЃ[ѓ^       „  Old  „  Old  „  New  „  Old  „  New  „ 
+         „Ґ„џ„џ„џ„џ„џ„џ„џ„©„џ„џ„џ„©„џ„џ„џ„Ё„џ„џ„џ„©„џ„џ„џ„Ё„џ„џ„џ„§
+         „  ѓXѓNѓЉѓvѓg   „  Old  „      Old      „      New      „ 
+         „Ґ„џ„џ„џ„џ„џ„џ„џ„©„џ„џ„џ„©„џ„џ„џ„џ„џ„џ„џ„Ё„џ„џ„џ„џ„џ„џ„џ„§
+         „  ѓCѓ“ѓ^ѓvѓЉѓ^ „  Old  „              New              „ 
+         „¤„џ„џ„џ„џ„џ„џ„џ„Ё„џ„џ„џ„Ё„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„Ј
+          Old --- Љщ‘¶‚МѓoѓCѓgЋwЊь
+          New --- ђV‚µ‚ў•¶ЋљЋwЊь
 
-    гѓ‡гѓјг‚їгЂЃг‚№г‚ЇгѓЄгѓ—гѓ€гЂЃг‚¤гѓіг‚їгѓ—гѓЄг‚їгЃ®ж–°гѓ»ж—§гЃ«й–ўгЃ—гЃ¦гЂЃдёЉгЃ® (a) гЃ‹г‚‰ (e) гЃѕгЃ§гЃ®
-    зµ„еђ€гЃ›гЃЊгЃ‚г‚ЉгЃѕгЃ™гЂ‚гЃ“гЃ®ж–‡ж›ёгЃЊж›ёгЃ‹г‚ЊгЃџеЅ“ж™‚гЃ«е­ењЁгЃ—гЃЄгЃ‹гЃЈгЃџ Encode гѓўг‚ёгѓҐгѓјгѓ«гЃЁ
-    гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЂЃгЃЉг‚€гЃіе­ењЁгЃ—гЃ¦гЃ„гЃџ JPerl г‚’ж›ёгЃЌи¶ігЃ—гЃ¦гЃїгЃѕгЃ—г‚‡гЃ†гЂ‚
+    ѓfЃ[ѓ^ЃAѓXѓNѓЉѓvѓgЃAѓCѓ“ѓ^ѓvѓЉѓ^‚МђVЃE‹Њ‚ЙЉЦ‚µ‚ДЃAЏг‚М (a) ‚©‚з (e) ‚Ь‚Е‚М
+    ‘gЌ‡‚№‚Є‚ ‚и‚Ь‚·ЃB‚±‚М•¶Џ‘‚ЄЏ‘‚©‚к‚Ѕ“–Ћћ‚Й‘¶ЌЭ‚µ‚И‚©‚Б‚Ѕ Encode ѓ‚ѓWѓ…Ѓ[ѓ‹‚Ж
+    ‚±‚Мѓ\ѓtѓgѓEѓFѓAЃA‚Ё‚ж‚С‘¶ЌЭ‚µ‚Д‚ў‚Ѕ JPerl ‚рЏ‘‚«‘«‚µ‚Д‚Э‚Ь‚µ‚е‚¤ЃB
 
                             (a)     (b)     (c)     (d)     (e)
                                            JPerl          Encode,Sjis
-         в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”¬в”Ђв”Ђв”Ђв”¬в”Ђв”Ђв”Ђв”¬в”Ђв”Ђв”Ђв”¬в”Ђв”Ђв”Ђв”¬в”Ђв”Ђв”Ђв”ђ
-         в”‚ гѓ‡гѓјг‚ї       в”‚ Old  в”‚ Old  в”‚ New  в”‚ Old  в”‚ New  в”‚
-         в”њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”ґв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”ґв”Ђв”Ђв”Ђв”¤
-         в”‚ г‚№г‚ЇгѓЄгѓ—гѓ€   в”‚ Old  в”‚     Old      в”‚     New      в”‚
-         в”њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”јв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ґв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”¤
-         в”‚ г‚¤гѓіг‚їгѓ—гѓЄг‚ї в”‚ Old  в”‚             New              в”‚
-         в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ґв”Ђв”Ђв”Ђв”ґв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”
-          Old --- ж—ўе­гЃ®гѓђг‚¤гѓ€жЊ‡еђ‘
-          New --- ж–°гЃ—гЃ„ж–‡е­—жЊ‡еђ‘
+         „Ў„џ„џ„џ„џ„џ„џ„џ„¦„џ„џ„џ„¦„џ„џ„џ„¦„џ„џ„џ„¦„џ„џ„џ„¦„џ„џ„џ„ў
+         „  ѓfЃ[ѓ^       „  Old  „  Old  „  New  „  Old  „  New  „ 
+         „Ґ„џ„џ„џ„џ„џ„џ„џ„©„џ„џ„џ„©„џ„џ„џ„Ё„џ„џ„џ„©„џ„џ„џ„Ё„џ„џ„џ„§
+         „  ѓXѓNѓЉѓvѓg   „  Old  „      Old      „      New      „ 
+         „Ґ„џ„џ„џ„џ„џ„џ„џ„©„џ„џ„џ„©„џ„џ„џ„џ„џ„џ„џ„Ё„џ„џ„џ„џ„џ„џ„џ„§
+         „  ѓCѓ“ѓ^ѓvѓЉѓ^ „  Old  „              New              „ 
+         „¤„џ„џ„џ„џ„џ„џ„џ„Ё„џ„џ„џ„Ё„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„џ„Ј
+          Old --- Љщ‘¶‚МѓoѓCѓgЋwЊь
+          New --- ђV‚µ‚ў•¶ЋљЋwЊь
 
-    JPerl гЃЊгЃЁгЃ¦г‚‚е„Єг‚ЊгЃ¦гЃ„г‚‹зђ†з”±гЃЇ (c) гЃ®дЅЌзЅ®гЃ«гЃ‚г‚‹гЃ‹г‚‰гЃ§гЃ™гЂ‚гЃ™гЃЄг‚ЏгЃЎж—Ґжњ¬иЄће‡¦зђ†
-    г‚’иЎЊгЃ†гЃџг‚ЃгЃ«г‚№г‚ЇгѓЄгѓ—гѓ€гЃ«з‰№е€ҐгЃЄиЁиї°г‚’иЎЊгЃ†еї…и¦ЃгЃЊгЃ‚г‚ЉгЃѕгЃ›г‚“гЂ‚
+    JPerl ‚Є‚Ж‚Д‚а—D‚к‚Д‚ў‚й—ќ—R‚Н (c) ‚М€К’u‚Й‚ ‚й‚©‚з‚Е‚·ЃB‚·‚И‚н‚ї“ъ–{ЊкЏ€—ќ
+    ‚рЌs‚¤‚Ѕ‚Я‚ЙѓXѓNѓЉѓvѓg‚Й“Б•К‚И‹LЏq‚рЌs‚¤•K—v‚Є‚ ‚и‚Ь‚№‚сЃB
 
-    еЇѕз…§зљ„гЃЄгЃ®гЃЇ Encode гѓўг‚ёгѓҐгѓјгѓ«г‚„гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃ«гЃ¦ "use Sjis;" г‚’иЁиї°гЃ™г‚‹
-    е ґеђ€гЃ§гЃ™гЂ‚гЃ“гЃ®е ґеђ€гЃЇж–°гЃџгЃЄг‚№г‚ЇгѓЄгѓ—гѓ€гЃ®ж›ёгЃЌж–№г‚’гЃ™г‚‹еї…и¦ЃгЃЊгЃ‚г‚ЉгЃѕгЃ™гЂ‚
+    ‘ОЏЖ“I‚И‚М‚Н Encode ѓ‚ѓWѓ…Ѓ[ѓ‹‚в‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Й‚Д "use Sjis;" ‚р‹LЏq‚·‚й
+    ЏкЌ‡‚Е‚·ЃB‚±‚МЏкЌ‡‚НђV‚Ѕ‚ИѓXѓNѓЉѓvѓg‚МЏ‘‚«•ы‚р‚·‚й•K—v‚Є‚ ‚и‚Ь‚·ЃB
 
-=item * г‚ґгѓјгѓ«3
+=item * ѓSЃ[ѓ‹3
 
-    г‚№г‚ЇгѓЄгѓ—гѓ€гЃЇгЂЃж–°гЃ—гЃ„ж–‡е­—жЊ‡еђ‘гѓўгѓјгѓ‰гЃ§г‚‚гЂЃд»Ґе‰ЌгЃ®гѓђг‚¤гѓ€жЊ‡еђ‘гѓўгѓјгѓ‰гЃЁеђЊгЃг‚№гѓ”гѓј
-    гѓ‰гЃ§е‹•дЅњгЃ™гЃ№гЃЌгЃ§гЃ‚г‚‹гЂ‚
+    ѓXѓNѓЉѓvѓg‚НЃAђV‚µ‚ў•¶ЋљЋwЊьѓ‚Ѓ[ѓh‚Е‚аЃA€И‘O‚МѓoѓCѓgЋwЊьѓ‚Ѓ[ѓh‚Ж“Ї‚¶ѓXѓsЃ[
+    ѓh‚Е“®Ќм‚·‚Ч‚«‚Е‚ ‚йЃB
 
-    гЃќг‚ЊгЃЇз„Ўзђ†гЂ‚гЃ гЃЈгЃ¦гЂЃд»Ґдё‹гЃ®ж™‚й–“гЃЊеї…и¦ЃгЃ г‚‚гЃ®гЂ‚
+    ‚»‚к‚Н–і—ќЃB‚ѕ‚Б‚ДЃA€И‰є‚МЋћЉФ‚Є•K—v‚ѕ‚а‚МЃB
 
-    (1) г‚№г‚ЇгѓЄгѓ—гѓ€г‚’г‚Ёг‚№г‚±гѓјгѓ—гЃ—гЃ¦гЂЃгѓђг‚¤гѓ€жЊ‡еђ‘ Perl гЃ§ж‰±гЃ€г‚‹г‚€гЃ†гЃ«е‡¦зђ†гЃ™г‚‹гЃџг‚ЃгЃ®
-     ж™‚й–“гЂ‚гЃџгЃ гЃ—гЂЃе‡¦зђ†гЃ•г‚ЊгЃџг‚№г‚ЇгѓЄгѓ—гѓ€гЃЇдїќе­гЃ§гЃЌг‚‹гЃџг‚ЃгЂЃж¬Ўе›ћгЃ‹г‚‰гЃЇгЃ“гЃ®ж™‚й–“г‚’гЃЄгЃЏ
-     гЃ™гЃ“гЃЁг‚‚еЏЇиѓЅгЃ§гЃ™гЂ‚
+    (1) ѓXѓNѓЉѓvѓg‚рѓGѓXѓPЃ[ѓv‚µ‚ДЃAѓoѓCѓgЋwЊь Perl ‚Е€µ‚¦‚й‚ж‚¤‚ЙЏ€—ќ‚·‚й‚Ѕ‚Я‚М
+     ЋћЉФЃB‚Ѕ‚ѕ‚µЃAЏ€—ќ‚і‚к‚ЅѓXѓNѓЉѓvѓg‚Н•Ы‘¶‚Е‚«‚й‚Ѕ‚ЯЃAЋџ‰с‚©‚з‚Н‚±‚МЋћЉФ‚р‚И‚­
+     ‚·‚±‚Ж‚а‰В”\‚Е‚·ЃB
 
-    (2) г‚Ёг‚№г‚±гѓјгѓ—гЃ•г‚ЊгЃџг‚№г‚ЇгѓЄгѓ—гѓ€гЃЊгѓћгѓ«гѓЃгѓђг‚¤гѓ€г‚ўгѓіг‚«гѓјгѓЄгѓіг‚°е‡¦зђ†г‚’иЎЊгЃ„гЃЄгЃЊг‚‰гЂЃ
-     ж­Ји¦ЏиЎЁзЏѕг‚’е®џиЎЊгЃ™г‚‹ж™‚й–“гЂ‚
+    (2) ѓGѓXѓPЃ[ѓv‚і‚к‚ЅѓXѓNѓЉѓvѓg‚Єѓ}ѓ‹ѓ`ѓoѓCѓgѓAѓ“ѓJЃ[ѓЉѓ“ѓOЏ€—ќ‚рЌs‚ў‚И‚Є‚зЃA
+     ђі‹K•\Њ»‚рЋАЌs‚·‚йЋћЉФЃB
 
-    гЃ™гЃ§гЃ«е­ењЁгЃ™г‚‹ ASCII гѓ‡гѓјг‚їгЃЇ1ж–‡е­—гЃЊ1г‚Єг‚Їгѓ†гѓѓгѓ€гЃ«гѓ‘гѓѓг‚ЇгЃ•г‚ЊгЃ¦гЃ„гЃѕгЃ™гЂ‚гЃќгЃ®
-    гѓ‡гѓјг‚їгЃЁдє’жЏ›жЂ§г‚’дїќгЃЎгЃЄгЃЊг‚‰ж–‡е­—зЁ®г‚’еў—г‚„гЃќгЃ†гЃЁгЃ™г‚‹гЃЁгЂЃISO-2022 гЃ®г‚€гЃ†гЃ«г‚Ёг‚№г‚±гѓј
-    гѓ—г‚·гѓјг‚±гѓіг‚№гЃЊеї…и¦ЃгЃ§гЃ‚гЃЈгЃџг‚ЉгЂЃShiftJIS г‚„ UTF-8 гЃ®г‚€гЃ†гЃ« "г‚Ёг‚№г‚±гѓјгѓ—гѓ“гѓѓгѓ€"
-    гЃЊеї…и¦ЃгЃ«гЃЄгЃЈгЃџг‚ЉгЃ—гЃѕгЃ™гЂ‚гЃ“г‚Њг‚‰гЃ®г‚Ёг‚№г‚±гѓјгѓ—е‡¦зђ†гЃЊеЉ г‚Џг‚‹гЃџг‚ЃгЂЃд»Ґе‰ЌгЃЁеђЊгЃг‚№гѓ”гѓј
-    гѓ‰гЃ§е‹•дЅњгЃ™гЃ№гЃЌгЃ§гЃ‚г‚‹гЃЁгЃ„гЃ†гЃ®гЃЇз„Ўзђ†гЃЄз›®жЁ™гЃ гЃЁжЂќгЃ„гЃѕгЃ™гЂ‚
+    ‚·‚Е‚Й‘¶ЌЭ‚·‚й ASCII ѓfЃ[ѓ^‚Н1•¶Ћљ‚Є1ѓIѓNѓeѓbѓg‚ЙѓpѓbѓN‚і‚к‚Д‚ў‚Ь‚·ЃB‚»‚М
+    ѓfЃ[ѓ^‚ЖЊЭЉ·ђ«‚р•Ы‚ї‚И‚Є‚з•¶ЋљЋн‚р‘ќ‚в‚»‚¤‚Ж‚·‚й‚ЖЃAISO-2022 ‚М‚ж‚¤‚ЙѓGѓXѓPЃ[
+    ѓvѓVЃ[ѓPѓ“ѓX‚Є•K—v‚Е‚ ‚Б‚Ѕ‚иЃAShiftJIS ‚в UTF-8 ‚М‚ж‚¤‚Й "ѓGѓXѓPЃ[ѓvѓrѓbѓg"
+    ‚Є•K—v‚Й‚И‚Б‚Ѕ‚и‚µ‚Ь‚·ЃB‚±‚к‚з‚МѓGѓXѓPЃ[ѓvЏ€—ќ‚Є‰Б‚н‚й‚Ѕ‚ЯЃA€И‘O‚Ж“Ї‚¶ѓXѓsЃ[
+    ѓh‚Е“®Ќм‚·‚Ч‚«‚Е‚ ‚й‚Ж‚ў‚¤‚М‚Н–і—ќ‚И–Ъ•W‚ѕ‚ЖЋv‚ў‚Ь‚·ЃB
 
-=item * г‚ґгѓјгѓ«4
+=item * ѓSЃ[ѓ‹4
 
-    Perl гЃЇгЂЃгѓђг‚¤гѓ€жЊ‡еђ‘гЃ® Perl гЃЁж–‡е­—жЊ‡еђ‘гЃ® Perl гЃ«жћќе€†гЃ‹г‚ЊгЃ›гЃљгЃ«гЂЃ1гЃ¤гЃ®иЁЂиЄћгЃ§
-    гЃ‚г‚Љз¶љгЃ‘г‚‹гЃ№гЃЌгЃ§гЃ‚г‚‹гЂ‚
+    Perl ‚НЃAѓoѓCѓgЋwЊь‚М Perl ‚Ж•¶ЋљЋwЊь‚М Perl ‚ЙЋ}•Є‚©‚к‚№‚ё‚ЙЃA1‚В‚МЊѕЊк‚Е
+    ‚ ‚и‘±‚Ї‚й‚Ч‚«‚Е‚ ‚йЃB
 
-    гѓђг‚¤гѓ€жЊ‡еђ‘гЃ® Perl гЃЇгЃ™гЃ§гЃ«гѓђг‚¤гѓЉгѓЄгѓ‡гѓјг‚їг‚’ж‰±гЃ†гЃ“гЃЁгЃЊгЃ§гЃЌг‚‹гЃџг‚ЃгЂЃж–‡е­—жЊ‡еђ‘гЃ®
-    Perl г‚’е€Ґз«‹гЃ¦гЃ§дЅњж€ђгЃ™г‚‹еї…и¦ЃгЃЇгЃ‚г‚ЉгЃѕгЃ›г‚“гЂ‚гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЇеЌгЃЄг‚‹ Perl гЃ®г‚ўгѓ—
-    гѓЄг‚±гѓјг‚·гѓ§гѓігѓ—гѓ­г‚°гѓ©гѓ гЃ§гЃ‚г‚ЉгЂЃгѓ•г‚Јгѓ«г‚їгѓ—гѓ­г‚°гѓ©гѓ гЃЁгЃ—гЃ¦дЅњж€ђгЃ•г‚ЊгЃ¦гЃ„гЃѕгЃ™гЂ‚
-    еџєжњ¬зљ„гЃ«гЃЇ perl гЃЊе®џиЎЊгЃ§гЃЌг‚‹з’°еўѓгЃЄг‚‰гЃ°е‹•дЅњгЃ™г‚‹гЃ§гЃ—г‚‡гЃ†гЂ‚
+    ѓoѓCѓgЋwЊь‚М Perl ‚Н‚·‚Е‚ЙѓoѓCѓiѓЉѓfЃ[ѓ^‚р€µ‚¤‚±‚Ж‚Є‚Е‚«‚й‚Ѕ‚ЯЃA•¶ЋљЋwЊь‚М
+    Perl ‚р•К—§‚Д‚ЕЌмђ¬‚·‚й•K—v‚Н‚ ‚и‚Ь‚№‚сЃB‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Н’P‚И‚й Perl ‚МѓAѓv
+    ѓЉѓPЃ[ѓVѓ‡ѓ“ѓvѓЌѓOѓ‰ѓЂ‚Е‚ ‚иЃAѓtѓBѓ‹ѓ^ѓvѓЌѓOѓ‰ѓЂ‚Ж‚µ‚ДЌмђ¬‚і‚к‚Д‚ў‚Ь‚·ЃB
+    Љо–{“I‚Й‚Н perl ‚ЄЋАЌs‚Е‚«‚йЉВ‹«‚И‚з‚О“®Ќм‚·‚й‚Е‚µ‚е‚¤ЃB
 
-=item * г‚ґгѓјгѓ«5
+=item * ѓSЃ[ѓ‹5
 
-    JPerl гѓ¦гѓјг‚¶гЃЊ Perl гЃ§ JPerl г‚’дїќе®€гЃ§гЃЌг‚‹г‚€гЃ†гЃ«гЃЄг‚‹гЂ‚
+    JPerl ѓ†Ѓ[ѓU‚Є Perl ‚Е JPerl ‚р•ЫЋз‚Е‚«‚й‚ж‚¤‚Й‚И‚йЃB
 
-    гЃџгЃ¶г‚“гЂ‚
+    ‚Ѕ‚Ф‚сЃB
 
 =back
 
-Programming Perl, 3rd ed. гЃЊж›ёгЃ‹г‚ЊгЃџй ѓгЃ«гЃЇгЂЃUTF8 гѓ•гѓ©г‚°гЃЇз”џгЃѕг‚ЊгЃ¦гЃЉг‚‰гЃљгЂЃPerl гЃЇ
-з°ЎеЌгЃЄд»•дє‹г‚’з°ЎеЌгЃ«гЃ§гЃЌг‚‹г‚€гЃ†гЃ«иЁ­иЁ€гЃ•г‚ЊгЃ¦гЃ„гЃѕгЃ—гЃџгЂ‚гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЇеЅ“ж™‚гЃ®г‚€гЃ†гЃЄ
-гѓ—гѓ­г‚°гѓ©гѓџгѓіг‚°з’°еўѓг‚’жЏђдѕ›гЃ—гЃѕгЃ™гЂ‚
+Programming Perl, 3rd ed. ‚ЄЏ‘‚©‚к‚ЅЌ ‚Й‚НЃAUTF8 ѓtѓ‰ѓO‚Нђ¶‚Ь‚к‚Д‚Ё‚з‚ёЃAPerl ‚Н
+ЉИ’P‚ИЋdЋ–‚рЉИ’P‚Й‚Е‚«‚й‚ж‚¤‚ЙђЭЊv‚і‚к‚Д‚ў‚Ь‚µ‚ЅЃB‚±‚Мѓ\ѓtѓgѓEѓFѓA‚Н“–Ћћ‚М‚ж‚¤‚И
+ѓvѓЌѓOѓ‰ѓ~ѓ“ѓOЉВ‹«‚р’с‹џ‚µ‚Ь‚·ЃB
 
-=head1 еЏ‚иЂѓж–‡зЊ®
+=head1 ЋQЌl•¶ЊЈ
 
- гѓ—гѓ­г‚°гѓ©гѓџгѓіг‚°Perl ж”№иЁ‚з‰€
- By Larry Wall, Tom Christiansen, Randal L. Schwartz, иї‘и—¤ е‰й›Є иЁі
- 1997е№ґ12жњ€ з™єиЎЊ
- 759гѓљгѓјг‚ё
+ ѓvѓЌѓOѓ‰ѓ~ѓ“ѓOPerl ‰ь’щ”Е
+ By Larry Wall, Tom Christiansen, Randal L. Schwartz, ‹Я“Ў ‰Гђб –у
+ 1997”N12ЊЋ ”­Ќs
+ 759ѓyЃ[ѓW
  ISBN 4-900900-48-6
  http://www.oreilly.co.jp/out/pperl/index.htm
 
- гѓ—гѓ­г‚°гѓ©гѓџгѓіг‚°Perl з¬¬3з‰€ VOLUME 1
- By Larry Wall, Tom Christiansen, Jon Orwant, иї‘и—¤ е‰й›Є иЁі
- 2002е№ґ09жњ€ з™єиЎЊ
- 756гѓљгѓјг‚ё
+ ѓvѓЌѓOѓ‰ѓ~ѓ“ѓOPerl ‘ж3”Е VOLUME 1
+ By Larry Wall, Tom Christiansen, Jon Orwant, ‹Я“Ў ‰Гђб –у
+ 2002”N09ЊЋ ”­Ќs
+ 756ѓyЃ[ѓW
  ISBN 4-87311-096-3
  http://www.oreilly.co.jp/books/4873110963/
 
- гѓ—гѓ­г‚°гѓ©гѓџгѓіг‚°Perl з¬¬3з‰€ VOLUME 2
- By Larry Wall, Tom Christiansen, Jon Orwant, иї‘и—¤ е‰й›Є иЁі
- 2002е№ґ09жњ€ з™єиЎЊ
- 680гѓљгѓјг‚ё
+ ѓvѓЌѓOѓ‰ѓ~ѓ“ѓOPerl ‘ж3”Е VOLUME 2
+ By Larry Wall, Tom Christiansen, Jon Orwant, ‹Я“Ў ‰Гђб –у
+ 2002”N09ЊЋ ”­Ќs
+ 680ѓyЃ[ѓW
  ISBN 4-87311-097-1
  http://www.oreilly.co.jp/books/4873110971/
 
- Perlг‚Їгѓѓг‚Їгѓ–гѓѓг‚Ї з¬¬2з‰€ VOLUME 1
- By Tom Christiansen, Nathan Torkington, Shibuya Perl Mongers з›ЈиЁі, ж ЄејЏдјљз¤ѕгѓ‰г‚­гѓҐгѓЎгѓігѓ€г‚·г‚№гѓ†гѓ  иЁі
- 2004е№ґ09жњ€ з™єиЎЊ
- 752гѓљгѓјг‚ё
+ PerlѓNѓbѓNѓuѓbѓN ‘ж2”Е VOLUME 1
+ By Tom Christiansen, Nathan Torkington, Shibuya Perl Mongers ЉД–у, Љ”Ћ®‰пЋРѓhѓLѓ…ѓЃѓ“ѓgѓVѓXѓeѓЂ –у
+ 2004”N09ЊЋ ”­Ќs
+ 752ѓyЃ[ѓW
  ISBN 4-87311-202-8
  http://www.oreilly.co.jp/books/4873112028/
 
- Perlг‚Їгѓѓг‚Їгѓ–гѓѓг‚Ї з¬¬2з‰€ VOLUME 2
- By Tom Christiansen, Nathan Torkington, Shibuya Perl Mongers з›ЈиЁі, ж ЄејЏдјљз¤ѕгѓ‰г‚­гѓҐгѓЎгѓігѓ€г‚·г‚№гѓ†гѓ  иЁі
- 2004е№ґ09жњ€ з™єиЎЊ
- 464гѓљгѓјг‚ё
+ PerlѓNѓbѓNѓuѓbѓN ‘ж2”Е VOLUME 2
+ By Tom Christiansen, Nathan Torkington, Shibuya Perl Mongers ЉД–у, Љ”Ћ®‰пЋРѓhѓLѓ…ѓЃѓ“ѓgѓVѓXѓeѓЂ –у
+ 2004”N09ЊЋ ”­Ќs
+ 464ѓyЃ[ѓW
  ISBN 4-87311-203-6
  http://www.oreilly.co.jp/books/4873112036/
 
- Perlг‚Їг‚¤гѓѓг‚ЇгѓЄгѓ•г‚Ўгѓ¬гѓіг‚№
- By Stephen Spainhour, Ellen Siever, Nathan Patwardhan, иї‘и—¤ е‰й›Є, еЏ°е ґ ењ­дёЂ з›ЈиЁі
- 2000е№ґ03жњ€ з™єиЎЊ
- 784гѓљгѓјг‚ё
+ PerlѓNѓCѓbѓNѓЉѓtѓ@ѓЊѓ“ѓX
+ By Stephen Spainhour, Ellen Siever, Nathan Patwardhan, ‹Я“Ў ‰Гђб, ‘дЏк Њ\€к ЉД–у
+ 2000”N03ЊЋ ”­Ќs
+ 784ѓyЃ[ѓW
  ISBN 4-900900-72-9
  http://www.oreilly.co.jp/books/4900900729/
 
- е€ќг‚ЃгЃ¦гЃ®Perl Win32г‚·г‚№гѓ†гѓ 
- Randal L. Schwartz, Erik Olson, Tom Christiansen и‘—, жњ‰й¦¬ дё‰йѓЋ з›ЈиЁі, зџіеЋџ ж™єжµ© иЁі
- 1998е№ґ11жњ€ з™єиЎЊ
- 348гѓљгѓјг‚ё
+ Џ‰‚Я‚Д‚МPerl Win32ѓVѓXѓeѓЂ
+ Randal L. Schwartz, Erik Olson, Tom Christiansen ’, —L”n ЋOY ЉД–у, ђОЊґ ’qЌ_ –у
+ 1998”N11ЊЋ ”­Ќs
+ 348ѓyЃ[ѓW
  ISBN 4-900900-79-6
  http://www.oreilly.co.jp/books/4900900796/
 
- е€ќг‚ЃгЃ¦гЃ®Perl з¬¬5з‰€
- Randal L. Schwartz, Tom Phoenix, brian d foy и‘—
- 2009е№ґ10жњ€24ж—Ґ з™єеЈІ
- 424гѓљгѓјг‚ё
+ Џ‰‚Я‚Д‚МPerl ‘ж5”Е
+ Randal L. Schwartz, Tom Phoenix, brian d foy ’
+ 2009”N10ЊЋ24“ъ ”­”„
+ 424ѓyЃ[ѓW
  ISBN978-4-87311-427-9
  http://www.oreilly.co.jp/books/9784873114279/
 
- PerlгѓЄг‚Ѕгѓјг‚№г‚­гѓѓгѓ€ - UNIXз‰€
- Futato, Irving, Jepson, Patwardhan, Siever е…±и‘—, г‚¤г‚Ёгѓ­гѓјгѓ¬гѓјгѓ™гѓ« е±±жњ¬ жµ© иЁі
+ PerlѓЉѓ\Ѓ[ѓXѓLѓbѓg - UNIX”Е
+ Futato, Irving, Jepson, Patwardhan, Siever ‹¤’, ѓCѓGѓЌЃ[ѓЊЃ[ѓxѓ‹ ЋR–{ Ќ_ –у
  ISBN4-900900-65-6
 
- ж—Ґжњ¬иЄћжѓ…е ±е‡¦зђ†
+ “ъ–{ЊкЏо•сЏ€—ќ
  Understanding Japanese Information Processing
- By Ken Lunde, жҐйЃЌй›Ђдѕ†, й€ґжњЁж­¦з”џ иЁі
- 1995е№ґ8жњ€ з™єиЎЊ
- 496гѓљгѓјг‚ё
+ By Ken Lunde, Џt•ХђќТ, —й–Ш•ђђ¶ –у
+ 1995”N8ЊЋ ”­Ќs
+ 496ѓyЃ[ѓW
  ISBN 4-89052-708-7
 
- CJKVж—Ґдё­йџ“и¶Љжѓ…е ±е‡¦зђ†
+ CJKV“ъ’†ЉШ‰zЏо•сЏ€—ќ
  Chinese, Japanese, Korean & Vietnamese Computing
- By Ken Lunde, е°Џжќѕ з« , йЂ†дє• е…‹е·± иЁі
- 2002е№ґ12жњ€ з™єиЎЊ
- 1172гѓљгѓјг‚ё
+ By Ken Lunde, Џ¬Џј ЏН, ‹t€д ЌЋЊИ –у
+ 2002”N12ЊЋ ”­Ќs
+ 1172ѓyЃ[ѓW
  ISBN 4-87311-108-0
  http://www.oreilly.co.jp/books/4873111080/
 
- и©іиЄ¬ ж­Ји¦ЏиЎЁзЏѕ з¬¬2з‰€
- By Jeffrey E. F. Friedl, з”°е’Њ е‹ќ иЁі
- 2003е№ґ05жњ€ з™єиЎЊ
- 464гѓљгѓјг‚ё
+ ЏЪђа ђі‹K•\Њ» ‘ж2”Е
+ By Jeffrey E. F. Friedl, “ca Џџ –у
+ 2003”N05ЊЋ ”­Ќs
+ 464ѓyЃ[ѓW
  ISBN 4-87311-130-7
  http://www.oreilly.co.jp/books/4873111307/
 
- и©іиЄ¬ ж­Ји¦ЏиЎЁзЏѕ з¬¬3з‰€
- By Jeffrey E. F. Friedl, ж ЄејЏдјљз¤ѕгѓ­гѓіг‚°гѓ†гѓјгѓ«пјЏй•·е°ѕ й«еј иЁі
- 2008е№ґ04жњ€ з™єиЎЊ
- 528гѓљгѓјг‚ё
+ ЏЪђа ђі‹K•\Њ» ‘ж3”Е
+ By Jeffrey E. F. Friedl, Љ”Ћ®‰пЋРѓЌѓ“ѓOѓeЃ[ѓ‹Ѓ^’·”ц Ќ‚ЌO –у
+ 2008”N04ЊЋ ”­Ќs
+ 528ѓyЃ[ѓW
  ISBN 978-4-87311-359-3
  http://www.oreilly.co.jp/books/9784873113593/
 
- Perlгѓ—гѓ­г‚°гѓ©гѓџгѓіг‚°
- Larry Wall, Randal L.Schwartz, иї‘и—¤ е‰й›Є иЁі
- 1993е№ґ2жњ€з™єиЎЊ
+ PerlѓvѓЌѓOѓ‰ѓ~ѓ“ѓO
+ Larry Wall, Randal L.Schwartz, ‹Я“Ў ‰Гђб –у
+ 1993”N2ЊЋ”­Ќs
  ISBN 4-89052-384-7
  http://www.context.co.jp/~cond/books/old-books.html
 
- JISжјўе­—е­—е…ё
- иЉќй‡ЋиЂ•еЏё з·Ёи‘—
- 1456 й Ѓ
+ JISЉїЋљЋљ“T
+ ЋЕ–мЌkЋi •Т’
+ 1456 •Е
  ISBN 4-542-20129-5
  http://www.webstore.jsa.or.jp/lib/lib.asp?fn=/manual/mnl01_12.htm
 
  UNIX MAGAZINE
- 1993е№ґ8жњ€еЏ·
- 172гѓљгѓјг‚ё
- T1008901080816 й›‘иЄЊ08901-8
+ 1993”N8ЊЋЌ†
+ 172ѓyЃ[ѓW
+ T1008901080816 ЋGЋЏ08901-8
  http://ascii.asciimw.jp/books/magazines/unix.shtml
 
-=head1 и¬ќиѕћ
+=head1 ЋУЋ«
 
-гЃ“гЃ®г‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЇгЂЃд»Ґдё‹гЃ®ж–№гЂ…гЃ®дЅњж€ђгЃ—гЃџг‚Ѕгѓ•гѓ€г‚¦г‚§г‚ўгЃЉг‚€гЃіж–‡ж›ёгЃ®гЃЉгЃ‹гЃ’гЃ«г‚€г‚ЉдЅњж€ђ
-гЃ•г‚ЊгЃѕгЃ—гЃџгЂ‚е…ЁгЃ¦гЃ®ж–№гЃ«ж„џи¬ќгЃ„гЃџгЃ—гЃѕгЃ™гЂ‚
+‚±‚Мѓ\ѓtѓgѓEѓFѓA‚НЃA€И‰є‚М•ыЃX‚МЌмђ¬‚µ‚Ѕѓ\ѓtѓgѓEѓFѓA‚Ё‚ж‚С•¶Џ‘‚М‚Ё‚©‚°‚Й‚ж‚иЌмђ¬
+‚і‚к‚Ь‚µ‚ЅЃB‘S‚Д‚М•ы‚ЙЉґЋУ‚ў‚Ѕ‚µ‚Ь‚·ЃB
 
- е±±дё‹ и‰Їи”µгЃ•г‚“, г‚·гѓ•гѓ€JISгЃ®гѓ‡г‚¶г‚¤гѓігЃ®и©±
+ ЋR‰є —З‘ ‚і‚с, ѓVѓtѓgJIS‚МѓfѓUѓCѓ“‚Мb
  ttp://furukawablog.spaces.live.com/Blog/cns!1pmWgsL289nm7Shn7cS0jHzA!2225.entry
- (е…€й ­гЃ« 'h' г‚’д»еЉ гЃ—гЃ¦г‚ўг‚Їг‚»г‚№гЃ—гЃ¦гЃЏгЃ гЃ•гЃ„)
+ (ђж“Є‚Й 'h' ‚р•t‰Б‚µ‚ДѓAѓNѓZѓX‚µ‚Д‚­‚ѕ‚і‚ў)
 
  Larry Wall, Perl
  http://www.perl.org/
 
- ж­Њд»Ј е’Њж­ЈгЃ•г‚“, jcode.pl
+ ‰М‘г aђі‚і‚с, jcode.pl
  ftp://ftp.iij.ad.jp/pub/IIJ/dist/utashiro/perl/
 
  Jeffrey E. F. Friedl, Mastering Regular Expressions
  http://www.oreilly.com/catalog/regex/index.html
 
- иІће»Ј зџҐиЎЊгЃ•г‚“, Shift-JISгѓ†г‚­г‚№гѓ€г‚’ж­ЈгЃ—гЃЏж‰±гЃ†
+ ’ењA ’mЌs‚і‚с, Shift-JISѓeѓLѓXѓg‚рђі‚µ‚­€µ‚¤
  http://homepage1.nifty.com/nomenclator/perl/shiftjis.htm
 
- гЃѕгЃ¤г‚‚гЃЁ г‚†гЃЌгЃІг‚ЌгЃ•г‚“, Ruby on Perl(s)
+ ‚Ь‚В‚а‚Ж ‚д‚«‚Р‚л‚і‚с, Ruby on Perl(s)
  http://www.rubyist.net/~matz/slides/yapc2006/
 
- и—¤еІЎ е’Ње¤«гЃ•г‚“, jperlгѓ¦гѓјг‚¶гѓјгЃ®гЃџг‚ЃгЃ«
+ “Ў‰Є a•v‚і‚с, jperlѓ†Ѓ[ѓUЃ[‚М‚Ѕ‚Я‚Й
  http://homepage1.nifty.com/kazuf/jperl.html
 
- е’Њжі‰ е®ЏжЋгЃ•г‚“, WindowsгЃ§Perl 5.8/5.10г‚’дЅїгЃ†гѓўгѓігЃг‚ѓгЃЄгЃ„
+ aђт ЌG–ѕ‚і‚с, Windows‚ЕPerl 5.8/5.10‚рЋg‚¤ѓ‚ѓ“‚¶‚б‚И‚ў
  http://www.aritia.org/hizumi/perl/perlwin.html
 
- еЎљжњ¬ з‰§з”џгЃ•г‚“, PerlгѓЎгѓў/WindowsгЃ§гЃ®гѓ•г‚Ўг‚¤гѓ«гѓ‘г‚№
+ ’Л–{ –qђ¶‚і‚с, PerlѓЃѓ‚/Windows‚Е‚Мѓtѓ@ѓCѓ‹ѓpѓX
  http://digit.que.ne.jp/work/wiki.cgi?Perl%E3%83%A1%E3%83%A2%2FWindows%E3%81%A7%E3%81%AE%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%83%91%E3%82%B9
 
- chaichanPaPaгЃ•г‚“, г‚·гѓ•гѓ€JISжјўе­—гЃ®гѓ•г‚Ўг‚¤гѓ«еђЌгЃ«гѓћгѓѓгѓЃгЃ—гЃ¦гЃїг‚‹
+ chaichanPaPa‚і‚с, ѓVѓtѓgJISЉїЋљ‚Мѓtѓ@ѓCѓ‹–ј‚Йѓ}ѓbѓ`‚µ‚Д‚Э‚й
  http://d.hatena.ne.jp/chaichanPaPa/20080802/1217660826
 
- й€ґжњЁ зґЂе¤«гЃ•г‚“, Jperl
+ —й–Ш ‹I•v‚і‚с, Jperl
  http://homepage2.nifty.com/kipp/perl/jperl/
 
- жёЎиѕє еЌљж–‡гЃ•г‚“, Jperl
+ “n•У ”Ћ•¶‚і‚с, Jperl
  http://search.cpan.org/~watanabe/
  http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
 
- е°ЏйЈј ејѕгЃ•г‚“, Encode гѓўг‚ёгѓҐгѓјгѓ«
+ Џ¬Ћ” ’e‚і‚с, Encode ѓ‚ѓWѓ…Ѓ[ѓ‹
  http://search.cpan.org/dist/Encode/
 
- Tokyo-pm дїќе­ж›ёеє«
+ Juerd, Perl Unicode Advice
+ http://juerd.nl/site.plp/perluniadvice
+
+ daily dayflower, 2008-06-25 perluniadvice
+ http://d.hatena.ne.jp/dayflower/20080625/1214374293
+
+ Tokyo-pm •Ы‘¶Џ‘ЊЙ
  http://mail.pm.org/pipermail/tokyo-pm/
 
 =cut

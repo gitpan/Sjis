@@ -18,6 +18,9 @@ $cwd =~ s#/#\\#g;
 
 my @test = sort split(/\n/,`dir /s /b t\\test.pl 2>NUL`);
 for my $test (@test) {
+    if (($test =~ m/MSWin32/oxms) and ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms)) {
+        next;
+    }
     print STDERR "Testing $test...\n";
 
     my $testdir = $test;

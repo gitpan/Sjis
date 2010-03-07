@@ -1,11 +1,13 @@
 use Sjis;
 
+my $__FILE__ = __FILE__;
+
 $a = "アソア";
 if ($a !~ s/ソ$//) {
-    print qq{ok - 4 "アソア" !~ s/ソ\$//\n};
+    print qq{ok - 4 "アソア" !~ s/ソ\$// $^X $__FILE__\n};
 }
 else {
-    print qq{not ok - 4 "アソア" !~ s/ソ\$//\n};
+    print qq{not ok - 4 "アソア" !~ s/ソ\$// $^X $__FILE__\n};
 }
 
 __END__
