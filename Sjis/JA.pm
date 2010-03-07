@@ -80,6 +80,7 @@ Perl のことで、Java や JVM とは関係がありません。そんなわけで、このソフトウェア
 というメッセージを残し、Perl から離れていってしまいました。
 
 スライド15 "jperl の今後"
+
 ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
 きっと誰かが引き継いで書いてくれるだろう。
@@ -112,7 +113,9 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 最近、以下のメールを再発見しました。
 
 [Tokyo.pm] jus Benkyoukai
+
 http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
+
 ("SJIS.pm" というファイル名で保存されているものとします)
 
   package SJIS;
@@ -906,10 +909,11 @@ http://home.m05.itscom.net/numa/cde/sjis-euc/sjis.html
  Informix ASCII INFORMIX V6 ALS 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC), (0xFD)(0xA1-0xFE)(0xA1-0xFE)
  Oracle Oracle7 (Release 7.1.3) 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x00-0xFF)
  Sybase SQL Server, Open Server 0x00-0x7F, 0xA1-0xDF, (0x81-0x9F, 0xE0-0xFC)(0x40-0x7E, 0x80-0xFC)
-
-日本語情報処理(ISBN 4-89052-708-7)より
-
+ 
+ 日本語情報処理(ISBN 4-89052-708-7)より
+ 
  Hewlett-Packard HP-15          0x00-0x7F, 0xA1-0xDF, (0x80-0xA0, 0xE0-0xFE)(0x21-0x7E, 0x80-0xFF)
+
 
   * アルゴリズム 2
 
