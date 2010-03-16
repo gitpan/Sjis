@@ -34,6 +34,7 @@ Sjis-JA - "Yet Another JPerl" Source code filter to escape ShiftJIS (Japanese do
       perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
       perl510  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
       perl512  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl64   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
 
       ? * を使ってワイルドカードの指定ができます
       ' ～ ' を使ってクォートすることができます
@@ -70,7 +71,7 @@ JPerl はとても優れたソフトウェアです。おっと、ここでいう JPerl は日本語対応版の
 Perl のことで、Java や JVM とは関係がありません。そんなわけで、このソフトウェア
 は衝突回避のために Sjis という名前にしました。
 
-ところで、その JPerl はバージョン 5.005_4 以降、メンテナンスされていません。
+ところで、その JPerl はバージョン 5.005_04 以降、メンテナンスされていません。
 
 大変残念なことに、JPerlの開発を行った渡辺 博文さんは The Perl Confernce Japan
 1998 にて
@@ -96,13 +97,13 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
 =item * ShiftJIS そのままの値を扱う
 
-=item * 過去と現在のスクリプト間でコード、ノウハウを共有できる
+=item * 過去のデータ、スクリプト、ノウハウと互換性を保てる
 
 =item * UTF8 フラグを扱わないですむ(perlunitut と perluniadvice の対応は不要)
 
-=item * でも Perl5 とは互換性がある (はずだ)
-
 =item * (JPerlを保守するために) C プログラミングを行わないですむ
+
+=item * (CPU, OS, perlのバージョン, 32ビット/64ビット版の違いによる) バイナリファイルに依存しない
 
 =back
 
@@ -148,6 +149,7 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
    perl58 make.bat install  --- perl5.008 環境にインストールします
    perl510 make.bat install --- perl5.010 環境にインストールします
    perl512 make.bat install --- perl5.012 環境にインストールします
+   perl64  make.bat install --- perl64    環境にインストールします
 
    make.bat dist            --- CPAN 配布用パッケージを作ります
    make.bat tar.bat         --- tar.bat を作成します
@@ -156,9 +158,10 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
 
    Sjis.pm          --- ShiftJIS ソースコードフィルタモジュール
    Esjis.pm         --- Sjis.pm のランタイムルーチン
-   perl58.bat       --- 環境変数 PATH の設定なしに perl5.8 を探して実行する
+   perl58.bat       --- 環境変数 PATH の設定なしに perl5.8  を探して実行する
    perl510.bat      --- 環境変数 PATH の設定なしに perl5.10 を探して実行する
    perl512.bat      --- 環境変数 PATH の設定なしに perl5.12 を探して実行する
+   perl64.bat       --- 環境変数 PATH の設定なしに perl64   を探して実行する
 
 =head1 文字クラスの定義
 
@@ -1115,16 +1118,22 @@ Unicode サポートが perl に導入される以前は、eq 演算子は、2つのスカラー変数によっ
     Perl は、バイト指向の Perl と文字指向の Perl に枝分かれせずに、1つの言語で
     あり続けるべきである。
 
+    JPerl は Perl 言語を分岐させないようにするために、インタプリタを分岐させました。
+    でも Perl コアチームはインタプリタの分岐を望んでいないのでしょう。
+
     バイト指向の Perl はすでにバイナリデータを扱うことができるため、文字指向の
     Perl を別立てで作成する必要はありません。このソフトウェアは単なる Perl のアプ
     リケーションプログラムであり、フィルタプログラムとして作成されています。
     基本的には perl が実行できる環境ならば動作するでしょう。
 
+    それに問題を perl スクリプトで解決するなら、Perl コミュニティがサポートして
+    くれることでしょう。
+
 =item * ゴール5
 
     JPerl ユーザが Perl で JPerl を保守できるようになる。
 
-    たぶん。
+    たぶん、そしてきっと。
 
 =back
 
@@ -1241,6 +1250,17 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  T1008901080816 雑誌08901-8
  http://ascii.asciimw.jp/books/magazines/unix.shtml
 
+ 関連ソフトウェア
+ http://search.cpan.org/dist/Big5Plus/
+ http://search.cpan.org/dist/EUCJP/
+ http://search.cpan.org/dist/GB18030/
+ http://search.cpan.org/dist/HP15/
+ http://search.cpan.org/dist/INFORMIXV6ALS/
+ http://search.cpan.org/dist/Sjis/
+ http://search.cpan.org/dist/UHC/
+ http://search.cpan.org/dist/UTF2/
+ http://search.cpan.org/dist/jacode/
+
 =head1 謝辞
 
 このソフトウェアは、以下の方々の作成したソフトウェアおよび文書のおかげにより作成
@@ -1282,7 +1302,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
 
  渡辺 博文さん, Jperl
  http://search.cpan.org/~watanabe/
- http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
+ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
  小飼 弾さん, Encode モジュール
  http://search.cpan.org/dist/Encode/
@@ -1295,6 +1315,23 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
 
  Tokyo-pm 保存書庫
  http://mail.pm.org/pipermail/tokyo-pm/
+ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001844.html
+ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
+
+ ruby-list
+ http://blade.nagaokaut.ac.jp/ruby/ruby-list/index.shtml
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/2440
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/2446
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/2569
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/9427
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/9431
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/10500
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/10501
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/10502
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12385
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12392
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/12393
+ http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/19156
 
 =cut
 
