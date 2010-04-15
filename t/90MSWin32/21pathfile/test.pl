@@ -5,7 +5,7 @@ $| = 1;
 
 my @script = map {"$_.pl"} (qw(chmod chown dbmopen do glob lstat open qx rename require stat sysopen system truncate unlink utime));
 for my $perlbin (qw(perl55 perl56 perl58 perl510 perl512)) {
-    next unless `$perlbin -v 2>NUL` =~ /This is perl,/;
+    next unless `$perlbin -v 2>NUL` =~ /This is perl/;
 
     system('echo 1 > F‹@”\\');
 

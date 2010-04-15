@@ -4,7 +4,7 @@ $| = 1;
 chomp(my @script = <DATA>);
 
 for my $perlbin (qw(perl55 perl56 perl58 perl510 perl512)) {
-    next unless `$perlbin -v 2>NUL` =~ /This is perl,/;
+    next unless `$perlbin -v 2>NUL` =~ /This is perl/;
 
     mkdir('hoge', 0777);
     system('echo 1 >hoge\\テストソース.txt');

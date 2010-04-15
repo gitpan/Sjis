@@ -5,7 +5,7 @@ $| = 1;
 
 my @script = map {"$_.pl"} (qw(chdir chmod chown glob mkdir opendir qx rename rmdir system utime));
 for my $perlbin (qw(perl55 perl56 perl58 perl510 perl512)) {
-    next unless `$perlbin -v 2>NUL` =~ /This is perl,/;
+    next unless `$perlbin -v 2>NUL` =~ /This is perl/;
 
     system('mkdir directory >NUL 2>NUL');
     system('mkdir D‹@”\\ >NUL 2>NUL');

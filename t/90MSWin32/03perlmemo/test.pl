@@ -7,7 +7,7 @@ $| = 1;
 chomp(my @script = <DATA>);
 
 for my $perlbin (qw(perl55 perl56 perl58 perl510 perl512)) {
-    next unless `$perlbin -v 2>NUL` =~ /This is perl,/;
+    next unless `$perlbin -v 2>NUL` =~ /This is perl/;
 
     system('echo > F機能\ 2>NUL');
     system('mkdir D機能\ 2>NUL');

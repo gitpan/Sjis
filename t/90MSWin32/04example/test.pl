@@ -82,7 +82,7 @@ dt\“ú–{Œê\sjis.txt:•\
 END
 
 for my $perlbin (qw(perl55 perl56 perl58 perl510 perl512)) {
-    next unless `$perlbin -v 2>NUL` =~ /\G(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?(?:This is perl,)(?{Esjis::m_matched})/;
+    next unless `$perlbin -v 2>NUL` =~ /\G(?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x81-\x9F\xE0-\xFC])*?(?:This is perl)(?{Esjis::m_matched})/;
 
     $_ = `$perlbin grepdir.pl aaa dt 2>NUL`;
     sleep 1;
