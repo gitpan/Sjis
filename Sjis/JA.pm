@@ -21,14 +21,6 @@ Sjis-JA - "Yet Another JPerl" Source code filter to escape ShiftJIS (Japanese do
 
       ※ no Sjis; は利用できません。
 
-      使える関数
-        Sjis::ord(...);
-        Sjis::reverse(...);
-        Sjis::length(...);
-        Sjis::substr(...);
-        Sjis::index(...);
-        Sjis::rindex(...);
-
     コマンドプロンプトで以下のように実行する
       perl     ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
       perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
@@ -38,6 +30,14 @@ Sjis-JA - "Yet Another JPerl" Source code filter to escape ShiftJIS (Japanese do
 
       ? * を使ってワイルドカードの指定ができます
       ' ～ ' を使ってクォートすることができます
+
+      使える関数
+        Sjis::ord(...);
+        Sjis::reverse(...);
+        Sjis::length(...);
+        Sjis::substr(...);
+        Sjis::index(...);
+        Sjis::rindex(...);
 
   ● 使い方: B
 
@@ -56,7 +56,13 @@ Sjis-JA - "Yet Another JPerl" Source code filter to escape ShiftJIS (Japanese do
 適用できるようになりました。
 
 Perl5.8 以降は Encode モジュールによってマルチリンガル処理がサポートされたため、
-jperl は不要になったと言われています。ですが、それは本当なのでしょうか？
+jperl は不要になったと言われています。
+
+JPerl in CPAN Perl Ports (Binary Distributions)
+
+http://www.cpan.org/ports/index.html#jperl
+
+ですが、それは本当なのでしょうか？
 
 日本国内において、汎用大型コンピュータの入出力、パーソナルコンピュータの内部コー
 ドおよび入出力、さらには携帯電話に至るまで、ShiftJIS を基本とした文字コード
@@ -141,20 +147,26 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
 ただし、Filter::Util::Call を利用していない点、Perl の構文を解析して必要に応じて
 エスケープする点が異なります。
 
-=head1 インストール方法
+=head1 インストール方法(makeを使う場合)
 
-   perl Makefile.pl         --- Makefile.pl が make.bat を生成します
-   make.bat install
-   make.bat test
+   perl Makefile.PL
+   make test
+   make install
 
-   make.bat install         --- 現在使用中の perl 環境にインストールします
-   perl58 make.bat install  --- perl5.008 環境にインストールします
-   perl510 make.bat install --- perl5.010 環境にインストールします
-   perl512 make.bat install --- perl5.012 環境にインストールします
-   perl64  make.bat install --- perl64    環境にインストールします
+=head1 インストール方法(makeを使わない場合)
 
-   make.bat dist            --- CPAN 配布用パッケージを作ります
-   make.bat tar.bat         --- tar.bat を作成します
+   perl pMakefile.pl         --- pMakefile.pl が pmake.bat を生成します
+   pmake.bat
+   pmake.bat test
+
+   pmake.bat install          --- 現在使用中の perl 環境にインストールします
+   perl58   pmake.bat install --- perl5.008 環境にインストールします
+   perl510  pmake.bat install --- perl5.010 環境にインストールします
+   perl512  pmake.bat install --- perl5.012 環境にインストールします
+   perl64   pmake.bat install --- perl64    環境にインストールします
+
+   pmake.bat dist             --- CPAN 配布用パッケージを作ります
+   pmake.bat ptar.bat         --- ptar.bat を作成します
 
 =head1 ソフトウェアの一覧
 
@@ -165,13 +177,77 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
    perl512.bat      --- 環境変数 PATH の設定なしに perl5.12 を探して実行する
    perl64.bat       --- 環境変数 PATH の設定なしに perl64   を探して実行する
 
-=head1 文字クラスの定義
+=head1 エスケープによる上位互換性の確保
+
+このソフトウェアは過去のものを壊したりはせず、常に「エスケープ」によって機能を追加
+しています。だから今まで可能であったことが不可能になることはありません。
+このアプローチは、後退が決して許されない分野に有効です。モダンPerlが常に問題を解決
+できるとは限らないのです。
+
+=head1 スクリプトのエスケープ
+
+作成したスクリプトに 'use Sjis;' と書く必要があります。
+
+  ---------------------------------
+  以前        以後
+  ---------------------------------
+  use utf8;   use Sjis;
+  ---------------------------------
+
+=head1 マルチバイト文字のエスケープ
+
+このソフトウェアによって、マルチバイト文字の第2バイトの @  [  \  ]  ^  `  {  |  }
+の直前に chr(0x5c) が挿入されます。対象は以下の箇所です。
+
+=over 2
+
+=item * シングルクォート中の文字列 ('', q{}, <<'END' and qw{})
+
+=item * ダブルクォート中の文字列 ("", qq{}, <<END, <<"END", ``, qx{} and <<`END`)
+
+=item * シングルクォート中の正規表現 (m'', s''', split(''), split(m'') and qr'')
+
+=item * ダブルクォート中の正規表現 (//, m//, ??, s///, split(//), split(m//) and qr//)
+
+=item * tr/// の中の文字 (tr/// and y///)
+
+=back
+
+  例: カタカナの「ソ」コードは "\x83\x5C"
+  
+                  見え方  ダンプ
+  -----------------------------------------
+  source script   "`/"    [83 5c]
+  -----------------------------------------
+ 
+  ここで use Sjis; を実行
+                          ダンプ
+  -----------------------------------------
+  escaped script  "`\/"   [83 [5c] 5c]
+  -----------------------------------------
+                    ^--- Sjis ソフトウェアでエスケープされる
+ 
+  参考            見え方  ダンプ
+  -----------------------------------------
+  your eye's      "`/\"   [83 5c] [5c]
+  -----------------------------------------
+  perl eye's      "`\/"   [83] \[5c]
+  -----------------------------------------
+ 
+                          ダンプ
+  -----------------------------------------
+  in the perl     "`/"    [83] [5c]
+  -----------------------------------------
+
+=head1 文字クラスのエスケープ
 
 過去のperlとの互換性を保つために文字クラスは以下のように再定義されています。
 
   ---------------------------------------------------------------------------
   escape        class
   ---------------------------------------------------------------------------
+   .            (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^\x0A])
+                (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[\x00-\xFF]) (/s 修飾子あり)
   \d            [0-9]
   \s            [\x09\x0A\x0C\x0D\x20]
   \w            [0-9A-Z_a-z]
@@ -193,119 +269,114 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
   \B            (?:(?<=[0-9A-Z_a-z])(?=[0-9A-Z_a-z])|(?:(?<=[\x81-\x9F\xE0-\xFC][\x00-\xFF])|(?<=[^0-9A-Z_a-z]))(?=[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^0-9A-Z_a-z]))
   ---------------------------------------------------------------------------
 
-=head1 JPerl 互換の機能
+=head1 組込み関数のエスケープ
 
-以下の関数は JPerl と同様に機能します。
-このソフトウェアによって書き換わる関数があります。
+このソフトウェアによって関数名の先頭に 'Esjis::' が書き加わりエスケープされます。
+Esjis::* 関数は Esjis.pm が提供します。
 
-=over 2
+  ---------------------------------
+  処理前      処理後
+  ---------------------------------
+  length      length
+  substr      substr
+  pos         pos
+  split       Esjis::split
+  tr///       Esjis::tr
+  tr///b      tr///
+  tr///B      tr///
+  y///        Esjis::tr
+  y///b       tr///
+  y///B       tr///
+  chop        Esjis::chop
+  index       Esjis::index
+  rindex      Esjis::rindex
+  lc          Esjis::lc
+  uc          Esjis::uc
+  chr         Esjis::chr
+  glob        Esjis::glob
+  lstat       Esjis::lstat
+  opendir     Esjis::opendir
+  stat        Esjis::stat
+  unlink      Esjis::unlink
+  chdir       Esjis::chdir
+  do          Esjis::do
+  require     Esjis::require
+  ---------------------------------
 
-=item * シングルクォート中の2オクテットコード文字列の扱い
+  ------------------------------------------------------------------------------------------------------------------------
+  処理前                   処理後
+  ------------------------------------------------------------------------------------------------------------------------
+  use Perl::Module;        BEGIN { Esjis::require 'Perl/Module.pm'; Perl::Module->import() if Perl::Module->can('import'); }
+  use Perl::Module @list;  BEGIN { Esjis::require 'Perl/Module.pm'; Perl::Module->import(@list) if Perl::Module->can('import'); }
+  use Perl::Module ();     BEGIN { Esjis::require 'Perl/Module.pm'; }
+  no Perl::Module;         BEGIN { Esjis::require 'Perl/Module.pm'; Perl::Module->unimport() if Perl::Module->can('unimport'); }
+  no Perl::Module @list;   BEGIN { Esjis::require 'Perl/Module.pm'; Perl::Module->unimport(@list) if Perl::Module->can('unimport'); }
+  no Perl::Module ();      BEGIN { Esjis::require 'Perl/Module.pm'; }
+  ------------------------------------------------------------------------------------------------------------------------
 
-=item * ダブルクォート中の2オクテットコード文字列の扱い
+=head1 ファイルテスト演算子のエスケープ
 
-=item * シングルクォート中の2オクテットコード正規表現の扱い
+このソフトウェアによって関数名の演算子の '-' を 'Esjis::' に書き換わります。
 
-=item * ダブルクォート中の2オクテットコード正規表現の扱い
+  ---------------------------------
+  処理前      処理後
+  ---------------------------------
+  -r          Esjis::r
+  -w          Esjis::w
+  -x          Esjis::x
+  -o          Esjis::o
+  -R          Esjis::R
+  -W          Esjis::W
+  -X          Esjis::X
+  -O          Esjis::O
+  -e          Esjis::e
+  -z          Esjis::z
+  -f          Esjis::f
+  -d          Esjis::d
+  -l          Esjis::l
+  -p          Esjis::p
+  -S          Esjis::S
+  -b          Esjis::b
+  -c          Esjis::c
+  -t          Esjis::t
+  -u          Esjis::u
+  -g          Esjis::g
+  -k          Esjis::k
+  -T          Esjis::T
+  -B          Esjis::B
+  -s          Esjis::s
+  -M          Esjis::M
+  -A          Esjis::A
+  -C          Esjis::C
+  ---------------------------------
 
-=item * chop は Esjis::chop に書き換わります
+=head1 関数名のエスケープ
 
-=item * split は Esjis::split に書き換わります
+もし文字指向の関数を使いたい場合は以下のように記述する必要があります。それぞれ
+の機能については「文字指向の関数」を参照してください。
 
-=item * length はそのままです
+  ---------------------------------
+  バイト指向  文字指向
+  ---------------------------------
+  ord         Sjis::ord
+  reverse     Sjis::reverse
+  length      Sjis::length
+  substr      Sjis::substr
+  index       Sjis::index
+  rindex      Sjis::rindex
+  ---------------------------------
 
-=item * substr はそのままです
+=head1 組込みの標準モジュールのエスケープ
 
-=item * index は Esjis::index に書き換わります
+Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
+モジュールの検索時、最初に '/Perl/site/lib/Sjis' が参照されるようになります。Sjis
+ソフトウェアで使えるように改造した標準モジュールをここに格納して、もとの標準モ
+ジュールをオーバーライドします。
 
-=item * rindex は Esjis::rindex に書き換わります
+=head1 標準モジュールの内容のエスケープ
 
-=item * pos はそのままです
-
-=item * lc は Esjis::lc または Esjis::lc_ に書き換わります
-
-=item * uc は Esjis::uc または Esjis::uc_ に書き換わります
-
-=item * ord はそのままです(インポートしない場合)
-
-=item * reverse はそのままです(インポートしない場合)
-
-=item * tr/// または y/// は Esjis::tr に書き換わります
-
-    /b と /B 修飾子が利用できます。
-
-=item * chdir は Esjis::chdir に書き換わります
-
-    MSWin32 環境の場合は perl5.005 に限り文字コード(0x5C)で終わるパスを扱うこと
-    ができます。
-
-=item * do file は Esjis::do file に書き換わります
-
-=item * require は Esjis::require に書き換わります
-
-=item * use Perl::Module @list; は
-
-    BEGIN { Esjis::require 'Perl/Module.pm'; Perl::Module->import(@list); } に
-    書き換わります。
-
-=item * use Perl::Module (); は
-
-    BEGIN { Esjis::require 'Perl/Module.pm'; } に書き換わります。
-
-=back
-
-=head1 JPerl と上位互換の機能
-
-以下の機能は JPerl と上位互換です。
-
-=over 2
-
-=item * chr は Esjis::chr または Esjis::chr_ に書き換わります
-
-    2オクテットコードに対応しています。
-
-=item * -X (ファイルテスト演算子) は Esjis::X または Esjis::X_ に書き換わります
-
-    例えば読取り可能かどうかをテストする -r は Esjis::r になります。
-
-    MSWin32 環境にて文字コード(0x5C)で終わるパスを扱うことができます。
-
-=item * glob は Esjis::glob または Esjis::glob_ に書き換わります
-
-    @glob = Esjis::glob($string);
-    @glob = Esjis::glob_;
-
-    Esjis::glob は、OS間で可搬性のある拡張されたDOS風グロブ(ワイルドカード)
-    機能を提供します。ディレクトリパスにもワイルドカードが使用でき、大文字か
-    小文字の区別がなく、逆スラッシュとスラッシュが両方使用できます(ただし
-    逆スラッシュは2重にしなければなりません)。
-
-    実行方法は、
-
-    use Sjis;
-    @perlfiles = glob  "..\pe?l/*.p?";
-    print <..\pe?l/*.p?>;
-
-    "~" は現在のユーザのホームディレクトリに展開されます。
-    MSWin32 環境にて文字コード(0x5C)で終わるパスを扱うことができます。
-
-=item * lstat は Esjis::lstat または Esjis::lstat_ に書き換わります
-
-    MSWin32 環境にて文字コード(0x5C)で終わるパスを扱うことができます。
-
-=item * opendir は Esjis::opendir に書き換わります
-
-    MSWin32 環境にて文字コード(0x5C)で終わるパスを扱うことができます。
-
-=item * stat は Esjis::stat または Esjis::stat_ に書き換わります
-
-    MSWin32 環境にて文字コード(0x5C)で終わるパスを扱うことができます。
-
-=item * unlink は Esjis::unlink に書き換わります
-
-    MSWin32 環境にて文字コード(0x5C)で終わるパスを扱うことができます。
-
-=back
+標準モジュールのファイルを /Perl/site/lib/Sjis にコピーして 'use utf8;' を
+'use Sjis;' に書き換えます。必要に応じてその他の書換えを行ってください。
 
 =head1 文字指向の関数
 
@@ -464,6 +535,12 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
 
     オリジナルの Perl と機能が同じです(ShiftJIS に対応していません)。
 
+=item * m/$re/o, s/$re/foo/o, qr/$re/o の /o 修飾子
+
+    perl5.006 にて /o 修飾子が期待通りの動作をしませんでした。変数 $re の値が
+    変更されると次回の実行時にその変更が反映されます。でも /o を使うときは $re
+    の内容を変更しないでしょうから、実際に問題になることはないでしょう。
+
 =item * chdir
 
     MSWin32 環境の perl5.006, perl5.008, perl5.010, perl5.012 にて文字コード(0x5C)
@@ -474,11 +551,16 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
     chdir does not work with chr(0x5C) at end of path
     http://bugs.activestate.com/show_bug.cgi?id=81839
 
-=item * m/$re/o, s/$re/foo/o, qr/$re/o の /o 修飾子
+=item * 後読み言明
 
-    perl5.006 にて /o 修飾子が期待通りの動作をしませんでした。変数 $re の値が
-    変更されると次回の実行時にその変更が反映されます。でも /o を使うときは $re
-    の内容を変更しないでしょうから、実際に問題になることはないでしょう。
+    後読み言明(例えば (?<=[A-Z]))が直前の二バイト文字の第二バイトに誤ってマッチ
+    することには対処されていません。
+    例えば、'アイウ' =~ /(?<=[A-Z])([アイウ])/ を実行するとマッチして $1 は 'イ'
+    になりますが、これは正しくありません。
+
+=item * 左辺値としての Sjis::substr
+
+Sjis::substr は CORE::substr とは異なり、左辺値として扱うことができません。
 
 =item * 特殊変数 $` と $& は機能しません
 
@@ -493,8 +575,8 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
  
     その部分も $& に含まれてしまうからです。
     上記の実行結果は以下のようになります。 
-      $' は ''       ('AAA' を希望)
-      $& は 'AAABBB' ('BBB' を希望)
+      $' は ''       ('AAA' を期待)
+      $& は 'AAABBB' ('BBB' を期待)
       $` は 'CCC'
  
     解決方法
@@ -518,7 +600,6 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
 =head1 作者
 
 このプロジェクトは 稲葉 準 ina@cpan.org によって始まりました。
-このファイルを分かち合いましょう。
 
 =head1 著作権
 
@@ -1102,13 +1183,13 @@ Unicode サポートが perl に導入される以前は、eq 演算子は、2つのスカラー変数によっ
 
                                    GOAL#1  GOAL#2
                             (a)     (b)     (c)     (d)     (e)
-         ┌───────┬───┬───┬───┬───┬───┐
-         │ データ       │ Old  │ Old  │ New  │ Old  │ New  │
-         ├───────┼───┼───┴───┼───┴───┤
-         │ スクリプト   │ Old  │     Old      │     New      │
-         ├───────┼───┼───────┴───────┤
-         │ インタプリタ │ Old  │             New              │
-         └───────┴───┴───────────────┘
+          +--------------+-------+-------+-------+-------+-------+
+          | data         |  Old  |  Old  |  New  |  Old  |  New  |
+          +--------------+-------+-------+-------+-------+-------+
+          | script       |  Old  |      Old      |      New      |
+          +--------------+-------+---------------+---------------+
+          | interpreter  |  Old  |              New              |
+          +--------------+-------+-------------------------------+
           Old --- 既存のバイト指向
           New --- 新しい文字指向
 
@@ -1117,14 +1198,14 @@ Unicode サポートが perl に導入される以前は、eq 演算子は、2つのスカラー変数によっ
     このソフトウェア、および存在していた JPerl を書き足してみましょう。
 
                             (a)     (b)     (c)     (d)     (e)
-                                           JPerl          Encode,Sjis
-         ┌───────┬───┬───┬───┬───┬───┐
-         │ データ       │ Old  │ Old  │ New  │ Old  │ New  │
-         ├───────┼───┼───┴───┼───┴───┤
-         │ スクリプト   │ Old  │     Old      │     New      │
-         ├───────┼───┼───────┴───────┤
-         │ インタプリタ │ Old  │             New              │
-         └───────┴───┴───────────────┘
+                                          JPerl           Encode,Sjis
+          +--------------+-------+-------+-------+-------+-------+
+          | data         |  Old  |  Old  |  New  |  Old  |  New  |
+          +--------------+-------+-------+-------+-------+-------+
+          | script       |  Old  |      Old      |      New      |
+          +--------------+-------+---------------+---------------+
+          | interpreter  |  Old  |              New              |
+          +--------------+-------+-------------------------------+
           Old --- 既存のバイト指向
           New --- 新しい文字指向
 
@@ -1160,21 +1241,22 @@ Unicode サポートが perl に導入される以前は、eq 演算子は、2つのスカラー変数によっ
     あり続けるべきである。
 
     JPerl は Perl 言語を分岐させないようにするために、インタプリタを分岐させました。
-    でも Perl コアチームはインタプリタの分岐を望んでいないのでしょう。
+    でも Perl コアチームはインタプリタの分岐を望んでいないのでしょう。結果的にPerl
+    言語が分岐し、コミュニティは縮小を余儀なくされました。
 
-    バイト指向の Perl はすでにバイナリデータを扱うことができるため、文字指向の
-    Perl を別立てで作成する必要はありません。このソフトウェアは単なる Perl のアプ
+    バイト指向の perl はすでにバイナリデータを扱うことができるため、文字指向の
+    perl を別立てで作成する必要はありません。このソフトウェアは単なる Perl のアプ
     リケーションプログラムであり、フィルタプログラムとして作成されています。
     基本的には perl が実行できる環境ならば動作するでしょう。
 
-    それに問題を perl スクリプトで解決するなら、Perl コミュニティがサポートして
-    くれることでしょう。
+    それに問題を Perl スクリプトで解決しようとするなら、Perl コミュニティのサポート
+    を得られるでしょう。
 
 =item * ゴール5
 
     JPerl ユーザが Perl で JPerl を保守できるようになる。
 
-    たぶん、そしてきっと。
+    JPerl がいつもあなたのそばにありますように ...
 
 =back
 
@@ -1329,6 +1411,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
 
  貞廣 知行さん, Shift-JISテキストを正しく扱う
  http://homepage1.nifty.com/nomenclator/perl/shiftjis.htm
+ http://search.cpan.org/dist/ShiftJIS-Regexp/
 
  まつもと ゆきひろさん, Ruby on Perl(s)
  http://www.rubyist.net/~matz/slides/yapc2006/
@@ -1351,6 +1434,11 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  渡辺 博文さん, Jperl
  http://search.cpan.org/~watanabe/
  ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
+
+ 石垣 憲一さん, Pod-PerldocJp, モダンPerlの世界へようこそ
+ http://search.cpan.org/dist/Pod-PerldocJp/
+ http://gihyo.jp/dev/serial/01/modern-perl/0031
+ http://gihyo.jp/dev/serial/01/modern-perl/0032
 
  小飼 弾さん, Encode モジュール
  http://search.cpan.org/dist/Encode/
