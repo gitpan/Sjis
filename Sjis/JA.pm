@@ -380,6 +380,8 @@ Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
 
 =head1 文字指向の関数
 
+=over 2
+
 =item * ord は Sjis::ord または Sjis::ord_ に書き換わります
 
     "use Sjis qw(ord);" によって ord は Sjis::ord に書き換わるようになります。
@@ -560,7 +562,7 @@ Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
 
 =item * 左辺値としての Sjis::substr
 
-Sjis::substr は CORE::substr とは異なり、左辺値として扱うことができません。
+    Sjis::substr は CORE::substr とは異なり、左辺値として扱うことができません。
 
 =item * 特殊変数 $` と $& は機能しません
 
