@@ -563,6 +563,10 @@ Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
 =item * 左辺値としての Sjis::substr
 
     Sjis::substr は CORE::substr とは異なり、左辺値として扱うことができません。
+    文字列の一部分を変更したい場合は、Sjis::substr の4番目の引数として置換え後の
+    文字列を指定します。
+    
+    Sjis::substr($string, 13, 4, "JPerl");
 
 =item * 特殊変数 $` と $& は機能しません
 
