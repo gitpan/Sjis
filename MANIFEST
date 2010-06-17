@@ -1,6 +1,5 @@
-lib/Sjis.pm
-lib/Esjis.pm
-lib/Sjis/JA.pm
+Sjis.pm
+Esjis.pm
 perl58.bat
 perl510.bat
 perl512.bat
@@ -12,6 +11,7 @@ MANIFEST
 test.pl
 README
 META.yml
+Sjis/JA.pm
 t/001_shiftjishtm.t
 t/002_shiftjishtm.t
 t/003_shiftjishtm.t
