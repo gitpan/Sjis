@@ -1445,6 +1445,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  http://search.cpan.org/dist/Pod-PerldocJp/
  http://gihyo.jp/dev/serial/01/modern-perl/0031
  http://gihyo.jp/dev/serial/01/modern-perl/0032
+ http://gihyo.jp/dev/serial/01/modern-perl/0033
 
  小飼 弾さん, Encode モジュール
  http://search.cpan.org/dist/Encode/
