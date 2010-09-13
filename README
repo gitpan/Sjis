@@ -1,6 +1,6 @@
 NAME
 
-      Sjis - "Yet Another JPerl" Source code filter for ShiftJIS script
+      Sjis - Source code filter for ShiftJIS script
 
 SYNOPSIS
 
@@ -29,11 +29,13 @@ SYNOPSIS
 
 DESCRIPTION
 
-      This software is "Yet Another JPerl" written by Perl.
+      This software is "JPerl on the Modern Perl" written by Perl.
 
       This "JPerl" means "Japanized Perl" or "Japanese Perl".
-      So is unrelated to Mr. Patrick E. Martin's JPerl -- Perl 5 implemented in Java.
-      And is unrelated to Mr. Ben Evans's jPerl -- Perl on the JVM, too.
+      So is unrelated to ...
+        Mr. Patrick E. Martin's JPerl -- Perl 5 implemented in Java
+        Mr. Ben Evans's jPerl -- Perl on the JVM
+        Mr. James C. Estill's jperl --- Jamie's PERL scripts for bioinformatics
 
       This software treats ShiftJIS directly. Therefore, there is not UTF8 flag.
 

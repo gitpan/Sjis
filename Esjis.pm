@@ -23,7 +23,7 @@ BEGIN {
 
 BEGIN { eval q{ use vars qw($VERSION $_warning) } }
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.63 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.64 $ =~ m/(\d+)/xmsg;
 
 # poor Symbol.pm - substitute of real Symbol.pm
 BEGIN {
@@ -262,8 +262,12 @@ sub Esjis::tr($$$$;$);
 sub Esjis::chop(@);
 sub Esjis::index($$;$);
 sub Esjis::rindex($$;$);
+sub Esjis::lcfirst(@);
+sub Esjis::lcfirst_();
 sub Esjis::lc(@);
 sub Esjis::lc_();
+sub Esjis::ucfirst(@);
+sub Esjis::ucfirst_();
 sub Esjis::uc(@);
 sub Esjis::uc_();
 sub Esjis::capture($);
@@ -714,6 +718,27 @@ sub Esjis::rindex($$;$) {
         );
     }
 
+    # lower case first with parameter
+    sub Esjis::lcfirst(@) {
+        if (@_) {
+            my $s = shift @_;
+            if (@_ and wantarray) {
+                return Esjis::lc(CORE::substr($s,0,1)) . CORE::substr($s,1), @_;
+            }
+            else {
+                return Esjis::lc(CORE::substr($s,0,1)) . CORE::substr($s,1);
+            }
+        }
+        else {
+            return Esjis::lc(CORE::substr($_,0,1)) . CORE::substr($_,1);
+        }
+    }
+
+    # lower case first without parameter
+    sub Esjis::lcfirst_() {
+        return Esjis::lc(CORE::substr($_,0,1)) . CORE::substr($_,1);
+    }
+
     # lower case with parameter
     sub Esjis::lc(@) {
         if (@_) {
@@ -780,6 +805,27 @@ sub Esjis::rindex($$;$) {
             "\xFD" => "\xDD", # LATIN LETTER Y WITH ACUTE
             "\xFE" => "\xDE", # LATIN LETTER THORN (Icelandic)
         );
+    }
+
+    # upper case first with parameter
+    sub Esjis::ucfirst(@) {
+        if (@_) {
+            my $s = shift @_;
+            if (@_ and wantarray) {
+                return Esjis::uc(CORE::substr($s,0,1)) . CORE::substr($s,1), @_;
+            }
+            else {
+                return Esjis::uc(CORE::substr($s,0,1)) . CORE::substr($s,1);
+            }
+        }
+        else {
+            return Esjis::uc(CORE::substr($_,0,1)) . CORE::substr($_,1);
+        }
+    }
+
+    # upper case first without parameter
+    sub Esjis::ucfirst_() {
+        return Esjis::uc(CORE::substr($_,0,1)) . CORE::substr($_,1);
     }
 
     # upper case with parameter
@@ -4244,8 +4290,12 @@ Esjis - Run-time routines for Sjis.pm
     Esjis::rindex(...);
     Esjis::lc(...);
     Esjis::lc_;
+    Esjis::lcfirst(...);
+    Esjis::lcfirst_;
     Esjis::uc(...);
     Esjis::uc_;
+    Esjis::ucfirst(...);
+    Esjis::ucfirst_;
     Esjis::capture(...);
     Esjis::ignorecase(...);
     Esjis::chr(...);
@@ -4390,6 +4440,15 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   Returns a lowercase version of ShiftJIS string (or $_, if omitted). This is the
   internal function implementing the \L escape in double-quoted strings.
 
+=item Lower case first character of string
+
+  $lcfirst = Esjis::lcfirst($string);
+  $lcfirst = Esjis::lcfirst_;
+
+  Returns a version of ShiftJIS string (or $_, if omitted) with the first character
+  lowercased. This is the internal function implementing the \l escape in double-
+  quoted strings.
+
 =item Upper case string
 
   $uc = Esjis::uc($string);
@@ -4398,6 +4457,15 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   Returns an uppercased version of ShiftJIS string (or $_, if string is omitted).
   This is the internal function implementing the \U escape in double-quoted
   strings.
+
+=item Upper case first character of string
+
+  $ucfirst = Esjis::ucfirst($string);
+  $ucfirst = Esjis::ucfirst_;
+
+  Returns a version of ShiftJIS string (or $_, if omitted) with the first character
+  uppercased. This is the internal function implementing the \u escape in double-
+  quoted strings.
 
 =item Make capture number
 

@@ -7,7 +7,7 @@ __END__
 
 =head1 ソフトウェア名称
 
-Sjis-JA - "Yet Another JPerl" Source code filter to escape ShiftJIS (Japanese document)
+Sjis-JA - Source code filter to escape ShiftJIS (Japanese document)
 
 =head1 概要
 
@@ -181,8 +181,7 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
 
 このソフトウェアは過去のものを壊したりはせず、常に「エスケープ」によって機能を追加
 しています。だから今まで可能であったことが不可能になることはありません。
-このアプローチは、後退が決して許されない分野に有効です。モダンPerlが常に問題を解決
-できるとは限らないのです。
+このアプローチは、後退が決して許されない分野に有効です。
 
 =head1 スクリプトのエスケープ
 
@@ -191,7 +190,7 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
   ---------------------------------
   以前        以後
   ---------------------------------
-  use utf8;   use Sjis;
+  (なし)      use Sjis;
   ---------------------------------
 
 =head1 マルチバイト文字のエスケープ
@@ -291,7 +290,9 @@ Esjis::* 関数は Esjis.pm が提供します。
   index       Esjis::index
   rindex      Esjis::rindex
   lc          Esjis::lc
+  lcfirst     Esjis::lcfirst
   uc          Esjis::uc
+  ucfirst     Esjis::ucfirst
   chr         Esjis::chr
   glob        Esjis::glob
   lstat       Esjis::lstat
@@ -316,7 +317,7 @@ Esjis::* 関数は Esjis.pm が提供します。
 
 =head1 ファイルテスト演算子のエスケープ
 
-このソフトウェアによって関数名の演算子の '-' を 'Esjis::' に書き換わります。
+このソフトウェアによって演算子の '-' を 'Esjis::' に書き換わります。
 
   ---------------------------------
   処理前      処理後
@@ -382,7 +383,7 @@ Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
 
 =over 2
 
-=item * ord は Sjis::ord または Sjis::ord_ に書き換わります
+=item * Sjis::ord
 
     "use Sjis qw(ord);" によって ord は Sjis::ord に書き換わるようになります。
 
@@ -395,7 +396,7 @@ Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
     この動作は JPerl と非互換なので明示的にインポートした場合のみ機能するように
     なっています。
 
-=item * reverse は Sjis::reverse に書き換わります
+=item * Sjis::reverse
 
     "use Sjis qw(reverse);" によって reverse は Sjis::reverse に書き換わるよう
     になります。
@@ -1363,7 +1364,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
 
  正規表現クックブック
  Jan Goyvaerts, Steven Levithan 著, 長尾 高弘 訳
- 2010年04月14日 発売予定
+ 2010年04月 発行
  552ページ
  ISBN978-4-87311-450-7
  http://www.oreilly.co.jp/books/9784873114507/
@@ -1386,16 +1387,22 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  T1008901080816 雑誌08901-8
  http://ascii.asciimw.jp/books/magazines/unix.shtml
 
- 関連ソフトウェア
+ Sjis ソフトウェアファミリー
+ http://search.cpan.org/dist/Big5HKSCS/
  http://search.cpan.org/dist/Big5Plus/
  http://search.cpan.org/dist/EUCJP/
  http://search.cpan.org/dist/GB18030/
  http://search.cpan.org/dist/HP15/
  http://search.cpan.org/dist/INFORMIXV6ALS/
+ http://search.cpan.org/dist/Latin1/
+ http://search.cpan.org/dist/OldUTF8/
  http://search.cpan.org/dist/Sjis/
  http://search.cpan.org/dist/UHC/
  http://search.cpan.org/dist/UTF2/
+
+ 関連ソフトウェア
  http://search.cpan.org/dist/jacode/
+ http://search.cpan.org/dist/Char/
 
 =head1 謝辞
 
@@ -1425,8 +1432,11 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  藤岡 和夫さん, jperlユーザーのために
  http://homepage1.nifty.com/kazuf/jperl.html
 
+ Bruce., Unicode in Perl
+ http://www.rakunet.org/TSNET/TSabc/18/546.html
+
  和泉 宏明さん, WindowsでPerl 5.8/5.10を使うモンじゃない
- http://www.aritia.org/hizumi/perl/perlwin.html
+ http://www.aritia.jp/hizumi/oldtext/perlwin.html
 
  塚本 牧生さん, Perlメモ/Windowsでのファイルパス
  http://digit.que.ne.jp/work/wiki.cgi?Perl%E3%83%A1%E3%83%A2%2FWindows%E3%81%A7%E3%81%AE%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%83%91%E3%82%B9
@@ -1455,6 +1465,9 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
 
  daily dayflower, 2008-06-25 perluniadvice
  http://d.hatena.ne.jp/dayflower/20080625/1214374293
+
+ Jesse Vincent, Compatibility is a virtue
+ http://www.nntp.perl.org/group/perl.perl5.porters/2010/05/msg159825.html
 
  Tokyo-pm 保存書庫
  http://mail.pm.org/pipermail/tokyo-pm/
