@@ -67,12 +67,14 @@ To install this software without make, type the following:
 
 PROGRAM COMPOSITION
 
-   Sjis.pm         --- source code filter to escape ShiftJIS
-   Esjis.pm        --- run-time routines for Sjis.pm
-   perl58.bat      --- find and run perl5.8  without %PATH% settings
-   perl510.bat     --- find and run perl5.10 without %PATH% settings
-   perl512.bat     --- find and run perl5.12 without %PATH% settings
-   perl64.bat      --- find and run perl64   without %PATH% settings
+   Sjis.pm               --- source code filter to escape ShiftJIS
+   Esjis.pm              --- run-time routines for Sjis.pm
+   perl58.bat            --- find and run perl5.8  without %PATH% settings
+   perl510.bat           --- find and run perl5.10 without %PATH% settings
+   perl512.bat           --- find and run perl5.12 without %PATH% settings
+   perl64.bat            --- find and run perl64   without %PATH% settings
+   warnings.pm_          --- poor warnings.pm
+   warnings/register.pm_ --- poor warnings/register.pm
 
 DEPENDENCIES
 

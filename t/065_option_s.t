@@ -30,7 +30,7 @@ for $i (1 .. 3) {
             print qq{ok - $tno \$a =~ s/\$re/‚ /o (\$re=$re)(\$a=$a) $^X $__FILE__\n};
         }
         else {
-            if ($] =~ /^5\.006/) {
+            if ($] =~ /^5\.006001/) {
                 print qq{ok - $tno # SKIP \$a =~ s/\$re/‚ /o (\$re=$re)(\$a=$a) $^X $__FILE__\n};
             }
             else {

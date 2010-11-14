@@ -39,6 +39,24 @@ Sjis-JA - Source code filter to escape ShiftJIS (Japanese document)
         Sjis::index(...);
         Sjis::rindex(...);
 
+      Perl5.6 エミュレーション関数
+        binmode(...);
+        open(...);
+
+      以下はダミー関数として
+        utf8::upgrade(...);
+        utf8::downgrade(...);
+        utf8::encode(...);
+        utf8::decode(...);
+        utf8::is_utf8(...);
+        utf8::valid(...);
+        bytes::chr(...);
+        bytes::index(...);
+        bytes::length(...);
+        bytes::ord(...);
+        bytes::rindex(...);
+        bytes::substr(...);
+
   ● 使い方: B
 
     コマンドプロンプトで以下のように実行する
@@ -315,6 +333,21 @@ Esjis::* 関数は Esjis.pm が提供します。
   no Perl::Module ();      BEGIN { Esjis::require 'Perl/Module.pm'; }
   ------------------------------------------------------------------------------------------------------------------------
 
+=head1 bytes::* 関数のアンエスケープ
+
+このソフトウェアによって bytes::* 関数の先頭の 'bytes::' が取り除かれます。
+
+  ------------------------------------
+  処理前           処理後
+  ------------------------------------
+  bytes::chr       chr
+  bytes::index     index
+  bytes::length    length
+  bytes::ord       ord
+  bytes::rindex    rindex
+  bytes::substr    substr
+  ------------------------------------
+
 =head1 ファイルテスト演算子のエスケープ
 
 このソフトウェアによって演算子の '-' を 'Esjis::' に書き換わります。
@@ -433,13 +466,11 @@ Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
 
     文字列の長さを、文字単位ではなく、バイト単位で数えるには
 
-    $blen = length $string;
+    $blen = length($string);
+    $blen = CORE::length($string);
+    $blen = bytes::length($string);
 
-    あるいは
-
-    $blen = CORE::length $string;
-
-    とします。
+    のいずれかを使います。
 
 =item * Sjis::substr
 
@@ -515,6 +546,208 @@ Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
 
 =back
 
+=head1 perl5.005 による Perl5.6 エミュレーション
+
+  perl5.005 を利用している際に Perl5.6 の関数の動作をエミュレートします。
+
+  --------------------------------------------------------------------
+  処理前          処理後                 Esjis.pm の BEGIN { } で設定
+  --------------------------------------------------------------------
+  binmode(...);   Esjis::binmode(...);   *CORE::GLOBAL::binmode = ...
+  open(...);      Esjis::open(...);      *CORE::GLOBAL::open    = ...
+  --------------------------------------------------------------------
+
+=head1 無視する utf8 プラグマ
+
+  utf8 プラグマ、bytes プラグマはコメントアウトされます。同ファイルで提供されて
+  いる関数の代わりとして Esjis.pm がダミー関数を提供します。
+
+  ---------------------------------------------------------------------
+  処理前          処理後                 説明
+  ---------------------------------------------------------------------
+  use utf8;       # use utf8;            Esjis.pm は no utf8; されている
+  no utf8;        # no utf8;             ときも utf8::* 関数を提供します
+  use bytes;      # use bytes;           Esjis.pm は no bytes; されている
+  no bytes;       # no bytes;            ときも bytes::* 関数を提供します
+  ---------------------------------------------------------------------
+
+=over 2
+
+=item binmode (perl5.005 による Perl5.6 エミュレーション)
+
+  binmode(FILEHANDLE, $disciplines);
+  binmode(FILEHANDLE);
+  binmode($filehandle, $disciplines);
+  binmode($filehandle);
+
+  * 2 つの引数が使えます
+
+  perl5.005 上で実行した場合は、Perl5.6 の binmode 関数の機能をエミュレートします。
+  以下は要点のみの記述なので、詳細は perlfunc/binmode を参照してください。
+
+   ファイルハンドル FILEHANDLE に対して、$disciplines 引数で指定された扱いを行うよ
+  うにする。$disciplines を省略すると、ファイルハンドルを ':raw' として扱うように
+  する。FILEHANDLE が式だった場合、その値がファイルハンドルの名前またはファイルハン
+  ドルへのリファレンスとして扱われる。
+
+   binmode 関数は、ファイルを open してから、そのファイルハンドルに対して実際の I/O
+  操作を行うまでの間に、実行しなければならない。さまざまなモードが、バッファ内のさ
+  まざまなデータに対して、さまざまな加工を行うために、ファイルのモードをリセットす
+  るには、そのファイルをオープンしなおす以外に方法はない。
+
+   ":raw" ディシプリンは、Perl がデータの中身に手出ししないようにするためのものであ
+  る。各ディシプリンがどのように動作するかについては open 関数の項を参照してくだ
+  さい。
+
+=item open (perl5.005 による Perl5.6 エミュレーション)
+
+  open(FILEHANDLE, $mode, @list);
+  open(FILEHANDLE, $expr);
+  open(FILEHANDLE);
+  open(my $filehandle, $mode, @list);
+  open(my $filehandle, $expr);
+  open(my $filehandle);
+
+  * ファイルハンドルを自動生成(autovivification)します
+  * 3 つの引数が使えます
+
+  perl5.005 上で実行した場合は、Perl5.6 の open 関数の機能をエミュレートします。
+  以下は要点のみの記述なので、詳細は perlfunc/open を参照してください。
+
+   この例が示すように、たいていの場合、FILEHANDLE 引数は単純な識別子(普通は大文字
+  のみから成る)であるが、その値がファイルハンドルへのリファレンスになるような式を
+  指定することもできる。(このリファレンスには、ファイルハンドル名に対するシンボ
+  リックリファレンス、またはファイルハンドルと解釈できる任意のオブジェクトへの
+  ハードリファレンスを指定できる。)これは間接ファイルハンドル(indirect filehandle)
+  と呼ばれる。第1引数として FILEHANDLE を受け取るすべての関数は、ファイルハンドル
+  の代わりに、間接ファイルハンドルを受け取ることができる。しかし open の場合は特別
+  で、間接ファイルハンドルとして未定義の変数を指定すると、Perl は自動的にその変数
+  を定義して、自動生成によって、適切なファイルハンドルへのリファレンスをセットして
+  くれる。この利点の1つとしては、ファイルハンドルがどこからも参照されなくなる(典型
+  的には、その変数のスコープから抜け出した場合)と、自動的にクローズされるということ
+  が挙げられる。
+
+  {
+      my $fh;                   # (初期化していない)
+      open($fh, ">logfile")     # $fh は自動生成される
+          or die "Can't create logfile: $!";
+          ...                   # $fh を使って処理を行う
+  }                             # $fh はここでクローズされる
+
+  また、次のようにして、open 関数を呼び出す際に my $fh 宣言を行えば、さらに読みやす
+  くなる:
+
+  open my $fh, ">logfile" or die ...
+
+   ここで、ファイル名の先頭にある ">" は、モードの一例である。歴史的な話をすると、最
+  初に用意された open は2引数のものであった。最近、導入された3引数の open では、モー
+  ドをファイル名から独立して別個に指定できるので、これらが混同されることがないという
+  利点がある。例えば、次に示すコードでは、">" で始まる名前を持つファイルをオープン
+  するわけではないことがわかる。このコードでは、$mode として ">" が指定されているの
+  で、$expr で指定された名前を持つファイルを書き込み用にオープンしようとする。
+  その際に、もしファイルが存在しなければ新たに作成し、すでにファイルが存在すれば、
+  そのファイルを切り捨てて空にする:
+  
+  open(LOG, ">", "logfile")  or die "Can't create logfile: $!";
+
+   1引数と2引数の open では、文字列変数をファイル名として使う際には注意が必要である。
+  なぜなら、変数は得体の知れないあらゆる文字を含んでいる可能性があるからだ(特に、イ
+  ンターネットの得体の知れないユーザからファイル名を受け取る場合)。十分に注意しない
+  と、ファイル名の一部が、$mode 文字列、無視される空白文字、dup 指定子(>& など)、
+  マイナス "-" と解釈されてしまう可能性がある。次に示すのは、このトラブルを避けるた
+  めに、伝統的に行われてきたやり方の1つである。
+
+  $path =~ s#^([ ])#./$1#;
+  open (FH, "< $path\0") or die "can't open $path: $!";
+
+   しかし、これにもまだいくつか問題がある。代わりに、3引数の open を使うようにすれ
+  ば、セキュリティ上のリスクにさらされずに、任意のファイル名を、クリーンに扱うこと
+  ができる:
+
+  open(FH, "<", $path) or die "can't open $path: $!";
+
+   また、Perl のリリース 5.6 では、open 関数でバイナリモードを指定できるようになっ
+  ているので、わざわざ binmode 関数を別に呼び出さずに済む。$mode 引数の一部として、
+  種々の入力ディシプリンと出力ディシプリンを指定することができる(3引数の場合のみ)。
+  binmode と等価なことをするには、3引数の open を使って、他の $mode 文字の後ろに
+  :raw ディシプリンを指定すればよい:
+
+  open(FH, "<:raw", $path) or die "can't open $path: $!";
+
+  表 1. I/O ディシプリン
+  -------------------------------------------------
+  ディシプリン    意味
+  -------------------------------------------------
+  :raw            バイナリモード、何も手を加えない
+  :crlf           改行文字を判別する
+  :encoding(...)  エンコーディング名を指定する
+  -------------------------------------------------
+
+   (そうすることに意味があるならば)ディシプリンを積み重ねることもできる。例えば、次
+  のような指定も可能である:
+
+  open(FH, "<:crlf:encoding(Sjis)", $path) or die "can't open $path: $!";
+
+=item ダミーの関数 utf8::upgrade
+
+  $num_octets = utf8::upgrade($string);
+
+  $string のオクテット数を返します。
+
+=item ダミーの関数 utf8::downgrade
+
+  $success = utf8::downgrade($string[, FAIL_OK]);
+
+  この関数は常に真の値を返します。
+
+=item ダミーの関数 utf8::encode
+
+  utf8::encode($string);
+
+  この関数は何も返しません。
+
+=item ダミーの関数 utf8::decode
+
+  $success = utf8::decode($string);
+
+  この関数は常に真の値を返します。
+
+=item ダミーの関数 utf8::is_utf8
+
+  $flag = utf8::is_utf8(STRING);
+
+  この関数は常に偽の値を返します。
+
+=item ダミーの関数 utf8::valid
+
+  $flag = utf8::valid(STRING);
+
+  この関数は常に真の値を返します。
+
+=item ダミーの関数 bytes::chr
+
+  バイト指向の関数 chr として実装されています。
+
+=item ダミーの関数 bytes::index
+
+  バイト指向の関数 index として実装されています。
+
+=item ダミーの関数 bytes::length
+
+  バイト指向の関数 length として実装されています。
+
+=item ダミーの関数 bytes::ord
+
+  バイト指向の関数 ord として実装されています。
+
+=item ダミーの関数 bytes::rindex
+
+  バイト指向の関数 rindex として実装されています。
+
+=item ダミーの関数 bytes::substr
+
+  バイト指向の関数 substr として実装されています。
+
 =head1 環境変数
 
  このソフトウェアは排他制御に flock 関数を使用します。ファイルが読取り可能になるまで
@@ -537,12 +770,6 @@ Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
 =item * format
 
     オリジナルの Perl と機能が同じです(ShiftJIS に対応していません)。
-
-=item * m/$re/o, s/$re/foo/o, qr/$re/o の /o 修飾子
-
-    perl5.006 にて /o 修飾子が期待通りの動作をしませんでした。変数 $re の値が
-    変更されると次回の実行時にその変更が反映されます。でも /o を使うときは $re
-    の内容を変更しないでしょうから、実際に問題になることはないでしょう。
 
 =item * chdir
 
@@ -1459,6 +1686,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
 
  小飼 弾さん, Encode モジュール
  http://search.cpan.org/dist/Encode/
+ http://www.dan.co.jp/~dankogai/yapcasia2006/slide.html
 
  Juerd, Perl Unicode Advice
  http://juerd.nl/site.plp/perluniadvice
@@ -1474,7 +1702,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  http://mail.pm.org/pipermail/tokyo-pm/1999-September/001844.html
  http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
 
- ruby-list
+ ruby-list (現在は 404 Not Found になってしまう)
  http://blade.nagaokaut.ac.jp/ruby/ruby-list/index.shtml
  http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/2440
  http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/2446

@@ -50,7 +50,7 @@ for $i (1 .. 2) {
         print qq{ok - $tno "ソアア" =~ m/\\Q\$re\\E/o $^X $__FILE__\n};
     }
     else {
-        if ($] =~ /^5\.006/) {
+        if ($] =~ /^5\.006001/) {
             print qq{ok - $tno # SKIP "ソアア" =~ m/\\Q\$re\\E/o $^X $__FILE__\n};
         }
         else {
@@ -67,7 +67,7 @@ for $i (1 .. 2) {
         print qq{ok - $tno "ソアア" !~ m/\\Q\$re\\E/o $^X $__FILE__\n};
     }
     else {
-        if ($] =~ /^5\.006/) {
+        if ($] =~ /^5\.006001/) {
             print qq{ok - $tno # SKIP "ソアア" !~ m/\\Q\$re\\E/o $^X $__FILE__\n};
         }
         else {
