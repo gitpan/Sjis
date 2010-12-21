@@ -6,6 +6,11 @@ print "1..1\n";
 
 my $__FILE__ = __FILE__;
 
+if ($^O eq 'MacOS') {
+    print "ok - 1 # SKIP $^X $0\n";
+    exit;
+}
+
 open(TMP,'>Kanji_xxx.tmp') || die "Can't open file: Kanji_xxx.tmp\n";
 print TMP <<EOL;
 ‚ ‚¢‚¤    align

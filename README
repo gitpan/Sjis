@@ -13,11 +13,11 @@ SYNOPSIS
       use Sjis version qw(ord reverse);
 
     And on command prompt:
-      perl     ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl510  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl512  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl64   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl     ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl510  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl512  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl64   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
 
   Usage: B
 

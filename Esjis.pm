@@ -17,7 +17,7 @@ use 5.00503;
 # (and so on)
 
 BEGIN { eval q{ use vars qw($VERSION) } }
-$VERSION = sprintf '%d.%02d', q$Revision: 0.68 $ =~ m/(\d+)/xmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.69 $ =~ m/(\d+)/xmsg;
 
 # use strict qw(subs vars);
 BEGIN {
@@ -26,7 +26,12 @@ BEGIN {
 
 BEGIN {
     my $PERL5LIB = __FILE__;
-    $PERL5LIB =~ s{[^/]*$}{Sjis};
+    if ($^O eq 'MacOS') {
+        $PERL5LIB =~ s{[^:]+$}{Sjis:};
+    }
+    else {
+        $PERL5LIB =~ s{[^/]*$}{Sjis};
+    }
     unshift @INC, $PERL5LIB;
 }
 
@@ -35,7 +40,7 @@ BEGIN {
     # instead of utf8.pm
     eval q{
         no warnings qw(redefine);
-        *utf8::upgrade   = sub { length $_[0] };
+        *utf8::upgrade   = sub { CORE::length $_[0] };
         *utf8::downgrade = sub { 1 };
         *utf8::encode    = sub {   };
         *utf8::decode    = sub { 1 };
@@ -43,7 +48,7 @@ BEGIN {
         *utf8::valid     = sub { 1 };
     };
     if ($@) {
-        *utf8::upgrade   = sub { length $_[0] };
+        *utf8::upgrade   = sub { CORE::length $_[0] };
         *utf8::downgrade = sub { 1 };
         *utf8::encode    = sub {   };
         *utf8::decode    = sub { 1 };
@@ -3511,12 +3516,28 @@ sub _dosglob {
     # in Chapter 7. File Access
     # of ISBN 0-596-00313-7 Perl Cookbook, 2nd Edition.
     #
-    # and File::HomeDir::Windows module
+    # and File::HomeDir, File::HomeDir::Windows module
 
     # DOS like system
     if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
         $expr =~ s{ \A ~ (?= [^/\\] ) }
                   { $ENV{'HOME'} || $ENV{'USERPROFILE'} || "$ENV{'HOMEDRIVE'}$ENV{'HOMEPATH'}" }oxmse;
+    }
+
+    # Mac OS system
+    elsif ($^O eq 'MacOS') {
+        if ($expr =~ m/ \A ~ /oxms) {
+            if ($ENV{'HOME'} || $ENV{'LOGDIR'}) {
+                $expr =~ s{ \A ~ (?= [^/:] ) }
+                          { $ENV{'HOME'} || $ENV{'LOGDIR'} }oxmse;
+            }
+            else {
+                eval q{ require Mac::Files; };
+                die if $@;
+                $expr =~ s{ \A ~ (?= [^/:] ) }
+                          { Mac::Files::FindFolder(Mac::Files::kOnSystemDisk(), Mac::Files::kDesktopFolderType()) }oxmse;
+            }
+        }
     }
 
     # UNIX like system
@@ -3531,7 +3552,19 @@ sub _dosglob {
 
     # if we're just beginning, do it all first
     if ($iter{$cxix} == 0) {
-        $entries{$cxix} = [ _do_glob(1, _parse_line($expr)) ];
+        if ($^O eq 'MacOS') {
+
+            # first, take care of updirs and trailing colons
+            my @expr = _canonpath_MacOS(_parse_line($expr));
+
+            # expand volume names
+            @expr = _expand_volume_MacOS(@expr);
+
+            $entries{$cxix} = (@expr) ? [ map { _unescape_MacOS($_) } _do_glob_MacOS(1,@expr) ] : [()];
+        }
+        else {
+            $entries{$cxix} = [ _do_glob(1, _parse_line($expr)) ];
+        }
     }
 
     # chuck it all out, quick or slow
@@ -3645,16 +3678,15 @@ OUTER:
         my $pattern = '';
         while ($expr =~ m/ \G ($q_char) /oxgc) {
             my $char = $1;
-            my $uc = Esjis::uc($char);
-            if ($uc ne $char) {
-                $pattern .= $uc;
-            }
-            elsif ($char eq '*') {
+            if ($char eq '*') {
                 $pattern .= "(?:$your_char)*",
             }
             elsif ($char eq '?') {
                 $pattern .= "(?:$your_char)?",  # DOS style
 #               $pattern .= "(?:$your_char)",   # UNIX style
+            }
+            elsif ((my $uc = Esjis::uc($char)) ne $char) {
+                $pattern .= $uc;
             }
             else {
                 $pattern .= quotemeta $char;
@@ -3738,6 +3770,286 @@ sub _parse_path {
     my $tail = pop @subpath;
     my $head = join $pathsep, @subpath;
     return $head, $tail;
+}
+
+#
+# ShiftJIS path globbing on Mac OS
+#
+sub _do_glob_MacOS {
+
+    my($cond,@expr) = @_;
+    my @glob = ();
+
+OUTER_MACOS:
+    for my $expr (@expr) {
+        next OUTER_MACOS if not defined $expr;
+        next OUTER_MACOS if $expr eq '';
+
+        my @matched = ();
+        my @globdir = ();
+        my $head    = ':';
+        my $unesc_head = $head;
+        my $pathsep = ':';
+        my $tail;
+
+        # if $expr is within quotes strip em and do no globbing
+        if ($expr =~ m/\A " ((?:$q_char)*) " \z/oxms) {
+            $expr = $1;
+
+            # $expr may contain escaped metachars '\*', '\?' and '\'
+            $expr = _unescape_MacOS($expr);
+
+            if ($cond eq 'd') {
+                if (Esjis::d $expr) {
+                    push @glob, $expr;
+                }
+            }
+            else {
+                if (Esjis::e $expr) {
+                    push @glob, $expr;
+                }
+            }
+            next OUTER_MACOS;
+        }
+
+        # note: $1 is not greedy
+        if (($head,$pathsep,$tail) = $expr =~ m{\A ((?:$q_char)*?) (:+) ((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^:])*) \z}oxms) {
+            if ($tail eq '') {
+                push @glob, $expr;
+                next OUTER_MACOS;
+            }
+            if (_hasmeta_MacOS($head)) {
+                if (@globdir = _do_glob_MacOS('d', $head)) {
+                    push @glob, _do_glob_MacOS($cond, map {"$_$pathsep$tail"} @globdir);
+                    next OUTER_MACOS;
+                }
+            }
+            $head .= $pathsep;
+
+            # unescape $head for file operations
+            $unesc_head = _unescape_MacOS($head);
+
+            $expr = $tail;
+        }
+
+        # If file component has no wildcards, we can avoid opendir
+        if (not _hasmeta_MacOS($expr)) {
+            if ($head eq ':') {
+                $unesc_head = $head = '';
+            }
+            $head .= $expr;
+
+            # unescape $head and $expr for file operations
+            $unesc_head .= _unescape_MacOS($expr);
+
+            if ($cond eq 'd') {
+                if (Esjis::d $unesc_head) {
+                    push @glob, $head;
+                }
+            }
+            else {
+                if (Esjis::e $unesc_head) {
+                    push @glob, $head;
+                }
+            }
+            next OUTER_MACOS;
+        }
+        Esjis::opendir(*DIR, $head) or next OUTER_MACOS;
+        my @leaf = readdir DIR;
+        closedir DIR;
+
+        my $pattern = _quotemeta_MacOS($expr);
+        my $matchsub = sub { Esjis::uc($_[0]) =~ m{\A $pattern \z}xms };
+
+#       if ($@) {
+#           print STDERR "$0: $@\n";
+#           next OUTER_MACOS;
+#       }
+
+INNER_MACOS:
+        for my $leaf (@leaf) {
+            if ($leaf eq '.' or $leaf eq '..') {
+                next INNER_MACOS;
+            }
+            if ($cond eq 'd' and not Esjis::d qq{$unesc_head$leaf}) {
+                next INNER_MACOS;
+            }
+
+            if (&$matchsub($leaf)) {
+                if (($unesc_head eq ':') and (Esjis::f qq{$unesc_head$leaf})) {
+                }
+                else {
+                    $leaf = $unesc_head . $leaf;
+                }
+
+                # On Mac OS, the two glob metachars '*' and '?' and the escape
+                # char '\' are valid characters for file and directory names.
+                # We have to escape and treat them specially.
+                push @matched, _escape_MacOS($leaf);
+                next INNER_MACOS;
+            }
+        }
+        if (@matched) {
+            push @glob, @matched;
+        }
+    }
+    return @glob;
+}
+
+#
+# _expand_volume_MacOS() will only be used on Mac OS (OS9 or older):
+# Takes an array of original patterns as argument and returns an array of
+# possibly modified patterns. Each original pattern is processed like
+# that:
+# + If there's a volume name in the pattern, we push a separate pattern
+#   for each mounted volume that matches (with '*', '?' and '\' escaped).
+# + If there's no volume name in the original pattern, it is pushed
+#   unchanged.
+# Note that the returned array of patterns may be empty.
+#
+sub _expand_volume_MacOS {
+
+    eval q{ require MacPerl; };
+    die if $@;
+
+    my @volume_glob = @_;
+    my @expand_volume = ();
+    for my $volume_glob (@volume_glob) {
+
+        # volume name in pattern
+        if ($volume_glob =~ m/\A ((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^:])+:) (.*) \z/oxms) {
+            my $pattern = _quotemeta_MacOS($1);
+            my $tail = $2;
+
+            for my $volume (map { MacPerl::MakePath($_) } MacPerl::Volumes()) {
+                if ($volume =~ m{\A $pattern \z}xmsi) {
+
+                    # On Mac OS, the two glob metachars '*' and '?' and the
+                    # escape char '\' are valid characters for volume names.
+                    # We have to escape and treat them specially.
+                    push @expand_volume, _escape_MacOS($volume) . $tail;
+                }
+            }
+        }
+
+        # no volume name in pattern
+        else {
+            push @expand_volume, $volume_glob;
+        }
+    }
+    return @expand_volume;
+}
+
+#
+# _canonpath_MacOS() will only be used on Mac OS (OS9 or older):
+# Resolves any updirs in the pattern. Removes a single trailing colon
+# from the pattern, unless it's a volume name pattern like "*HD:"
+#
+sub _canonpath_MacOS {
+    my(@expr) = @_;
+
+    for my $expr (@expr) {
+
+        # resolve any updirs, e.g. "*HD:t?p::a*" -> "*HD:a*"
+        1 while ($expr =~ s/\A ((?:$q_char)*) : (?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^:])+ :: ((?:$q_char)*?) \z/$1:$2/oxms);
+
+        # remove a single trailing colon, e.g. ":*:" -> ":*"
+        $expr =~ s/ : ((?:[\x81-\x9F\xE0-\xFC][\x00-\xFF]|[^:])+) : \z/:$1/oxms;
+    }
+    return @expr;
+}
+
+#
+# _escape_MacOS() will only be used on Mac OS (OS9 or older):
+# Escape metachars '*', '?' and '\' of arguments.
+#
+sub _escape_MacOS {
+    my($expr) = @_;
+
+    # escape regex metachars but not '\' and glob chars '*', '?'
+    my $escape = '';
+    while ($expr =~ m/ \G ($q_char) /oxmsgc) {
+        my $char = $1;
+        if ($char =~ m/\A [*?\\] \z/oxms) {
+            $escape .= '\\' . $char;
+        }
+        else {
+            $escape .= $char;
+        }
+    }
+    return $escape;
+}
+
+#
+# _unescape_MacOS() will only be used on Mac OS (OS9 or older):
+# Unescapes a list of arguments which may contain escaped
+# metachars '*', '?' and '\'.
+#
+sub _unescape_MacOS {
+    my($expr) = @_;
+
+    my $unescape = '';
+    while ($expr =~ m/ \G (\\[*?\\] | $q_char) /oxmsgc) {
+        my $char = $1;
+        if ($char =~ m/\A \\([*?\\]) \z/oxms) {
+            $unescape .= $1;
+        }
+        else {
+            $unescape .= $char;
+        }
+    }
+    return $unescape;
+}
+
+#
+# _hasmeta_MacOS() will only be used on Mac OS (OS9 or older):
+#
+sub _hasmeta_MacOS {
+    my($expr) = @_;
+
+    # if a '*' or '?' is preceded by an odd count of '\', temporary delete
+    # it (and its preceding backslashes), i.e. don't treat '\*' and '\?' as
+    # wildcards
+    while ($expr =~ m/ \G (\\[*?\\] | $q_char) /oxgc) {
+        my $char = $1;
+        if ($char eq '*') {
+            return 1;
+        }
+        elsif ($char eq '?') {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+#
+# _quotemeta_MacOS() will only be used on Mac OS (OS9 or older):
+#
+sub _quotemeta_MacOS {
+    my($expr) = @_;
+
+    # escape regex metachars but not '\' and glob chars '*', '?'
+    my $quotemeta = '';
+    while ($expr =~ m/ \G (\\[*?\\] | $q_char) /oxgc) {
+        my $char = $1;
+        if ($char =~ m/\A \\[*?\\] \z/oxms) {
+            $quotemeta .= $char;
+        }
+        elsif ($char eq '*') {
+            $quotemeta .= "(?:$your_char)*",
+        }
+        elsif ($char eq '?') {
+            $quotemeta .= "(?:$your_char)?",  # DOS style
+#           $quotemeta .= "(?:$your_char)",   # UNIX style
+        }
+        elsif ((my $uc = Esjis::uc($char)) ne $char) {
+            $quotemeta .= $uc;
+        }
+        else {
+            $quotemeta .= quotemeta $char;
+        }
+    }
+    return $quotemeta;
 }
 
 #
@@ -3955,7 +4267,13 @@ sub Esjis::do($) {
 ITER_DO:
     {
         for my $prefix (@INC) {
-            $realfilename = "$prefix/$filename";
+            if ($^O eq 'MacOS') {
+                $realfilename = "$prefix$filename";
+            }
+            else {
+                $realfilename = "$prefix/$filename";
+            }
+
             if (Esjis::f($realfilename)) {
 
                 my $script = '';
@@ -3972,7 +4290,13 @@ ITER_DO:
                 if (Esjis::e("$realfilename.e")) {
                     my $fh = gensym();
                     if (CORE::open $fh, "$realfilename.e") {
-                        if (exists $ENV{'SJIS_NONBLOCK'}) {
+                        if ($^O eq 'MacOS') {
+                            eval q{
+                                require Mac::Files;
+                                Mac::Files::FSpSetFLock("$realfilename.e");
+                            };
+                        }
+                        elsif (exists $ENV{'SJIS_NONBLOCK'}) {
 
                             # 7.18. Locking a File
                             # in Chapter 7. File Access
@@ -3991,6 +4315,12 @@ ITER_DO:
                         }
                         local $/ = undef; # slurp mode
                         $script = <$fh>;
+                        if ($^O eq 'MacOS') {
+                            eval q{
+                                require Mac::Files;
+                                Mac::Files::FSpRstFLock("$realfilename.e");
+                            };
+                        }
                         close $fh;
                     }
                 }
@@ -4005,10 +4335,16 @@ ITER_DO:
                         CORE::require Sjis;
                         $script = Sjis::escape_script($script);
                         my $fh = gensym();
-                        if ((eval q{ use Fcntl qw(O_WRONLY O_CREAT); 1 } and CORE::sysopen($fh, "$realfilename.e", &O_WRONLY|&O_CREAT))
-                            or CORE::open($fh, ">$realfilename.e")
+                        if ((eval q{ use Fcntl qw(O_WRONLY O_APPEND O_CREAT); 1 } and CORE::sysopen($fh, "$realfilename.e", &O_WRONLY|&O_APPEND|&O_CREAT))
+                            or CORE::open($fh, ">>$realfilename.e")
                         ) {
-                            if (exists $ENV{'SJIS_NONBLOCK'}) {
+                            if ($^O eq 'MacOS') {
+                                eval q{
+                                    require Mac::Files;
+                                    Mac::Files::FSpSetFLock("$realfilename.e");
+                                };
+                            }
+                            elsif (exists $ENV{'SJIS_NONBLOCK'}) {
                                 eval q{
                                     unless (flock($fh, LOCK_EX | LOCK_NB)) {
                                         carp "$__FILE__: Can't immediately write-lock the file: $realfilename.e";
@@ -4019,11 +4355,15 @@ ITER_DO:
                             else {
                                 eval q{ flock($fh, LOCK_EX) };
                             }
-
                             truncate($fh, 0) or croak "$__FILE__: Can't truncate file: $realfilename.e";
                             seek($fh, 0, 0)  or croak "$__FILE__: Can't seek file: $realfilename.e";
-
                             print {$fh} $script;
+                            if ($^O eq 'MacOS') {
+                                eval q{
+                                    require Mac::Files;
+                                    Mac::Files::FSpRstFLock("$realfilename.e");
+                                };
+                            }
                             close $fh;
                         }
                     }
@@ -4070,7 +4410,13 @@ sub Esjis::require(;$) {
 ITER_REQUIRE:
     {
         for my $prefix (@INC) {
-            $realfilename = "$prefix/$_";
+            if ($^O eq 'MacOS') {
+                $realfilename = "$prefix$_";
+            }
+            else {
+                $realfilename = "$prefix/$_";
+            }
+
             if (Esjis::f($realfilename)) {
 
                 my $script = '';
@@ -4087,7 +4433,13 @@ ITER_REQUIRE:
                 if (Esjis::e("$realfilename.e")) {
                     my $fh = gensym();
                     CORE::open($fh, "$realfilename.e") or croak "Can't open file: $realfilename.e";
-                    if (exists $ENV{'SJIS_NONBLOCK'}) {
+                    if ($^O eq 'MacOS') {
+                        eval q{
+                            require Mac::Files;
+                            Mac::Files::FSpSetFLock("$realfilename.e");
+                        };
+                    }
+                    elsif (exists $ENV{'SJIS_NONBLOCK'}) {
                         eval q{
                             unless (flock($fh, LOCK_SH | LOCK_NB)) {
                                 carp "$__FILE__: Can't immediately read-lock the file: $realfilename.e";
@@ -4100,6 +4452,12 @@ ITER_REQUIRE:
                     }
                     local $/ = undef; # slurp mode
                     $script = <$fh>;
+                    if ($^O eq 'MacOS') {
+                        eval q{
+                            require Mac::Files;
+                            Mac::Files::FSpRstFLock("$realfilename.e");
+                        };
+                    }
                     close($fh) or croak "Can't close file: $realfilename";
                 }
                 else {
@@ -4113,14 +4471,18 @@ ITER_REQUIRE:
                         CORE::require Sjis;
                         $script = Sjis::escape_script($script);
                         my $fh = gensym();
-
-                        if (eval q{ use Fcntl qw(O_WRONLY O_CREAT); 1 } and CORE::sysopen($fh,"$realfilename.e",&O_WRONLY|&O_CREAT)) {
+                        if (eval q{ use Fcntl qw(O_WRONLY O_APPEND O_CREAT); 1 } and CORE::sysopen($fh,"$realfilename.e",&O_WRONLY|&O_APPEND|&O_CREAT)) {
                         }
                         else {
-                            CORE::open($fh, ">$realfilename.e") or croak "Can't write open file: $realfilename.e";
+                            CORE::open($fh, ">>$realfilename.e") or croak "Can't write open file: $realfilename.e";
                         }
-
-                        if (exists $ENV{'SJIS_NONBLOCK'}) {
+                        if ($^O eq 'MacOS') {
+                            eval q{
+                                require Mac::Files;
+                                Mac::Files::FSpSetFLock("$realfilename.e");
+                            };
+                        }
+                        elsif (exists $ENV{'SJIS_NONBLOCK'}) {
                             eval q{
                                 unless (flock($fh, LOCK_EX | LOCK_NB)) {
                                     carp "$__FILE__: Can't immediately write-lock the file: $realfilename.e";
@@ -4131,11 +4493,15 @@ ITER_REQUIRE:
                         else {
                             eval q{ flock($fh, LOCK_EX) };
                         }
-
                         truncate($fh, 0) or croak "$__FILE__: Can't truncate file: $realfilename.e";
                         seek($fh, 0, 0)  or croak "$__FILE__: Can't seek file: $realfilename.e";
-
                         print {$fh} $script;
+                        if ($^O eq 'MacOS') {
+                            eval q{
+                                require Mac::Files;
+                                Mac::Files::FSpRstFLock("$realfilename.e");
+                            };
+                        }
                         close($fh) or croak "Can't close file: $realfilename";
                     }
                 }
@@ -4306,15 +4672,6 @@ sub Esjis::open(*;$@) {
     else {
         croak "$0: usage: open(FILEHANDLE [,MODE [,EXPR]])";
     }
-}
-
-#
-# escape shell command line
-#
-sub escapeshellcmd {
-    my($word) = @_;
-    $word =~ s/([\t\n\r\x20!"#\$%&'()*+;<=>?\[\\\]^`{|}~\x7F\xFF])/\\$1/g;
-    return $word;
 }
 
 #
@@ -4812,11 +5169,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   successive name on each call. If $string is omitted, $_ is globbed instead.
   This function function when the pathname ends with chr(0x5C) on MSWin32.
 
-  For example, C<<..\\l*b\\file/*glob.p?>> will work as expected (in that it will
-  find something like '..\lib\File/DosGlob.pm' alright). Note that all path
-  components are case-insensitive, and that backslashes and forward slashes are
-  both accepted, and preserved. You may have to double the backslashes if you are
-  putting them in literally, due to double-quotish parsing of the pattern by perl.
+  For example, C<<..\\l*b\\file/*glob.p?>> on MSWin32 or UNIX will work as
+  expected (in that it will find something like '..\lib\File/DosGlob.pm'
+  alright).
+  On the MacOS, C<<::l*b:file:*glob.p?>> will work as it.
+  Note that all path components are
+  case-insensitive, and that backslashes and forward slashes are both accepted,
+  and preserved. You may have to double the backslashes if you are putting them in
+  literally, due to double-quotish parsing of the pattern by perl.
   A tilde ("~") expands to the current user's home directory.
 
   Spaces in the argument delimit distinct patterns, so C<glob('*.exe *.dll')> globs

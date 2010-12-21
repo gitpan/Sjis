@@ -19,7 +19,7 @@ use Esjis;
 
 BEGIN { eval q{ use vars qw($VERSION $_warning) } }
 
-$VERSION = sprintf '%d.%02d', q$Revision: 0.68 $ =~ m/(\d+)/oxmsg;
+$VERSION = sprintf '%d.%02d', q$Revision: 0.69 $ =~ m/(\d+)/oxmsg;
 
 # poor Symbol.pm - substitute of real Symbol.pm
 BEGIN {
@@ -248,13 +248,21 @@ if (Esjis::e("$filename.e")) {
 if (not Esjis::e("$filename.e")) {
     my $fh = gensym();
 
-    if (eval q{ use Fcntl qw(O_WRONLY O_CREAT); 1 } and CORE::sysopen($fh,"$filename.e",&O_WRONLY|&O_CREAT)) {
+    if (eval q{ use Fcntl qw(O_WRONLY O_APPEND O_CREAT); 1 } and CORE::sysopen($fh,"$filename.e",&O_WRONLY|&O_APPEND|&O_CREAT)) {
     }
     else {
-        CORE::open($fh, ">$filename.e") or die "$__FILE__: Can't write open file: $filename.e";
+        CORE::open($fh, ">>$filename.e") or die "$__FILE__: Can't write open file: $filename.e";
     }
 
-    if (exists $ENV{'SJIS_NONBLOCK'}) {
+    if (0) {
+    }
+    elsif ($^O eq 'MacOS') {
+        eval q{
+            require Mac::Files;
+            Mac::Files::FSpSetFLock("$filename.e");
+        };
+    }
+    elsif (exists $ENV{'SJIS_NONBLOCK'}) {
 
         # 7.18. Locking a File
         # in Chapter 7. File Access
@@ -280,6 +288,14 @@ if (not Esjis::e("$filename.e")) {
 
     my $mode = (Esjis::stat($filename))[2] & 0777;
     chmod $mode, "$filename.e";
+
+    if ($^O eq 'MacOS') {
+        eval q{
+            require Mac::Files;
+            Mac::Files::FSpRstFLock("$filename.e");
+        };
+    }
+
     close($fh) or die "$__FILE__: Can't close file: $filename.e";
 }
 
@@ -292,7 +308,16 @@ local @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
 my $fh = gensym();
 CORE::open($fh, "$filename.e") or die "$__FILE__: Can't read open file: $filename.e";
-if (exists $ENV{'SJIS_NONBLOCK'}) {
+
+if (0) {
+}
+elsif ($^O eq 'MacOS') {
+    eval q{
+        require Mac::Files;
+        Mac::Files::FSpSetFLock("$filename.e");
+    };
+}
+elsif (exists $ENV{'SJIS_NONBLOCK'}) {
     eval q{
         unless (flock($fh, LOCK_SH | LOCK_NB)) {
             warn "$__FILE__: Can't immediately read-lock the file: $filename.e";
@@ -309,13 +334,30 @@ if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
     exit system map {m/ $your_gap [ ] /oxms ? qq{"$_"} : $_} $^X, "$filename.e", @ARGV;
 }
 
-# UNIX like system
-else {
-    exit system map { escapeshellcmd($_) }                   $^X, "$filename.e", @ARGV;
+# MacOS system
+elsif ($^O eq 'MacOS') {
+    my $system = system map { _escapeshellcmd_MacOS($_) }    $^X, "$filename.e", @ARGV;
+    eval q{
+        require Mac::Files;
+        Mac::Files::FSpRstFLock("$filename.e");
+    };
+    exit $system;
 }
 
-# escape shell command line
-sub escapeshellcmd {
+# UNIX-like system
+else {
+    exit system map { _escapeshellcmd($_) }                  $^X, "$filename.e", @ARGV;
+}
+
+# escape shell command line on Mac OS
+sub _escapeshellcmd_MacOS {
+    my($word) = @_;
+    $word =~ s/(["`{\xB6])/\xB6$1/g;
+    return qq{"$word"};
+}
+
+# escape shell command line on UNIX-like system
+sub _escapeshellcmd {
     my($word) = @_;
     $word =~ s/([\t\n\r\x20!"#\$%&'()*+;<=>?\[\\\]^`{|}~\x7F\xFF])/\\$1/g;
     return $word;
@@ -4491,9 +4533,7 @@ sub e_split_q {
 sub e_require {
     my($module) = @_;
 
-    my $expr = $module;
-    $expr =~ s#::#/#g;
-    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+    my $expr = _pathof($module);
 
     return qq<Esjis::require '$expr';>;
 }
@@ -4504,13 +4544,10 @@ sub e_require {
 sub e_use_noimport {
     my($module) = @_;
 
-    my $expr = $module;
-    $expr =~ s#::#/#g;
-    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+    my $expr = _pathof($module);
 
     my $fh = gensym();
-    for my $prefix (@INC) {
-        my $realfilename = "$prefix/$expr";
+    for my $realfilename (_realfilename($expr)) {
 
         if (CORE::open($fh, $realfilename)) {
             local $/ = undef; # slurp mode
@@ -4533,13 +4570,10 @@ sub e_use_noimport {
 sub e_no_nounimport {
     my($module) = @_;
 
-    my $expr = $module;
-    $expr =~ s#::#/#g;
-    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+    my $expr = _pathof($module);
 
     my $fh = gensym();
-    for my $prefix (@INC) {
-        my $realfilename = "$prefix/$expr";
+    for my $realfilename (_realfilename($expr)) {
 
         if (CORE::open($fh, $realfilename)) {
             local $/ = undef; # slurp mode
@@ -4562,13 +4596,10 @@ sub e_no_nounimport {
 sub e_use_noparam {
     my($module) = @_;
 
-    my $expr = $module;
-    $expr =~ s#::#/#g;
-    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+    my $expr = _pathof($module);
 
     my $fh = gensym();
-    for my $prefix (@INC) {
-        my $realfilename = "$prefix/$expr";
+    for my $realfilename (_realfilename($expr)) {
 
         if (CORE::open($fh, $realfilename)) {
             local $/ = undef; # slurp mode
@@ -4597,13 +4628,10 @@ sub e_use_noparam {
 sub e_no_noparam {
     my($module) = @_;
 
-    my $expr = $module;
-    $expr =~ s#::#/#g;
-    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+    my $expr = _pathof($module);
 
     my $fh = gensym();
-    for my $prefix (@INC) {
-        my $realfilename = "$prefix/$expr";
+    for my $realfilename (_realfilename($expr)) {
 
         if (CORE::open($fh, $realfilename)) {
             local $/ = undef; # slurp mode
@@ -4632,13 +4660,10 @@ sub e_no_noparam {
 sub e_use {
     my($module,$list) = @_;
 
-    my $expr = $module;
-    $expr =~ s#::#/#g;
-    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+    my $expr = _pathof($module);
 
     my $fh = gensym();
-    for my $prefix (@INC) {
-        my $realfilename = "$prefix/$expr";
+    for my $realfilename (_realfilename($expr)) {
 
         if (CORE::open($fh, $realfilename)) {
             local $/ = undef; # slurp mode
@@ -4661,13 +4686,10 @@ sub e_use {
 sub e_no {
     my($module,$list) = @_;
 
-    my $expr = $module;
-    $expr =~ s#::#/#g;
-    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+    my $expr = _pathof($module);
 
     my $fh = gensym();
-    for my $prefix (@INC) {
-        my $realfilename = "$prefix/$expr";
+    for my $realfilename (_realfilename($expr)) {
 
         if (CORE::open($fh, $realfilename)) {
             local $/ = undef; # slurp mode
@@ -4682,6 +4704,37 @@ sub e_no {
     }
 
     return qq<no $module $list;>;
+}
+
+#
+# file path of module
+#
+sub _pathof {
+    my($expr) = @_;
+
+    if ($^O eq 'MacOS') {
+        $expr =~ s#::#:#g;
+    }
+    else {
+        $expr =~ s#::#/#g;
+    }
+    $expr .= '.pm' if $expr !~ m/ \.pm \z/oxmsi;
+
+    return $expr;
+}
+
+#
+# real file name of module
+#
+sub _realfilename {
+    my($expr) = @_;
+
+    if ($^O eq 'MacOS') {
+        return map {"$_$expr"} @INC;
+    }
+    else {
+        return map {"$_/$expr"} @INC;
+    }
 }
 
 1;
@@ -4757,6 +4810,7 @@ In this country, ShiftJIS is widely used on mainframe I/O, the personal computer
 and the cellular phone. This software treats ShiftJIS directly. Therefor there is
 not UTF8 flag.
 
+A difficult solution makes the problem more difficult.
 Shall we escape from the encode problem?
 
 =head1 Yet Another Future Of
@@ -5401,6 +5455,17 @@ Back to and see 'Escaping Your Script'. Enjoy hacking!!
  
  (The value '1' doesn't have the meaning)
 
+=head1 MacJPerl on the MacOS
+
+ The functions of MacJPerl was mimicked referring to the books and web.
+ It is welcome if there is a bug report.
+ 
+ The following software is necessary to execute Sjis software.
+ 1. MacPerl module
+ 2. Mac::Files module
+ 3. ToolServer
+ 4. MPW(Macintosh Programmer's Workshop)
+
 =head1 BUGS AND LIMITATIONS
 
 Please patches and report problems to author are welcome.
@@ -5494,6 +5559,22 @@ just compared the byte-strings represented by two scalars. Beginning
 with perl 5.8, eq compares two byte-strings with simultaneous
 consideration of the UTF8 flag.
 
+  Information processing model beginning with perl 5.8
+ 
+    +----------------------+---------------------+
+    |     Text strings     |                     |
+    +----------+-----------|    Binary strings   |
+    |   UTF8   |  Latin-1  |                     |
+    +----------+-----------+---------------------+
+    | UTF8     |            Not UTF8             |
+    | Flagged  |            Flagged              |
+    +--------------------------------------------+
+    http://perl-users.jp/articles/advent-calendar/2010/casual/4
+ 
+    You should memorize this figure.
+ 
+    (Why is only Latin-1 special?)
+
 This change consequentially made a big gap between a past script and
 new script. Both scripts cannot re-use the code mutually any longer.
 Because a new method puts a strain in the programmer, it will still take
@@ -5503,6 +5584,19 @@ The biggest problem of new method is that the UTF8 flag can't synchronize
 to real encode of string. Thus you must debug about UTF8 flag, before
 your script. How to solve it by returning to a past method, I will quote
 page 402 of Programming Perl, 3rd ed. again.
+
+  Information processing model beginning with this software
+ 
+    +-----------------------------------+
+    |           Octet Strings           | aka Binary strings
+    +-----------------------------------+
+    |         Character Strings         | aka Text strings
+    +-----------------------------------+
+    |      ASCII Compatible Encoding    | ex. ShiftJIS
+    +-----------------------------------+
+                (No UTF8 Flag)
+ 
+    You need not memorize this figure.
 
 Ideally, I'd like to achieve these five Goals:
 
@@ -5599,6 +5693,7 @@ problem by the Perl script.
 =item Goal #5:
 
 JPerl users will be able to maintain JPerl by Perl.
+Or MacJPerl users will be able to maintain MacJPerl by MacPerl.
 
 May the JPerl be with you, always.
 
@@ -5716,6 +5811,13 @@ programming environment like at that time.
  T1008901080816 ZASSHI 08901-8
  http://ascii.asciimw.jp/books/magazines/unix.shtml
 
+ MacPerl Power and Ease
+ By Vicki Brown, Chris Nandor
+ April 1998
+ Pages: 350
+ ISBN 10: 1881957322 | ISBN 13: 978-1881957324
+ http://www.amazon.com/Macperl-Power-Ease-Vicki-Brown/dp/1881957322
+
  Sjis software family
  http://search.cpan.org/dist/Big5HKSCS/
  http://search.cpan.org/dist/Big5Plus/
@@ -5781,6 +5883,9 @@ I am thankful to all persons.
  http://search.cpan.org/~watanabe/
  ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
+ Chuck Houpt, Michiko Nozu, MacJPerl
+ http://habilis.net/macjperl/index.j.html
+
  Kenichi Ishigaki, Pod-PerldocJp, Welcome to modern Perl world
  http://search.cpan.org/dist/Pod-PerldocJp/
  http://gihyo.jp/dev/serial/01/modern-perl/0031
@@ -5805,7 +5910,7 @@ I am thankful to all persons.
  http://mail.pm.org/pipermail/tokyo-pm/1999-September/001844.html
  http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
 
- ruby-list (now 404 Not Found)
+ ruby-list
  http://blade.nagaokaut.ac.jp/ruby/ruby-list/index.shtml
  http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/2440
  http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/2446

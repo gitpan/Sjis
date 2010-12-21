@@ -3,10 +3,17 @@ die "This file is not encoded in ShiftJIS.\n" if q{あ} ne "\x82\xa0";
 
 # 一般的なファイル名と chr(0x5C) で終わるファイル名のファイルテストの結果が一致することの確認
 
-my $__FILE__ = __FILE__;
-
 use Sjis;
 print "1..52\n";
+
+my $__FILE__ = __FILE__;
+
+if ($^O eq 'MacOS') {
+    for my $tno (1..52) {
+        print "ok - $tno # SKIP $^X $0\n";
+    }
+    exit;
+}
 
 my $chcp = `chcp`;
 if ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms or $chcp !~ /932/oxms) {

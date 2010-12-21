@@ -22,11 +22,11 @@ Sjis-JA - Source code filter to escape ShiftJIS (Japanese document)
       ※ no Sjis; は利用できません。
 
     コマンドプロンプトで以下のように実行する
-      perl     ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl510  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl512  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
-      perl64   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  are  ok  ...
+      perl     ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl510  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl512  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl64   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
 
       ? * を使ってワイルドカードの指定ができます
       ' ～ ' を使ってクォートすることができます
@@ -87,6 +87,7 @@ http://www.cpan.org/ports/index.html#jperl
 が広く使われています。このソフトウェアはその ShiftJIS を直接扱います。そのため
 UTF8 フラグはありません。
 
+複雑な解法は問題をより複雑にします。
 あなたもエンコードの問題からエスケープしませんか？
 
 =head1 もうひとつの未来
@@ -123,7 +124,7 @@ ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
 =item * 過去のデータ、スクリプト、ノウハウと互換性を保てる
 
-=item * Sjis.pm と Esjis.pm だけで機能する(他のモジュールがなくとも動きます)
+=item * UNIX風OS、DOS風OSの場合は、Sjis.pm と Esjis.pm だけで機能する
 
 =item * UTF8 フラグを扱わないですむ(perlunitut と perluniadvice の対応は不要)
 
@@ -761,6 +762,17 @@ Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
 
  (値 '1' は意味を持たないので何でも構いません)
 
+=head1 MacJPerl の機能
+
+ 図書と Web 上の情報を参考にして MacOS に対応してみました。実機がないためにテストが
+ できていません。動作報告、バグ報告等頂けるととてもありがたいです。
+ 
+ 実行には以下のソフトウェアが必要です。
+ 1. MacPerl モジュール
+ 2. Mac::Files モジュール
+ 3. ToolServer
+ 4. MPW(Macintosh Programmer's Workshop)
+
 =head1 バグと制限事項
 
 バグ報告、パッチを歓迎します。
@@ -1377,6 +1389,22 @@ Unicode サポートが perl に導入される以前は、eq 演算子は、2つのスカラー変数によっ
 て表されたバイト列をただ比べていました。perl5.8 以降、eq は、2つのバイト列を比べる
 と同時に UTF8 フラグを考慮します。
 
+  perl5.8 以降の情報処理モデル
+ 
+    +----------------------+---------------------+
+    |    テキストデータ    |                     |
+    +----------+-----------|   バイナリデータ    |
+    |   UTF8   |  Latin-1  |                     |
+    +----------+-----------+---------------------+
+    | UTF8     |            UTF8                 |
+    | フラグON |            フラグ OFF           |
+    +--------------------------------------------+
+    http://perl-users.jp/articles/advent-calendar/2010/casual/4
+ 
+    この図を覚えないとプログラムを書けません。
+ 
+    (どうして Latin-1 だけ特別扱いするのでしょうか？)
+
 結果的にこの変更は、過去のスクリプトと新しいスクリプトの間に大きな溝を作りました。
 もはや両者のスクリプトはコードを互いに再利用することができません。また新しい方法は
 プログラマに負担をかけるため、現存するスクリプトがすべて置き換わるのはまだまだ時間
@@ -1388,6 +1416,19 @@ Unicode サポートが perl に導入される以前は、eq 演算子は、2つのスカラー変数によっ
 
 そこで昔の方法に戻すことによって、どのように解決されるのか Programming Perl, 3rd ed.
 (邦訳 プログラミングPerl 第3版) の402ページをもう一度引用しましょう。
+
+  Sjisソフトウェア利用による情報処理モデル
+ 
+    +-----------------------------------+
+    |            オクテット列           | バイナリデータ
+    +-----------------------------------+
+    |               文字列              | テキストデータ
+    +-----------------------------------+
+    |       ASCII 互換の符号化方式      | ShiftJIS など
+    +-----------------------------------+
+              (UTF8フラグがない)
+ 
+    この図に意味はないため、覚える必要がありません。
 
 理想的には、以下の5つのゴールを実現しようと考えています。
 
@@ -1489,6 +1530,7 @@ Unicode サポートが perl に導入される以前は、eq 演算子は、2つのスカラー変数によっ
 =item * ゴール5
 
     JPerl ユーザが Perl で JPerl を保守できるようになる。
+    あるいは MacJPerl ユーザが MacPerl で MacJPerl を保守できるようになる。
 
     JPerl がいつもあなたのそばにありますように ...
 
@@ -1562,7 +1604,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
 
  日本語情報処理
  Understanding Japanese Information Processing
- By Ken Lunde, 春遍雀來, 鈴木武生 訳
+ By Ken Lunde, 春遍 雀來, 鈴木 武生 訳
  1995年8月 発行
  496ページ
  ISBN 4-89052-708-7
@@ -1603,7 +1645,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  http://www.context.co.jp/~cond/books/old-books.html
 
  JIS漢字字典
- 芝野耕司 編著
+ 芝野 耕司 編著
  1456 頁
  ISBN 4-542-20129-5
  http://www.webstore.jsa.or.jp/lib/lib.asp?fn=/manual/mnl01_12.htm
@@ -1613,6 +1655,24 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  172ページ
  T1008901080816 雑誌08901-8
  http://ascii.asciimw.jp/books/magazines/unix.shtml
+
+ MacPerl入門
+ Vicki Brown, Chris Nandor 著, (株)コスモ・プラネット 訳
+ 1999年03月 発行
+ 399ページ
+ ISBN 4-7561-3068-2
+
+ Macintoshデータ活用術
+ 石田 豊 著
+ 230ページ
+ 1995年2月 発行
+ ISBN 4-89563-408-6
+
+ MPWプログラミング講座
+ Handmade Intelligence 著
+ 1992年8月 発行
+ 346ページ
+ ISBN 4-7561-0963-2
 
  Sjis ソフトウェアファミリー
  http://search.cpan.org/dist/Big5HKSCS/
@@ -1678,6 +1738,9 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  http://search.cpan.org/~watanabe/
  ftp://ftp.oreilly.co.jp/pcjp98/watanabe/jperlconf.ppt
 
+ Chuck Houpt, 野津 美智子さん, MacJPerl
+ http://habilis.net/macjperl/index.j.html
+
  石垣 憲一さん, Pod-PerldocJp, モダンPerlの世界へようこそ
  http://search.cpan.org/dist/Pod-PerldocJp/
  http://gihyo.jp/dev/serial/01/modern-perl/0031
@@ -1702,7 +1765,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  http://mail.pm.org/pipermail/tokyo-pm/1999-September/001844.html
  http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
 
- ruby-list (現在は 404 Not Found になってしまう)
+ ruby-list
  http://blade.nagaokaut.ac.jp/ruby/ruby-list/index.shtml
  http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/2440
  http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/2446

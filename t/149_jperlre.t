@@ -5,9 +5,25 @@ print "1..1\n";
 
 my $__FILE__ = __FILE__;
 
-my $null = '/dev/null';
+if ($^O eq 'MacOS') {
+    print "ok - 1 # SKIP $^X $0\n";
+    exit;
+}
+
+my $null = '';
 if ($^O =~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
     $null = 'NUL';
+}
+elsif ($^O eq 'MacOS') {
+
+    # ISBN4-7561-3068-2
+    # MacPerl 入門 Chapter 7
+    # P.131 標準I/Oのリダイレクト
+
+    $null = 'Dev:Null';
+}
+else{
+    $null = '/dev/null';
 }
 
 my $script = __FILE__ . '.pl';
