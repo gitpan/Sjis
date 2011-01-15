@@ -6,10 +6,10 @@ die "This file is not encoded in ShiftJIS.\n" if q{‚ } ne "\x82\xa0";
 my $__FILE__ = __FILE__;
 
 use Esjis;
-print "1..26\n";
+print "1..22\n";
 
 if ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
-    for my $tno (1..26) {
+    for my $tno (1..22) {
         print "ok - $tno # SKIP $^X $0\n";
     }
     exit;
@@ -138,68 +138,39 @@ else {
     print "not ok - 17 Esjis::c 'directory' == -c 'directory' $^X $__FILE__\n";
 }
 
-local $^W = 0;
-if (((Esjis::t 'directory') ne '') == ((-t 'directory') ne '')) {
-    print "ok - 18 Esjis::t 'directory' == -t 'directory' $^X $__FILE__\n";
-}
-else {
-    print "not ok - 18 Esjis::t 'directory' == -t 'directory' $^X $__FILE__\n";
-}
-
 if (((Esjis::u 'directory') ne '') == ((-u 'directory') ne '')) {
-    print "ok - 19 Esjis::u 'directory' == -u 'directory' $^X $__FILE__\n";
+    print "ok - 18 Esjis::u 'directory' == -u 'directory' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 19 Esjis::u 'directory' == -u 'directory' $^X $__FILE__\n";
+    print "not ok - 18 Esjis::u 'directory' == -u 'directory' $^X $__FILE__\n";
 }
 
 if (((Esjis::g 'directory') ne '') == ((-g 'directory') ne '')) {
-    print "ok - 20 Esjis::g 'directory' == -g 'directory' $^X $__FILE__\n";
+    print "ok - 19 Esjis::g 'directory' == -g 'directory' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 20 Esjis::g 'directory' == -g 'directory' $^X $__FILE__\n";
-}
-
-if (((Esjis::k 'directory') ne '') == ((-k 'directory') ne '')) {
-    print "ok - 21 Esjis::k 'directory' == -k 'directory' $^X $__FILE__\n";
-}
-else {
-    print "not ok - 21 Esjis::k 'directory' == -k 'directory' $^X $__FILE__\n";
-}
-
-if (((Esjis::T 'directory') ne '') == ((-T 'directory') ne '')) {
-    print "ok - 22 Esjis::T 'directory' == -T 'directory' $^X $__FILE__\n";
-}
-else {
-    print "not ok - 22 Esjis::T 'directory' == -T 'directory' $^X $__FILE__\n";
-}
-
-if (((Esjis::B 'directory') ne '') == ((-B 'directory') ne '')) {
-    print "ok - 23 Esjis::B 'directory' == -B 'directory' $^X $__FILE__\n";
-}
-else {
-    print "not ok - 23 Esjis::B 'directory' == -B 'directory' $^X $__FILE__\n";
+    print "not ok - 19 Esjis::g 'directory' == -g 'directory' $^X $__FILE__\n";
 }
 
 if (((Esjis::M 'directory') ne '') == ((-M 'directory') ne '')) {
-    print "ok - 24 Esjis::M 'directory' == -M 'directory' $^X $__FILE__\n";
+    print "ok - 20 Esjis::M 'directory' == -M 'directory' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 24 Esjis::M 'directory' == -M 'directory' $^X $__FILE__\n";
+    print "not ok - 20 Esjis::M 'directory' == -M 'directory' $^X $__FILE__\n";
 }
 
 if (((Esjis::A 'directory') ne '') == ((-A 'directory') ne '')) {
-    print "ok - 25 Esjis::A 'directory' == -A 'directory' $^X $__FILE__\n";
+    print "ok - 21 Esjis::A 'directory' == -A 'directory' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 25 Esjis::A 'directory' == -A 'directory' $^X $__FILE__\n";
+    print "not ok - 21 Esjis::A 'directory' == -A 'directory' $^X $__FILE__\n";
 }
 
 if (((Esjis::C 'directory') ne '') == ((-C 'directory') ne '')) {
-    print "ok - 26 Esjis::C 'directory' == -C 'directory' $^X $__FILE__\n";
+    print "ok - 22 Esjis::C 'directory' == -C 'directory' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 26 Esjis::C 'directory' == -C 'directory' $^X $__FILE__\n";
+    print "not ok - 22 Esjis::C 'directory' == -C 'directory' $^X $__FILE__\n";
 }
 
 closedir(DIR);

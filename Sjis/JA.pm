@@ -23,6 +23,8 @@ Sjis-JA - Source code filter to escape ShiftJIS (Japanese document)
 
     コマンドプロンプトで以下のように実行する
       perl     ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl55   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
+      perl56   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
       perl58   ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
       perl510  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
       perl512  ShiftJIS_script.pl  wild*  *card  and  '*quote*'  on MSWin32
@@ -86,6 +88,9 @@ http://www.cpan.org/ports/index.html#jperl
 ドおよび入出力、さらには携帯電話に至るまで、ShiftJIS を基本とした文字コード
 が広く使われています。このソフトウェアはその ShiftJIS を直接扱います。そのため
 UTF8 フラグはありません。
+このソフトウェアは Shift_JIS, Windows-31J, CP932, MacJapanese, SJIS(R90),
+Shift_JISX0213, Shift_JIS-2004 などいわゆる ShiftJIS の亜種を扱うことができます。
+この文書ではこれらの総称して ShiftJIS という語で表しています(「_」がない)。
 
 複雑な解法は問題をより複雑にします。
 あなたもエンコードの問題からエスケープしませんか？
@@ -172,6 +177,9 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
    make test
    make install
 
+   もしシステムに strict.pm がない場合は付属の strict.pm_ を strict.pm にリネーム
+   して使用してください。
+
 =head1 インストール方法(makeを使わない場合)
 
    perl pMakefile.pl         --- pMakefile.pl が pmake.bat を生成します
@@ -179,22 +187,32 @@ http://mail.pm.org/pipermail/tokyo-pm/1999-September/001854.html
    pmake.bat test
 
    pmake.bat install          --- 現在使用中の perl 環境にインストールします
+   perl55   pmake.bat install --- perl5.005 環境にインストールします
+   perl56   pmake.bat install --- perl5.006 環境にインストールします
    perl58   pmake.bat install --- perl5.008 環境にインストールします
    perl510  pmake.bat install --- perl5.010 環境にインストールします
    perl512  pmake.bat install --- perl5.012 環境にインストールします
    perl64   pmake.bat install --- perl64    環境にインストールします
+
+   もしシステムに strict.pm がない場合は付属の strict.pm_ を strict.pm にリネーム
+   して使用してください。
 
    pmake.bat dist             --- CPAN 配布用パッケージを作ります
    pmake.bat ptar.bat         --- ptar.bat を作成します
 
 =head1 ソフトウェアの一覧
 
-   Sjis.pm          --- ShiftJIS ソースコードフィルタモジュール
-   Esjis.pm         --- Sjis.pm のランタイムルーチン
-   perl58.bat       --- 環境変数 PATH の設定なしに perl5.8  を探して実行する
-   perl510.bat      --- 環境変数 PATH の設定なしに perl5.10 を探して実行する
-   perl512.bat      --- 環境変数 PATH の設定なしに perl5.12 を探して実行する
-   perl64.bat       --- 環境変数 PATH の設定なしに perl64   を探して実行する
+   Sjis.pm               --- ShiftJIS ソースコードフィルタモジュール
+   Esjis.pm              --- Sjis.pm のランタイムルーチン
+   perl55.bat            --- 環境変数 PATH の設定なしに perl5.5  を探して実行する
+   perl56.bat            --- 環境変数 PATH の設定なしに perl5.6  を探して実行する
+   perl58.bat            --- 環境変数 PATH の設定なしに perl5.8  を探して実行する
+   perl510.bat           --- 環境変数 PATH の設定なしに perl5.10 を探して実行する
+   perl512.bat           --- 環境変数 PATH の設定なしに perl5.12 を探して実行する
+   perl64.bat            --- 環境変数 PATH の設定なしに perl64   を探して実行する
+   strict.pm_            --- ダミーの strict.pm
+   warnings.pm_          --- warnings.pm の簡易版
+   warnings/register.pm_ --- warnings/register.pm の簡易版
 
 =head1 エスケープによる上位互換性の確保
 
@@ -351,7 +369,7 @@ Esjis::* 関数は Esjis.pm が提供します。
 
 =head1 ファイルテスト演算子のエスケープ
 
-このソフトウェアによって演算子の '-' を 'Esjis::' に書き換わります。
+このソフトウェアによって演算子の '-' は 'Esjis::' に書き換わります。
 
   ---------------------------------
   処理前      処理後
@@ -373,7 +391,7 @@ Esjis::* 関数は Esjis.pm が提供します。
   -S          Esjis::S
   -b          Esjis::b
   -c          Esjis::c
-  -t          Esjis::t
+  -t          -t
   -u          Esjis::u
   -g          Esjis::g
   -k          Esjis::k
@@ -785,8 +803,16 @@ Esjis.pm の先頭で "BEGIN { unshift @INC, '/Perl/site/lib/Sjis' }" が行われ、
 
 =item * chdir
 
-    MSWin32 環境の perl5.006, perl5.008, perl5.010, perl5.012 にて文字コード(0x5C)
-    で終わるパスを扱うことができません。
+    perl5.005 であれば常に chdir() を正常に実行できます。
+
+    perl5.006 または perl5.00800 の場合で文字コード(0x5C)で終わるディレクトリ
+    を指定して実行するには jacode.pl ライブラリが必要です。
+
+    perl5.008001以降, perl5.010, perl5.012 にて文字コード(0x5C)で終わるディレ
+    クトリを指定して実行するとき、Win32 モジュールの Win32::GetShortPathName()
+    によって短い名前を取得できた場合は chdir() が成功します。ただし、chdir()
+    後のカレントディレクトリは Win32::GetShortPathName() によって取得した短い
+    名前になります。
 
     参考リンク
     Bug #81839
@@ -1679,6 +1705,7 @@ Programming Perl, 3rd ed. が書かれた頃には、UTF8 フラグは生まれておらず、Perl は
  http://search.cpan.org/dist/Big5Plus/
  http://search.cpan.org/dist/EUCJP/
  http://search.cpan.org/dist/GB18030/
+ http://search.cpan.org/dist/GBK/
  http://search.cpan.org/dist/HP15/
  http://search.cpan.org/dist/INFORMIXV6ALS/
  http://search.cpan.org/dist/Latin1/

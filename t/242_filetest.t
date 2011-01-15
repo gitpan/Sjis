@@ -6,10 +6,10 @@ die "This file is not encoded in ShiftJIS.\n" if q{‚ } ne "\x82\xa0";
 my $__FILE__ = __FILE__;
 
 use Esjis;
-print "1..24\n";
+print "1..23\n";
 
 if ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
-    for my $tno (1..24) {
+    for my $tno (1..23) {
         print "ok - $tno # SKIP $^X $0\n";
     }
     exit;
@@ -300,96 +300,79 @@ else {
     }
 }
 
-if (-t ('file')) {
-    if (Esjis::t(_)) {
-        print "ok - 18 Esjis::t _ == -t _ $^X $__FILE__\n";
-    }
-    else {
-        print "not ok - 18 Esjis::t _ == -t _ $^X $__FILE__\n";
-    }
-}
-else {
-    if (Esjis::t(_)) {
-        print "not ok - 18 Esjis::t _ == -t _ $^X $__FILE__\n";
-    }
-    else {
-        print "ok - 18 Esjis::t _ == -t _ $^X $__FILE__\n";
-    }
-}
-
 if (-u ('file')) {
     if (Esjis::u(_)) {
-        print "ok - 19 Esjis::u _ == -u _ $^X $__FILE__\n";
+        print "ok - 18 Esjis::u _ == -u _ $^X $__FILE__\n";
     }
     else {
-        print "not ok - 19 Esjis::u _ == -u _ $^X $__FILE__\n";
+        print "not ok - 18 Esjis::u _ == -u _ $^X $__FILE__\n";
     }
 }
 else {
     if (Esjis::u(_)) {
-        print "not ok - 19 Esjis::u _ == -u _ $^X $__FILE__\n";
+        print "not ok - 18 Esjis::u _ == -u _ $^X $__FILE__\n";
     }
     else {
-        print "ok - 19 Esjis::u _ == -u _ $^X $__FILE__\n";
+        print "ok - 18 Esjis::u _ == -u _ $^X $__FILE__\n";
     }
 }
 
 if (-g ('file')) {
     if (Esjis::g(_)) {
-        print "ok - 20 Esjis::g _ == -g _ $^X $__FILE__\n";
+        print "ok - 19 Esjis::g _ == -g _ $^X $__FILE__\n";
     }
     else {
-        print "not ok - 20 Esjis::g _ == -g _ $^X $__FILE__\n";
+        print "not ok - 19 Esjis::g _ == -g _ $^X $__FILE__\n";
     }
 }
 else {
     if (Esjis::g(_)) {
-        print "not ok - 20 Esjis::g _ == -g _ $^X $__FILE__\n";
+        print "not ok - 19 Esjis::g _ == -g _ $^X $__FILE__\n";
     }
     else {
-        print "ok - 20 Esjis::g _ == -g _ $^X $__FILE__\n";
+        print "ok - 19 Esjis::g _ == -g _ $^X $__FILE__\n";
     }
 }
 
 if (-k ('file')) {
     if (Esjis::k(_)) {
-        print "ok - 21 Esjis::k _ == -k _ $^X $__FILE__\n";
+        print "ok - 20 Esjis::k _ == -k _ $^X $__FILE__\n";
     }
     else {
-        print "not ok - 21 Esjis::k _ == -k _ $^X $__FILE__\n";
+        print "not ok - 20 Esjis::k _ == -k _ $^X $__FILE__\n";
     }
 }
 else {
     if (Esjis::k(_)) {
-        print "not ok - 21 Esjis::k _ == -k _ $^X $__FILE__\n";
+        print "not ok - 20 Esjis::k _ == -k _ $^X $__FILE__\n";
     }
     else {
-        print "ok - 21 Esjis::k _ == -k _ $^X $__FILE__\n";
+        print "ok - 20 Esjis::k _ == -k _ $^X $__FILE__\n";
     }
 }
 
 $_ = -M 'file';
 if (Esjis::M(_) == $_) {
-    print "ok - 22 Esjis::M _ (@{[Esjis::M _]}) == -M 'file' ($_) $^X $__FILE__\n";
+    print "ok - 21 Esjis::M _ (@{[Esjis::M _]}) == -M 'file' ($_) $^X $__FILE__\n";
 }
 else {
-    print "not ok - 22 Esjis::M _ (@{[Esjis::M _]}) == -M 'file' ($_) $^X $__FILE__\n";
+    print "not ok - 21 Esjis::M _ (@{[Esjis::M _]}) == -M 'file' ($_) $^X $__FILE__\n";
 }
 
 $_ = -A 'file';
 if (Esjis::A(_) == $_) {
-    print "ok - 23 Esjis::A _ (@{[Esjis::A _]}) == -A 'file' ($_) $^X $__FILE__\n";
+    print "ok - 22 Esjis::A _ (@{[Esjis::A _]}) == -A 'file' ($_) $^X $__FILE__\n";
 }
 else {
-    print "not ok - 23 Esjis::A _ (@{[Esjis::A _]}) == -A 'file' ($_) $^X $__FILE__\n";
+    print "not ok - 22 Esjis::A _ (@{[Esjis::A _]}) == -A 'file' ($_) $^X $__FILE__\n";
 }
 
 $_ = -C 'file';
 if (Esjis::C(_) == $_) {
-    print "ok - 24 Esjis::C _ (@{[Esjis::C _]}) == -C 'file' ($_) $^X $__FILE__\n";
+    print "ok - 23 Esjis::C _ (@{[Esjis::C _]}) == -C 'file' ($_) $^X $__FILE__\n";
 }
 else {
-    print "not ok - 24 Esjis::C _ (@{[Esjis::C _]}) == -C 'file' ($_) $^X $__FILE__\n";
+    print "not ok - 23 Esjis::C _ (@{[Esjis::C _]}) == -C 'file' ($_) $^X $__FILE__\n";
 }
 
 close(FILE);

@@ -6,10 +6,10 @@ die "This file is not encoded in ShiftJIS.\n" if q{‚ } ne "\x82\xa0";
 my $__FILE__ = __FILE__;
 
 use Esjis;
-print "1..52\n";
+print "1..48\n";
 
 if ($^O !~ /\A (?: MSWin32 | NetWare | symbian | dos ) \z/oxms) {
-    for my $tno (1..52) {
+    for my $tno (1..48) {
         print "ok - $tno # SKIP $^X $0\n";
     }
     exit;
@@ -258,131 +258,102 @@ else {
     print "not ok - 34 Esjis::c FILE == -c FILE $^X $__FILE__\n";
 }
 
-local $^W = 0;
-if (((Esjis::t 'file') ne '') == ((-t 'file') ne '')) {
-    print "ok - 35 Esjis::t 'file' == -t 'file' $^X $__FILE__\n";
-}
-else {
-    print "not ok - 35 Esjis::t 'file' == -t 'file' $^X $__FILE__\n";
-}
-
-if (((Esjis::t FILE) ne '') == ((-t FILE) ne '')) {
-    print "ok - 36 Esjis::t FILE == -t FILE $^X $__FILE__\n";
-}
-else {
-    print "not ok - 36 Esjis::t FILE == -t FILE $^X $__FILE__\n";
-}
-
 if (((Esjis::u 'file') ne '') == ((-u 'file') ne '')) {
-    print "ok - 37 Esjis::u 'file' == -u 'file' $^X $__FILE__\n";
+    print "ok - 35 Esjis::u 'file' == -u 'file' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 37 Esjis::u 'file' == -u 'file' $^X $__FILE__\n";
+    print "not ok - 35 Esjis::u 'file' == -u 'file' $^X $__FILE__\n";
 }
 
 if (((Esjis::u FILE) ne '') == ((-u FILE) ne '')) {
-    print "ok - 38 Esjis::u FILE == -u FILE $^X $__FILE__\n";
+    print "ok - 36 Esjis::u FILE == -u FILE $^X $__FILE__\n";
 }
 else {
-    print "not ok - 38 Esjis::u FILE == -u FILE $^X $__FILE__\n";
+    print "not ok - 36 Esjis::u FILE == -u FILE $^X $__FILE__\n";
 }
 
 if (((Esjis::g 'file') ne '') == ((-g 'file') ne '')) {
-    print "ok - 39 Esjis::g 'file' == -g 'file' $^X $__FILE__\n";
+    print "ok - 37 Esjis::g 'file' == -g 'file' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 39 Esjis::g 'file' == -g 'file' $^X $__FILE__\n";
+    print "not ok - 37 Esjis::g 'file' == -g 'file' $^X $__FILE__\n";
 }
 
 if (((Esjis::g FILE) ne '') == ((-g FILE) ne '')) {
-    print "ok - 40 Esjis::g FILE == -g FILE $^X $__FILE__\n";
+    print "ok - 38 Esjis::g FILE == -g FILE $^X $__FILE__\n";
 }
 else {
-    print "not ok - 40 Esjis::g FILE == -g FILE $^X $__FILE__\n";
-}
-
-if (((Esjis::k 'file') ne '') == ((-k 'file') ne '')) {
-    print "ok - 41 Esjis::k 'file' == -k 'file' $^X $__FILE__\n";
-}
-else {
-    print "not ok - 41 Esjis::k 'file' == -k 'file' $^X $__FILE__\n";
-}
-
-if (((Esjis::k FILE) ne '') == ((-k FILE) ne '')) {
-    print "ok - 42 Esjis::k FILE == -k FILE $^X $__FILE__\n";
-}
-else {
-    print "not ok - 42 Esjis::k FILE == -k FILE $^X $__FILE__\n";
+    print "not ok - 38 Esjis::g FILE == -g FILE $^X $__FILE__\n";
 }
 
 if (((Esjis::T 'file') ne '') == ((-T 'file') ne '')) {
-    print "ok - 43 Esjis::T 'file' == -T 'file' $^X $__FILE__\n";
+    print "ok - 39 Esjis::T 'file' == -T 'file' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 43 Esjis::T 'file' == -T 'file' $^X $__FILE__\n";
+    print "not ok - 39 Esjis::T 'file' == -T 'file' $^X $__FILE__\n";
 }
 
 if (((Esjis::T FILE) ne '') == ((-T FILE) ne '')) {
-    print "ok - 44 Esjis::T FILE == -T FILE $^X $__FILE__\n";
+    print "ok - 40 Esjis::T FILE == -T FILE $^X $__FILE__\n";
 }
 else {
-    print "not ok - 44 Esjis::T FILE == -T FILE $^X $__FILE__\n";
+    print "not ok - 40 Esjis::T FILE == -T FILE $^X $__FILE__\n";
 }
 
 if (((Esjis::B 'file') ne '') == ((-B 'file') ne '')) {
-    print "ok - 45 Esjis::B 'file' == -B 'file' $^X $__FILE__\n";
+    print "ok - 41 Esjis::B 'file' == -B 'file' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 45 Esjis::B 'file' == -B 'file' $^X $__FILE__\n";
+    print "not ok - 41 Esjis::B 'file' == -B 'file' $^X $__FILE__\n";
 }
 
 if (((Esjis::B FILE) ne '') == ((-B FILE) ne '')) {
-    print "ok - 46 Esjis::B FILE == -B FILE $^X $__FILE__\n";
+    print "ok - 42 Esjis::B FILE == -B FILE $^X $__FILE__\n";
 }
 else {
-    print "not ok - 46 Esjis::B FILE == -B FILE $^X $__FILE__\n";
+    print "not ok - 42 Esjis::B FILE == -B FILE $^X $__FILE__\n";
 }
 
 if (((Esjis::M 'file') ne '') == ((-M 'file') ne '')) {
-    print "ok - 47 Esjis::M 'file' == -M 'file' $^X $__FILE__\n";
+    print "ok - 43 Esjis::M 'file' == -M 'file' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 47 Esjis::M 'file' == -M 'file' $^X $__FILE__\n";
+    print "not ok - 43 Esjis::M 'file' == -M 'file' $^X $__FILE__\n";
 }
 
 if (((Esjis::M FILE) ne '') == ((-M FILE) ne '')) {
-    print "ok - 48 Esjis::M FILE == -M FILE $^X $__FILE__\n";
+    print "ok - 44 Esjis::M FILE == -M FILE $^X $__FILE__\n";
 }
 else {
-    print "not ok - 48 Esjis::M FILE == -M FILE $^X $__FILE__\n";
+    print "not ok - 44 Esjis::M FILE == -M FILE $^X $__FILE__\n";
 }
 
 if (((Esjis::A 'file') ne '') == ((-A 'file') ne '')) {
-    print "ok - 49 Esjis::A 'file' == -A 'file' $^X $__FILE__\n";
+    print "ok - 45 Esjis::A 'file' == -A 'file' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 49 Esjis::A 'file' == -A 'file' $^X $__FILE__\n";
+    print "not ok - 45 Esjis::A 'file' == -A 'file' $^X $__FILE__\n";
 }
 
 if (((Esjis::A FILE) ne '') == ((-A FILE) ne '')) {
-    print "ok - 50 Esjis::A FILE == -A FILE $^X $__FILE__\n";
+    print "ok - 46 Esjis::A FILE == -A FILE $^X $__FILE__\n";
 }
 else {
-    print "not ok - 50 Esjis::A FILE == -A FILE $^X $__FILE__\n";
+    print "not ok - 46 Esjis::A FILE == -A FILE $^X $__FILE__\n";
 }
 
 if (((Esjis::C 'file') ne '') == ((-C 'file') ne '')) {
-    print "ok - 51 Esjis::C 'file' == -C 'file' $^X $__FILE__\n";
+    print "ok - 47 Esjis::C 'file' == -C 'file' $^X $__FILE__\n";
 }
 else {
-    print "not ok - 51 Esjis::C 'file' == -C 'file' $^X $__FILE__\n";
+    print "not ok - 47 Esjis::C 'file' == -C 'file' $^X $__FILE__\n";
 }
 
 if (((Esjis::C FILE) ne '') == ((-C FILE) ne '')) {
-    print "ok - 52 Esjis::C FILE == -C FILE $^X $__FILE__\n";
+    print "ok - 48 Esjis::C FILE == -C FILE $^X $__FILE__\n";
 }
 else {
-    print "not ok - 52 Esjis::C FILE == -C FILE $^X $__FILE__\n";
+    print "not ok - 48 Esjis::C FILE == -C FILE $^X $__FILE__\n";
 }
 
 close(FILE);

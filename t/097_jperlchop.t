@@ -4,7 +4,7 @@ die "This file is not encoded in ShiftJIS.\n" if q{‚ } ne "\x82\xa0";
 use Sjis;
 print "1..4\n";
 
-my $__FILE__ = $__FILE__;
+my $__FILE__ = __FILE__;
 
 #
 # chop, chomp
